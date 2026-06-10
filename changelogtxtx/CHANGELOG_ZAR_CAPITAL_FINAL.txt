@@ -1,0 +1,264 @@
+# ============================================================
+# CHANGELOG — ZAR CAPITAL PARTNERS
+# Proyecto de Pedro Zacarias
+# Última actualización: 28/05/2026 — v3.5 FINAL
+# ============================================================
+# INSTRUCCIÓN PARA CUALQUIER IA QUE LEA ESTO:
+# Leelo COMPLETO antes de responder. Sistema en GitHub:
+# pedritozar/zar-simulator. Adjuntar al inicio de cada sesión.
+# REGLA: Simulador institucional de juego/simulación.
+#        NO cruzar con trading real ni finanzas personales.
+#        Responder siempre en español.
+# ============================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 1. DESCRIPCIÓN DEL PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ZAR Capital Partners — simulación institucional de hedge fund.
+Entorno de juego con lógica interna, APIs reales y Claude como IA.
+
+FILOSOFÍA: "Un inicio de viaje para prepararse para el mañana,
+usando la tecnología a favor y aprendiendo divirtiéndose."
+— Pedro Zacarias, 23/05/2026
+
+REPOSITORIO: github.com/pedritozar/zar-simulator
+ARCHIVOS:
+  - zar_capital_simulator.html   → Simulador principal (862 líneas)
+  - worldmonitor.html            → Monitor global 3D (v3.2 — 2434 líneas)
+  - zar_command_center.html      → Centro de comando (2137 líneas)
+
+STACK:
+  - Frontend: HTML/CSS/JS puro
+  - 3D Globe: globe.gl (wrapper Three.js)
+  - AI: Claude API Sonnet 4 — claude-sonnet-4-20250514
+  - localStorage: 'zcp_state_v3', 'zcp_apikey', 'zcp_world_event',
+    'zcp_modo_universo', 'zcp_acled_cache', 'zcp_gdelt_cache',
+    'zcp_celestrak_cache', 'zcp_journal_v1'
+  - Tipografías: IBM Plex Mono + Barlow Condensed
+  - Paleta: #07090e · #c89040 · #4a9eff · #00c896 · #e84040 · #8860ff
+  - Libs: satellite.js 4.1.3 · Howler.js (pendiente archivos .ogg)
+  - Cloudflare Worker: zar-gdelt-proxyf.pzacarias18.workers.dev ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 2. ESTADO ACTUAL DE ARCHIVOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── worldmonitor.html — v3.2 ✅ ÚLTIMO ESTABLE ──
+  2434 líneas
+
+  CAPAS ACTIVAS:
+  ✅ Portfolio ZAR · Sedes · Flujos de Capital
+  ✅ Cables Submarinos (11) · Rutas Marítimas (7)
+  ✅ Rutas Aéreas Comerciales (15) — azul pálido
+  ✅ Zonas de Conflicto (21) · Eventos del Mundo
+  ✅ Etiquetas Bloomberg (14 ciudades)
+  ✅ Satélites en Órbita (24) · Lanzaderas (9)
+  ✅ Puertos Globales (12) · Bloomberg Matrix Bar
+  ✅ Panel Data Feeds (GDELT/ACLED/CelesTrak/OpenSky)
+  ✅ Global Journal 📖 panel flotante
+  ✅ SFX Web Audio API nativa (3 sonidos)
+  ✅ LP_MECHANICS array (8 reglas de penalización)
+  ✅ SoundManager Howler.js skeleton (pendiente .ogg)
+  ✅ Botón 🔇 en top bar — toggle audio
+  ✅ Modal Private Equity — 12 unicornios Defense Tech (NV4+)
+  ✅ Unicornios PE como puntos clickeables en globo (NV4+)
+
+  CAPAS DESBLOQUEABLES:
+  🔒 NV3  → Aviones Militares OpenSky
+  🔒 NV4  → PE Modal + Unicornios clickeables en globo
+  🔒 NV5  → Red Satelital
+  🔒 NV7  → ZAR Defense
+  🔒 NV9  → ZAR Orbital
+  🔒 NV10 → Base Lunar
+
+  APIs EN TIEMPO REAL:
+  📡 GDELT     — CF Worker proxy ✅ zar-gdelt-proxyf.pzacarias18.workers.dev
+  📡 ACLED     — requiere key acleddata.com
+  📡 CelesTrak — TLEs reales cada 5s, cache 1h
+  📡 OpenSky   — militares OSINT cada 90s, NV3+
+
+── zar_capital_simulator.html ✅ 862 líneas ──
+  ✅ GEM-14: evaluarLPsAlFinDeTurno() integrado
+  ✅ DSK-01: 5 funciones quant (Sharpe/MaxDD/Calmar/CAGR/WinRate)
+  ✅ Panel Track Record en sidebar (actualización automática)
+  ✅ historialAUM + lpCooldowns + lpsActivos en estado S
+  ⚠ Pendiente: nueva partida con API Key nueva
+
+── zar_command_center.html ✅ 2137 líneas ──
+  ✅ GEM-06: Directorio 8 LPs institucionales con unlock por nivel
+  ✅ GEM-17: Pestaña ⬡ Private Equity integrada
+             KPIs: capital desplegado / unicornios / retorno esperado
+             Portfolio grid dinámico desde localStorage
+             Bitácora eventos PE · botón World Monitor
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 3. ÁRBOL EVOLUTIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STAGE 1 — HEDGE FUND PURO (NV 1-3)
+  └─ LPs: lp_001 Family Office · lp_002 Oxford · lp_003 Kowloon
+
+STAGE 2 — PRIVATE EQUITY ARM (NV 4-6) ← EN CONSTRUCCIÓN
+  └─ 12 unicornios Defense Tech (modal + globo + pestaña CC)
+  └─ LPs: lp_004 Vostok · lp_005 Takeda · lp_006 Nexus · lp_007 Temasek
+  └─ Pendiente: DSK-02 motor retornos PE · lógica inversión en simulador
+
+STAGE 3 — HOLDING CORPORATIVO (NV 7-9)
+  └─ ZAR Defense / Orbital / Intelligence / Energy
+
+STAGE 4 — CONGLOMERADO GLOBAL (NV 10-12)
+  └─ IPO ficticio · Base Lunar · lp_008 OMEGA-7
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 4. APIS INTEGRADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Claude API        → Sonnet 4 — narrativa, cisnes negros, journal
+✅ Alpha Vantage     → Command Center
+✅ GDELT 2.0         → WorldMonitor + CF Worker proxy ✅
+✅ ACLED             → WorldMonitor (requiere key)
+✅ CelesTrak + TLE   → WorldMonitor (satellite.js)
+✅ OpenSky Network   → WorldMonitor (militares OSINT — NV3)
+✅ Cloudflare Worker → zar-gdelt-proxyf.pzacarias18.workers.dev
+⏳ Howler.js audio   → skeleton listo · pendiente 4 archivos .ogg
+⏳ NewsAPI           → pendiente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 5. PRÓXIMOS OBJETIVOS — PARA EL PRÓXIMO CHAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠ PRIORIDAD 1 — DEUDA TÉCNICA AUDIO:
+  El SoundManager de Howler.js está integrado pero sin archivos.
+  Sin try/catch, los 404 pueden romper la UI.
+  → Claude debe agregar try/catch en initSoundManager()
+  → Pedro debe descargar los 4 .ogg y subir a /assets/audio/:
+    market_open.ogg   · market_closed.ogg
+    modo_ficcion.ogg  · cisne_negro.ogg
+  → IDs Freesound verificados: 651372 · 582315 · 448086 · 369124
+    ⚠ Gemini advirtió que 2 de 4 IDs pueden ser incorrectos
+    → verificar manualmente antes de descargar
+
+⚠ PRIORIDAD 2 — DSK-02 PENDIENTE DE DEEPSEEK:
+  Motor de simulación de retornos PE con Monte Carlo ligero.
+  Cuando DeepSeek entregue DSK-02, integrar en simulador.
+  Estructura esperada:
+    simularRetornoPE(inversion) → { resultado, multiplo, ganancia }
+    evaluarPortfolioPE(inversiones[]) → { totalRetorno, wins, losses }
+
+⚠ PRIORIDAD 3 — NUEVA PARTIDA:
+  Aún no se inició la primera partida real con API Key.
+  → Pedro tiene nueva API Key (sk-ant-api03...eAAA)
+  → Iniciar simulación · Turno 1 · verificar Claude API responde
+
+EN COLA (sin urgencia):
+  → Sincronización WorldMonitor ↔ Simulador en tiempo real
+  → Stage 3 planning (NV 7-9)
+  → GEM-18 para Gemini (por definir)
+  → DSK-03 para DeepSeek (por definir)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 6. TAREAS COMPLETADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+G-01→G-08 ✓ Datos fundamentales WorldMonitor
+GEM-01 ✓ Audio research — Howler.js + Web Audio API
+GEM-02 ✓ Global Journal JSON
+GEM-03 ✓ 15 rutas aéreas — v2.5
+GEM-04 ✓ OpenSky OSINT — v2.6
+GEM-05 ✓ Journal UI — v2.7
+GEM-06 ✓ 8 LPs geopolíticos — Command Center
+GEM-07 ✓ Cloudflare Worker GDELT — deployado y funcionando
+GEM-08 ✓ 4 tracks audio Freesound (⚠ pendiente .ogg físicos)
+GEM-09 ✓ SFX 3 funciones Web Audio API — v2.9
+GEM-10 ✓ LP_MECHANICS 8 reglas — v2.9
+GEM-11 ✓ URLs Freesound verificadas (parcialmente)
+GEM-12 ✓ Stage 2 PE — mecánicas, eventos, 12 unicornios
+GEM-13 ✓ Modal PE HTML/CSS — v3.1
+GEM-14 ✓ evaluarLPsAlFinDeTurno() — simulador integrado
+GEM-15 ✓ Turno 1 revisado y validado
+GEM-16 ✓ Coordenadas 12 unicornios — v3.2 puntos clickeables
+GEM-17 ✓ Pestaña PE integrada Command Center — KPIs + grid + log
+DSK-01 ✓ 5 funciones quant JS integradas en simulador
+         (Sharpe · MaxDD · Calmar · WinRate · CAGR)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 7. REGLAS DE TRABAJO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROTOCOLO ANTES DE TOCAR CÓDIGO:
+  1. Anunciar qué archivo y secciones exactas
+  2. Pedir confirmación a Pedro
+  3. Tarea pesada → Sonnet 4
+
+MODELO: Sonnet 4.6 · CHANGELOG: adjuntar siempre · tiene prioridad
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 8. EQUIPO IA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[PRINCIPAL]    Claude Sonnet 4.6  — arquitectura, código, APIs
+[COLABORADOR]  Gemini Pro         — research, datos, OSINT (GEM-xx)
+[CUANTITATIVO] DeepSeek R1        — matemática financiera (DSK-xx)
+               Incorporado: 28/05/2026
+               Rol: fórmulas JS puras, Sharpe, CAGR, Monte Carlo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 9. VERSIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+worldmonitor.html:
+  v2.3→v2.9 — Ver sesiones anteriores
+  v3.0 — SoundManager + botón 🔇
+  v3.1 — Modal PE + 12 unicornios
+  v3.2 — Coordenadas exactas + puntos NV4 clickeables
+         ← ÚLTIMO ESTABLE — 2434 líneas — 28/05/2026
+
+zar_capital_simulator.html:
+  28/05/2026 — GEM-14 LP Mechanics + DSK-01 Track Record
+               ← ÚLTIMO ESTABLE — 862 líneas
+
+zar_command_center.html:
+  28/05/2026 — GEM-17 Pestaña Private Equity integrada
+               ← ÚLTIMO ESTABLE — 2137 líneas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 10. PRINCIPIO — REFLEXIÓN TECNOLÓGICA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INSTRUCCIÓN: Cada tecnología nueva → explicar origen, creador,
+contexto histórico. Principio de Pedro Zacarias.
+
+REFLEXIÓN FUNDACIONAL — 25/05/2026:
+"Desde un escritorio en la parte austral del mundo, conectado
+por cables submarinos que cruzan océanos — todo construido sobre
+colaboraciones entre naciones que compiten pero comparten
+protocolos. Argentinos, estadounidenses, rusos, japoneses,
+europeos y chinos pusieron su granito de arena."
+— Pedro Zacarias & Claude, 25/05/2026
+
+ORIGEN DE TECNOLOGÍAS EN ZAR:
+  Internet/TCP-IP   → ARPANET militar USA (1969)
+  Globe.gl/Three.js → Ricardo Cabello "mrdoob", España (2010)
+  Cables submarinos → primer cable Atlántico, Cyrus Field (1858)
+  GPS               → Defensa USA, abierto al mundo (2000)
+  Cloudflare        → Matthew Prince, USA (2017)
+  Freesound         → Univ. Pompeu Fabra, Barcelona (2005)
+  GitHub            → Tom Preston-Werner, USA (2008)
+  Claude API        → Anthropic, San Francisco (2023)
+  CelesTrak         → Dr. T.S. Kelso, USA
+  OpenSky Network   → Univ. Kaiserslautern + ETH Zürich (2013)
+  GDELT             → Kalev Leetaru, USA (2013)
+  satellite.js      → Brandon Rhodes + comunidad open source
+  DeepSeek R1       → DeepSeek AI, China (2024) — razonamiento
+                      open-weights, entrenado con GRPO reinforcement
+worldmonitor.html → v3.3 — 2440 líneas
+  ✅ try/catch en initSoundManager() — 404 audio silenciosos
+
+zar_capital_simulator.html → 1020 líneas
+  ✅ DSK-02: simularRetornoPE() + evaluarPortfolioPE() — Monte Carlo PE
+
+zar_command_center.html → 2266 líneas  
+  ✅ GEM-18: initDinastiaYVida() + eventos RPG dinásticos
+             Panel CIO: Salud / Tensión / Lealtad / Palanca
+             3 eventos: Romance, Crisis Salud, Tensión Hermanos

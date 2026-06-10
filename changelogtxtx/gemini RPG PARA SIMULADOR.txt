@@ -1,0 +1,75 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OBJETIVO 4 (GEM-18): JSON DEFINITIVO — LINAJE, SUCESIÓN Y RPG DINÁSTICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Claude, con Gemini hemos pulido el motor del GEM-18. Hemos decidido mantener un enfoque estrictamente "hiperrealista" (estilo la saga Yellowstone). El drama debe surgir orgánicamente de la gestión del capital, la sucesión y el peso del legado, sin convertirlo en una película de Hollywood. 
+
+Las mecánicas de "Soft Power" (compra de medios) y "Fondos Rivales" quedan descartadas por ahora. Nos centraremos en la Tensión Sucesoria, el Modo Regencia (crisis de salud del CIO), la Palanca Política y la protección del Family Office a través de las décadas.
+
+Por favor, utilizá esta estructura `dinastiaYVida` limpia para inyectar en `zcp_state_v3`:
+
+```json
+{
+  "vehiculoCorporativo": {
+    "etapaActual": "STAGE_1",
+    "tipo": "Family Office", 
+    "escala": "Local",
+    "poderDeLaJunta": 0
+  },
+  "cioActivo": {
+    "nombre": "Pedro Zacarias",
+    "edad": 25,
+    "origen": "Inmersión Moscovita",
+    "vidaPersonal": { "estadoCivil": "Soltero", "escandalosActivos": 0, "salud": 100 },
+    "aptitudes": { "macro": 7, "networking": 8, "riesgo": 9 },
+    "rasgos": ["Lobo Solitario", "Joven Promesa"]
+  },
+  "linaje": {
+    "dinamicaFamiliar": {
+      "tensionSucesoria": 0,
+      "palancaPolitica": 0,
+      "lealtadInterna": 100
+    },
+    "descendencia": [],
+    "sucesion": {
+      "herederoDesignado": null,
+      "regenteTemporal": null
+    }
+  },
+  "eventosRPGPendientes": [
+    {
+      "id_evento": "EVT_RPG_01",
+      "tipo": "ROMANCE_ESTRATEGICO",
+      "titulo": "Encuentro en la City",
+      "descripcion": "Cruzas miradas con una alta ejecutiva de la bolsa. Una relación formal abre puertas, pero cuesta capital mantener el estilo de vida. Una aventura es gratis, pero aumenta el riesgo de escándalo.",
+      "opciones": [
+        { "id": "A", "texto": "Romance formal y estratégico", "impacto": { "vidaPersonal.estadoCivil": "En Pareja", "aptitudes.networking": 2, "capital_personal_var": -10000 } },
+        { "id": "B", "texto": "Aventura discreta", "impacto": { "escandalos_riesgo": 15, "rasgo_adquirido": "Seductor Financiero" } }
+      ]
+    },
+    {
+      "id_evento": "EVT_RPG_ENDGAME_01",
+      "tipo": "CRISIS_SALUD",
+      "titulo": "El Patriarca Cae",
+      "descripcion": "Sufres un colapso por estrés durante un foro económico. Mientras estás internado, el simulador entra en 'Modo Regencia'. La Junta y tus herederos deben decidir quién mantiene el barco a flote.",
+      "opciones": [
+        { "id": "A", "texto": "Delegar en tu Pupilo de confianza (Judoka)", "impacto": { "sucesion.regenteTemporal": "Pupilo", "linaje.dinamicaFamiliar.tensionSucesoria": 40, "nota": "Garantiza estabilidad en el AUM, pero enfurece a tus herederos de sangre." } },
+        { "id": "B", "texto": "Ceder temporalmente al hijo mayor", "impacto": { "sucesion.regenteTemporal": "Hijo Mayor", "vehiculoCorporativo.poderDeLaJunta": 20, "aum_variacion": -50000, "nota": "Mantiene la paz familiar, pero el mercado duda de su capacidad." } }
+      ]
+    },
+    {
+      "id_evento": "EVT_RPG_LEGADO_01",
+      "tipo": "TENSION_HERMANOS",
+      "titulo": "El Peso del Legado",
+      "descripcion": "A medida que el fondo crece, tus hijos toman caminos distintos. Uno exige liquidar su parte del fideicomiso para financiar su carrera política, mientras el otro busca desplazar a la vieja guardia de la Junta.",
+      "opciones": [
+        { "id": "A", "texto": "Financiar la carrera política (Crear Palanca)", "impacto": { "linaje.dinamicaFamiliar.palancaPolitica": 50, "aum_variacion": -200000, "linaje.dinamicaFamiliar.tensionSucesoria": -10 } },
+        { "id": "B", "texto": "Proteger el capital del fondo a toda costa", "impacto": { "linaje.dinamicaFamiliar.tensionSucesoria": 30, "reputacionFondo": 10, "nota": "El mercado aplaude tu disciplina, pero la familia se fractura." } }
+      ]
+    }
+  ]
+}
+
+Acción esperada de Claude:
+Crear la función initDinastiaYVida() para cargar este JSON al iniciar.
+Hacer que el panel de "Árbol Genealógico" y "Vehículo Legal" lean estos datos, reflejando el realismo institucional.
+Asegurar que los eventos de Endgame (Regencia, Tensión Sucesoria) tengan un peso numérico real en zcp_state_v3.

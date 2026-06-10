@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZAR Capital — WorldMonitor 3D v2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Barlow+Condensed:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-primary:#07090e;--bg-secondary:#0c101a;--bg-input:#121824;
+  --bg-panel:rgba(7,9,14,0.92);--border:#1a2535;--border-subtle:#0f1620;
+  --text-dim:#1e2c3a;--text-muted:#3a4f65;--text-main:#c0cbd8;
+  --cyan:#00d4ff;--gold:#c89040;--green:#00c896;--red:#e84040;--blue:#4a9eff;--purple:#8860ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:var(--text-main);font-family:'IBM Plex Mono','Courier New',monospace;font-size:11px;overflow:hidden;height:100vh;width:100vw}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--text-dim)}
+#globe-wrap{position:fixed;inset:0;top:44px;z-index:1}
+.panel{position:fixed;background:var(--bg-panel);border:1px solid var(--border);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:10}
+.btn{background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;transition:all .2s}
+.layer-row{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;border-bottom:1px solid var(--border-subtle);transition:background .15s;user-select:none}
+.layer-row:hover{background:var(--bg-input)}
+.layer-row.locked{opacity:.45;cursor:not-allowed}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:opacity .2s}
+.ev-row{padding:8px 10px;border-bottom:1px solid var(--border-subtle);cursor:pointer;transition:background .15s}
+.ev-row:hover{background:var(--bg-input)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 6px rgba(0,212,255,.3)}50%{box-shadow:0 0 18px rgba(0,212,255,.7)}}
+@keyframes scanLine{0%{top:0}100%{top:100%}}
+@keyframes cyanFlicker{0%,100%{opacity:1}92%{opacity:.85}95%{opacity:.6}97%{opacity:.9}}
+@keyframes satFlicker{0%,100%{opacity:1;transform:scale(1)}30%{opacity:.4;transform:scale(.7)}60%{opacity:.9;transform:scale(1.2)}80%{opacity:.5;transform:scale(.8)}}
+@keyframes launchPulse{0%{transform:scale(1);opacity:1}50%{transform:scale(2.5);opacity:.4}100%{transform:scale(1);opacity:1}}
+@keyframes lunarGlow{0%,100%{box-shadow:0 0 4px #8860ff,0 0 8px #8860ff}50%{box-shadow:0 0 12px #8860ff,0 0 24px rgba(136,96,255,.5)}}
+.loading-spin{animation:spin 1s linear infinite;display:inline-block}
+.glow-cyan{animation:glowPulse 2s ease-in-out infinite}
+.flicker{animation:cyanFlicker 4s ease-in-out infinite}
+/* Satélites HTML */
+.sat-dot{width:4px;height:4px;border-radius:50%;position:absolute;transform:translate(-50%,-50%);pointer-events:none}
+.sat-starlink{background:#00d4ff;box-shadow:0 0 5px #00d4ff;animation:satFlicker 2s ease-in-out infinite}
+.sat-gps{background:#ffffff;box-shadow:0 0 4px #fff;animation:satFlicker 3s ease-in-out infinite}
+.sat-galileo{background:#4a9eff;box-shadow:0 0 4px #4a9eff;animation:satFlicker 2.5s ease-in-out infinite}
+.sat-beidou{background:#e84040;box-shadow:0 0 4px #e84040;animation:satFlicker 2.8s ease-in-out infinite}
+.sat-iss{width:6px;height:6px;background:#c89040;box-shadow:0 0 8px #c89040,0 0 16px rgba(200,144,64,.5);animation:satFlicker 1.2s ease-in-out infinite}
+.sat-launch{background:#00ff88;box-shadow:0 0 8px #00ff88;animation:launchPulse 1.5s ease-in-out infinite}
+.sat-lunar{width:7px;height:7px;background:#8860ff;box-shadow:0 0 10px #8860ff;animation:lunarGlow 2s ease-in-out infinite}
+
+/* TICKERS EN ESQUINAS */
+.ticker-corner{position:fixed;z-index:30;background:rgba(7,9,14,0.88);border:1px solid rgba(0,212,255,.2);backdrop-filter:blur(12px);padding:8px 12px;min-width:180px}
+#tk-tl{top:52px;left:226px;border-top:2px solid var(--cyan)}
+#tk-tr{top:52px;right:282px;border-top:2px solid var(--gold)}
+#tk-bl{bottom:38px;left:12px;border-bottom:2px solid var(--green)}
+#tk-br{bottom:38px;right:12px;border-bottom:2px solid var(--red)}
+.tk-label{font-size:7px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.tk-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:3px}
+.tk-key{font-size:8px;color:var(--text-muted)}
+.tk-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px}
+.tk-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+/* BLOOMBERG MATRIX BAR */
+#bloomberg-bar{position:fixed;top:44px;left:0;right:0;height:28px;background:rgba(7,9,14,.95);border-bottom:1px solid rgba(0,212,255,.15);z-index:25;display:flex;align-items:center;overflow:hidden}
+#bloomberg-inner{display:flex;gap:0;white-space:nowrap;animation:tickerScroll 40s linear infinite}
+.bm-item{display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-right:1px solid var(--border);height:28px;flex-shrink:0}
+.bm-sym{font-size:8px;color:var(--text-muted);letter-spacing:1.5px}
+.bm-val{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px}
+.bm-chg{font-size:8px;letter-spacing:.5px}
+.up{color:#00c896}.dn{color:#e84040}.nt{color:var(--text-muted)}
+
+/* CISNE NEGRO AUTO NOTIFICATION */
+#auto-event-toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid #e84040;color:#e84040;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:10px 18px;z-index:999;letter-spacing:1px;display:none;animation:fadeInUp .3s ease}
+
+/* LEVEL UNLOCK TOAST */
+#unlock-toast{position:fixed;top:82px;right:18px;background:var(--bg-secondary);border:1px solid var(--cyan);color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:10px 14px;z-index:999;display:none;animation:fadeInUp .3s ease;max-width:220px}
+
+/* SCAN LINE EFFECT */
+#globe-wrap::after{content:'';position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.15),transparent);pointer-events:none;animation:scanLine 8s linear infinite;z-index:2}
+
+/* DIFF BADGE */
+#diff-badge{font-size:8px;padding:1px 6px;border-radius:0;letter-spacing:1px}
+
+/* GEM-05: GLOBAL JOURNAL PANEL */
+#journal-panel{position:fixed;top:80px;right:290px;width:340px;bottom:44px;background:var(--bg-panel);border:1px solid var(--border);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:15;display:none;flex-direction:column;animation:fadeInUp .3s ease;box-shadow:-5px 0 25px rgba(0,0,0,.5)}
+.jrn-header{padding:10px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.jrn-title-main{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;color:var(--text-main)}
+.jrn-content{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+.jrn-entry{background:rgba(0,0,0,.4);border:1px solid var(--border-subtle);border-left:2px solid var(--text-dim);padding:10px;transition:background .2s}
+.jrn-entry:hover{background:var(--bg-input)}
+.jrn-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.jrn-tag{font-size:8px;padding:2px 6px;letter-spacing:1px;font-weight:600;text-transform:uppercase}
+.tag-market{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid var(--cyan)}
+.tag-intel{background:rgba(200,144,64,.1);color:var(--gold);border:1px solid var(--gold)}
+.tag-alert{background:rgba(232,64,64,.1);color:var(--red);border:1px solid var(--red)}
+.tag-geo{background:rgba(0,200,150,.1);color:var(--green);border:1px solid var(--green)}
+.tag-fiction{background:rgba(136,96,255,.1);color:var(--purple);border:1px solid var(--purple)}
+.jrn-date{font-size:8px;color:var(--text-dim);letter-spacing:1px}
+.jrn-headline{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--text-main);line-height:1.2;margin-bottom:5px;letter-spacing:.5px}
+.jrn-body{font-size:9px;color:var(--text-muted);line-height:1.5}
+.jrn-metrics{margin-top:8px;padding-top:6px;border-top:1px dashed var(--border-subtle);font-size:8px;color:var(--text-dim);letter-spacing:1px}
+.jrn-source{font-size:7px;color:var(--text-dim);margin-top:4px;letter-spacing:.5px}
+.jrn-footer{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0}
+
+/* GEM-13: PRIVATE EQUITY MODAL */
+#pe-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#pe-overlay.open{display:flex;animation:fadeInUp .25s ease}
+.pe-modal{width:700px;max-height:88vh;background:var(--bg-panel);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.9)}
+.pe-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.pe-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;color:var(--text-main)}
+.pe-risk-bajo{border:1px solid var(--green);color:var(--green);font-size:7px;padding:2px 6px;letter-spacing:1px;font-weight:700}
+.pe-risk-medio{border:1px solid var(--gold);color:var(--gold);font-size:7px;padding:2px 6px;letter-spacing:1px;font-weight:700}
+.pe-risk-alto{border:1px solid var(--red);color:var(--red);font-size:7px;padding:2px 6px;letter-spacing:1px;font-weight:700}
+.pe-body{display:flex;flex:1;overflow:hidden;min-height:0}
+.pe-left{flex:.6;padding:14px;overflow-y:auto;border-right:1px solid var(--border)}
+.pe-right{flex:.4;padding:14px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.pe-lore{font-size:9px;color:var(--text-muted);line-height:1.6;margin-bottom:10px;padding:8px;background:rgba(0,0,0,.3)}
+.pe-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px}
+.pe-metric{background:rgba(0,0,0,.4);padding:7px;text-align:center}
+.pe-metric label{font-size:7px;color:var(--text-dim);letter-spacing:1px;display:block;margin-bottom:2px;text-transform:uppercase}
+.pe-metric span{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--gold)}
+.pe-events h4{font-size:7px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.pe-event-item{font-size:8px;color:var(--text-muted);padding:4px 0;border-bottom:1px solid var(--border-subtle)}
+.pe-kpis{background:rgba(0,0,0,.35);padding:8px}
+.pe-kpi-row{display:flex;justify-content:space-between;margin-bottom:3px}
+.pe-kpi-row span:first-child{font-size:8px;color:var(--text-muted)}
+.pe-kpi-row span:last-child{font-size:8px;font-weight:600;color:var(--cyan)}
+.pe-slider-wrap label{font-size:7px;color:var(--text-dim);letter-spacing:1px;display:block;margin-bottom:4px;text-transform:uppercase}
+.pe-slider-wrap input[type=range]{width:100%;accent-color:var(--gold);margin-bottom:4px}
+.pe-monto{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--gold);text-align:center;font-weight:700}
+.pe-impact{font-size:8px;color:var(--text-dim);text-align:center;margin-bottom:4px}
+.pe-btn-invest{width:100%;padding:9px;background:var(--gold);border:none;color:#000;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-bottom:5px}
+.pe-btn-invest:disabled{background:var(--border);color:var(--text-dim);cursor:not-allowed}
+.pe-btn-cancel{width:100%;padding:7px;background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:8px;cursor:pointer;letter-spacing:1px}
+.pe-footer{padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div style="position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg-secondary);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:20">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:3px;color:#c89040">ZAR CAPITAL PARTNERS</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-muted);margin-left:10px">WORLDMONITOR v2.0</span>
+    </div>
+    <div id="sim-status" style="font-size:8px;color:var(--text-muted);letter-spacing:1px;border:1px solid var(--border);padding:2px 8px">○ CARGANDO...</div>
+    <div id="diff-badge" style="font-size:8px;background:rgba(0,200,150,.12);color:#00c896;border:1px solid #00c896;padding:2px 8px;letter-spacing:1px;display:none">PRINC.</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div id="world-clock" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text-muted);letter-spacing:2px"></div>
+    <div id="market-status" style="font-size:8px;padding:2px 8px;border:1px solid var(--border);color:var(--text-muted);letter-spacing:1px"></div>
+    <div id="auto-status" style="font-size:8px;color:var(--text-dim);letter-spacing:.5px">AUTO ○</div>
+    <button onclick="toggleSound()" id="btn-sound" style="font-size:9px;padding:3px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text-dim);letter-spacing:1px;font-family:'IBM Plex Mono',monospace;cursor:pointer;transition:all .2s">🔇</button>
+    <button onclick="toggleJournal()" style="font-size:9px;padding:3px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text-main);letter-spacing:1px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--text-main)'" onmouseout="this.style.borderColor='var(--border)'">📖 JOURNAL</button>
+    <a href="zar_capital_simulator.html" style="font-size:9px;padding:3px 10px;background:transparent;border:1px solid #c89040;color:#c89040;text-decoration:none;letter-spacing:1px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;transition:all .2s" onmouseover="this.style.background='rgba(200,144,64,.1)'" onmouseout="this.style.background='transparent'">← Simulador</a>
+  </div>
+</div>
+
+<!-- BLOOMBERG MATRIX BAR -->
+<div id="bloomberg-bar">
+  <div id="bloomberg-inner">
+    <!-- items generados por JS -->
+  </div>
+</div>
+
+<!-- GLOBE -->
+<div id="globe-wrap" style="top:72px"></div>
+
+<!-- TICKERS EN ESQUINAS -->
+<div class="ticker-corner" id="tk-tl">
+  <div class="tk-label"><div class="tk-dot" style="background:var(--cyan)"></div>FONDO ZAR</div>
+  <div class="tk-row"><span class="tk-key">AUM</span><span class="tk-val" id="tl-aum" style="color:var(--gold)">—</span></div>
+  <div class="tk-row"><span class="tk-key">TURNO</span><span class="tk-val" id="tl-turn" style="color:var(--text-main)">—</span></div>
+  <div class="tk-row"><span class="tk-key">NIVEL</span><span class="tk-val" id="tl-level" style="color:var(--cyan);font-size:10px">—</span></div>
+  <div class="tk-row"><span class="tk-key">REP</span><span class="tk-val" id="tl-rep" style="color:var(--blue)">—</span></div>
+</div>
+
+<div class="ticker-corner" id="tk-tr">
+  <div class="tk-label"><div class="tk-dot" style="background:var(--gold)"></div>MÉTRICAS</div>
+  <div class="tk-row"><span class="tk-key">RIESGO</span><span class="tk-val" id="tr-risk" style="color:var(--red)">—</span></div>
+  <div class="tk-row"><span class="tk-key">MORAL</span><span class="tk-val" id="tr-mor" style="color:var(--green)">—</span></div>
+  <div class="tk-row"><span class="tk-key">COMPL</span><span class="tk-val" id="tr-cmp" style="color:var(--green)">—</span></div>
+  <div class="tk-row"><span class="tk-key">LP</span><span class="tk-val" id="tr-lp" style="color:var(--green)">—</span></div>
+</div>
+
+<div class="ticker-corner" id="tk-bl">
+  <div class="tk-label"><div class="tk-dot" style="background:var(--green)"></div>UNIVERSO</div>
+  <div class="tk-row"><span class="tk-key">MODO</span><span class="tk-val" id="bl-modo" style="color:var(--gold);font-size:10px">HÍBRIDO</span></div>
+  <div class="tk-row"><span class="tk-key">DIFIC</span><span class="tk-val" id="bl-dif" style="color:var(--green);font-size:10px">PRINC.</span></div>
+  <div class="tk-row"><span class="tk-key">CAPAS</span><span class="tk-val" id="bl-layers" style="color:var(--blue)">—</span></div>
+  <div class="tk-row"><span class="tk-key">NEXT EV</span><span class="tk-val" id="bl-next" style="color:var(--text-muted);font-size:10px">—</span></div>
+</div>
+
+<div class="ticker-corner" id="tk-br">
+  <div class="tk-label"><div class="tk-dot" style="background:var(--red)"></div>GLOBO</div>
+  <div id="coord-display-tk" style="font-size:8px;color:var(--text-muted);letter-spacing:.5px;margin-bottom:4px">LAT — LNG —</div>
+  <div class="tk-row"><span class="tk-key">NV-UNLOCK</span><span class="tk-val" id="br-unlock" style="color:var(--purple);font-size:10px">NV3 →🔒</span></div>
+  <div class="tk-row"><span class="tk-key">EVENTOS</span><span class="tk-val" id="br-evts" style="color:var(--red)">0</span></div>
+</div>
+
+<!-- AUTO EVENT TOAST -->
+<div id="auto-event-toast">🦢 CISNE NEGRO AUTOMÁTICO DETECTADO — Ver Simulador</div>
+<div id="unlock-toast"></div>
+
+<!-- GEM-05: GLOBAL JOURNAL PANEL -->
+<div id="journal-panel">
+  <div class="jrn-header">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="jrn-title-main">GLOBAL JOURNAL</span>
+      <span style="font-size:7px;color:var(--cyan);border:1px solid var(--cyan);padding:1px 4px;letter-spacing:1px">INTEL FEED</span>
+    </div>
+    <button onclick="toggleJournal()" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-family:monospace;font-size:12px">✕</button>
+  </div>
+  <div class="jrn-content" id="journal-feed">
+    <!-- Entradas generadas por JS desde localStorage zcp_journal_v1 -->
+    <div class="jrn-entry" style="border-left-color:var(--gold)">
+      <div class="jrn-top">
+        <span class="jrn-tag tag-intel">[ZAR INTEL]</span>
+        <span class="jrn-date">2026.143.1200 UTC</span>
+      </div>
+      <div class="jrn-headline">Meridian Fund reasigna exposición en Asia-Pacífico.</div>
+      <div class="jrn-body">El comité de inversiones ejecutó cobertura preventiva tras detectar inestabilidad en la cadena de suministro de semiconductores.</div>
+      <div class="jrn-metrics">IMPACTO: AUM −0.5% · RIESGO −12</div>
+      <div class="jrn-source">FUENTE: ZAR Command Center</div>
+    </div>
+    <div class="jrn-entry" style="border-left-color:var(--red)">
+      <div class="jrn-top">
+        <span class="jrn-tag tag-alert">[GLOBAL ALERT]</span>
+        <span class="jrn-date">2026.143.1315 UTC</span>
+      </div>
+      <div class="jrn-headline">Escalada naval en el Estrecho de Taiwán.</div>
+      <div class="jrn-body">Reportes de inteligencia (GDELT) indican ejercicios no programados bloqueando rutas mercantes clave. Posible impacto en sector tecnológico.</div>
+      <div class="jrn-metrics">IMPACTO: —</div>
+      <div class="jrn-source">FUENTE: WorldMonitor / GDELT · OSINT</div>
+    </div>
+    <div class="jrn-entry" style="border-left-color:var(--purple)">
+      <div class="jrn-top">
+        <span class="jrn-tag tag-fiction">[FICTION]</span>
+        <span class="jrn-date">2026.144.0900 UTC</span>
+      </div>
+      <div class="jrn-headline">Rumores en Davos: Vanguard Systems cierra contrato clasificado.</div>
+      <div class="jrn-body">Fuentes no confirmadas sugieren acuerdo de USD 2.1B para sistemas autónomos enjambre. Impacto en pipeline Stage 2 de ZAR.</div>
+      <div class="jrn-metrics">IMPACTO: —</div>
+      <div class="jrn-source">FUENTE: Sector Rumors · Nivel Ficción</div>
+    </div>
+  </div>
+  <div class="jrn-footer">
+    <button onclick="generateJournalEntry()" style="width:100%;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:7px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s" onmouseover="this.style.background='rgba(0,212,255,.08)'" onmouseout="this.style.background='transparent'">✦ GENERAR ENTRADA — CLAUDE API</button>
+  </div>
+</div>
+
+<!-- GEM-13: PRIVATE EQUITY MODAL OVERLAY -->
+<div id="pe-overlay" onclick="if(event.target===this)closePEModal()">
+  <div class="pe-modal">
+    <div class="pe-hdr">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="pe-flag" style="font-size:16px">🇺🇸</span>
+        <h2 id="pe-name">STARTUP NAME</h2>
+        <span id="pe-risk-badge" class="pe-risk-alto">ALTO</span>
+        <span style="font-size:7px;padding:2px 5px;border:1px solid var(--blue);color:var(--blue);letter-spacing:1px" id="pe-nv-badge">NV4</span>
+      </div>
+      <button onclick="closePEModal()" style="background:transparent;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;font-family:monospace">✕</button>
+    </div>
+    <div class="pe-body">
+      <div class="pe-left">
+        <div class="pe-lore" id="pe-lore">Descripción de la startup...</div>
+        <div class="pe-metrics">
+          <div class="pe-metric"><label>Ticket Mín.</label><span id="pe-ticket">—</span></div>
+          <div class="pe-metric"><label>Múltiplo</label><span id="pe-multiplo">—</span></div>
+          <div class="pe-metric"><label>Maduración</label><span id="pe-turnos">—</span></div>
+        </div>
+        <div id="pe-progress-wrap" style="display:none;margin-bottom:10px">
+          <div style="font-size:7px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Inversión Activa</div>
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+            <div id="pe-progress-bar" style="height:100%;background:var(--cyan);width:0%;transition:width .4s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:3px">
+            <span id="pe-progress-label" style="font-size:7px;color:var(--text-dim)"></span>
+          </div>
+        </div>
+        <div class="pe-events">
+          <h4>Eventos Recientes del Portfolio</h4>
+          <div id="pe-events-list">
+            <div class="pe-event-item" style="color:var(--text-dim);font-style:italic">Sin eventos registrados</div>
+          </div>
+        </div>
+      </div>
+      <div class="pe-right">
+        <div class="pe-kpis">
+          <div style="font-size:7px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Estado del Fondo</div>
+          <div class="pe-kpi-row"><span>AUM</span><span id="pe-kpi-aum">—</span></div>
+          <div class="pe-kpi-row"><span>Riesgo</span><span id="pe-kpi-riesgo">—</span></div>
+          <div class="pe-kpi-row"><span>Reputación</span><span id="pe-kpi-rep">—</span></div>
+          <div class="pe-kpi-row"><span>Turno</span><span id="pe-kpi-turno">—</span></div>
+        </div>
+        <div class="pe-slider-wrap">
+          <label>Capital a Invertir (% AUM)</label>
+          <input type="range" id="pe-slider" min="5" max="30" value="5" step="1" oninput="updatePESlider()">
+          <div class="pe-monto" id="pe-monto-display">$0</div>
+          <div class="pe-impact" id="pe-impact-preview">Impacto en métricas: —</div>
+        </div>
+        <button class="pe-btn-invest" id="pe-btn-invest" onclick="confirmarInversion()">✦ INVERTIR</button>
+        <button class="pe-btn-cancel" onclick="closePEModal()">CANCELAR</button>
+      </div>
+    </div>
+    <div class="pe-footer">
+      <small>Simulación institucional — ZAR Capital Partners · Stage 2 NV4+</small>
+      <span id="pe-exit-info" style="font-size:7px;color:var(--text-dim)"></span>
+    </div>
+  </div>
+</div>
+
+<!-- LEFT PANEL -->
+<div class="panel" style="top:80px;left:12px;width:210px">
+  <div style="padding:7px 10px;border-bottom:1px solid var(--border);font-size:8px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase">Capas del Mapa</div>
+
+  <div class="layer-row" onclick="toggleLayer('portfolio')">
+    <div class="ldot" id="dot-portfolio" style="background:#4a9eff"></div>
+    <span style="font-size:9px;flex:1">Portfolio ZAR</span>
+    <span id="ind-portfolio" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('hq')">
+    <div class="ldot" id="dot-hq" style="background:#c89040"></div>
+    <span style="font-size:9px;flex:1">Sedes del Fondo</span>
+    <span id="ind-hq" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('routes')">
+    <div class="ldot" id="dot-routes" style="background:#4a9eff;border-radius:2px"></div>
+    <span style="font-size:9px;flex:1">Flujos de Capital</span>
+    <span id="ind-routes" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('cables')">
+    <div class="ldot" id="dot-cables" style="background:#00d4ff;border-radius:2px"></div>
+    <span style="font-size:9px;flex:1">Cables Submarinos</span>
+    <span id="ind-cables" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('shipping')">
+    <div class="ldot" id="dot-shipping" style="background:#c89040;border-radius:2px"></div>
+    <span style="font-size:9px;flex:1">Rutas Marítimas</span>
+    <span id="ind-shipping" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('airroutes')">
+    <div class="ldot" id="dot-airroutes" style="background:rgba(200,200,255,.9);border-radius:2px"></div>
+    <span style="font-size:9px;flex:1">Rutas Aéreas</span>
+    <span id="ind-airroutes" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('conflicts')">
+    <div class="ldot" id="dot-conflicts" style="background:#e84040"></div>
+    <span style="font-size:9px;flex:1">Zonas de Conflicto</span>
+    <span id="ind-conflicts" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('events')">
+    <div class="ldot" id="dot-events" style="background:#c89040"></div>
+    <span style="font-size:9px;flex:1">Eventos del Mundo</span>
+    <span id="ind-events" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('labels')">
+    <div class="ldot" id="dot-labels" style="background:#8860ff"></div>
+    <span style="font-size:9px;flex:1">Etiquetas Regiones</span>
+    <span id="ind-labels" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('rings')">
+    <div class="ldot" id="dot-rings" style="background:#00c896"></div>
+    <span style="font-size:9px;flex:1">Rings de Alerta</span>
+    <span id="ind-rings" style="font-size:9px;color:var(--text-muted)">OFF</span>
+  </div>
+
+  <!-- CAPAS BLOQUEADAS -->
+  <div style="padding:5px 10px;background:rgba(136,96,255,.06);border-bottom:1px solid var(--border-subtle);border-top:1px solid var(--border-subtle)">
+    <span style="font-size:7px;color:var(--purple);letter-spacing:1.5px;text-transform:uppercase">Capas Desbloqueables</span>
+  </div>
+  <div class="layer-row locked" id="row-planes" onclick="tryUnlock('planes',3)">
+    <div class="ldot" style="background:var(--text-dim)"></div>
+    <span style="font-size:9px;flex:1">Aviones Militares</span>
+    <span id="ind-planes" style="font-size:8px;color:var(--purple)">🔒 NV3</span>
+  </div>
+  <div class="layer-row locked" id="row-satellites" onclick="tryUnlock('satellites',5)">
+    <div class="ldot" style="background:var(--text-dim)"></div>
+    <span style="font-size:9px;flex:1">Red Satelital</span>
+    <span id="ind-satellites" style="font-size:8px;color:var(--purple)">🔒 NV5</span>
+  </div>
+  <div class="layer-row locked" id="row-defense" onclick="tryUnlock('defense',7)">
+    <div class="ldot" style="background:var(--text-dim)"></div>
+    <span style="font-size:9px;flex:1">ZAR Defense</span>
+    <span id="ind-defense" style="font-size:8px;color:var(--purple)">🔒 NV7</span>
+  </div>
+  <div class="layer-row locked" id="row-orbital" onclick="tryUnlock('orbital',9)">
+    <div class="ldot" style="background:var(--text-dim)"></div>
+    <span style="font-size:9px;flex:1">ZAR Orbital</span>
+    <span id="ind-orbital" style="font-size:8px;color:var(--purple)">🔒 NV9</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('satellites_live')">
+    <div class="ldot" id="dot-satellites_live" style="background:#00d4ff"></div>
+    <span style="font-size:9px;flex:1">Satélites en Órbita</span>
+    <span id="ind-satellites_live" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('launchpads')">
+    <div class="ldot" id="dot-launchpads" style="background:#00ff88"></div>
+    <span style="font-size:9px;flex:1">Lanzaderas Espaciales</span>
+    <span id="ind-launchpads" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row" onclick="toggleLayer('ports')">
+    <div class="ldot" id="dot-ports" style="background:#4a9eff;border-radius:2px"></div>
+    <span style="font-size:9px;flex:1">Puertos Globales</span>
+    <span id="ind-ports" style="font-size:9px;color:#00c896">ON</span>
+  </div>
+  <div class="layer-row locked" id="row-lunar" onclick="tryUnlock('lunar',10)">
+    <div class="ldot" style="background:var(--text-dim)"></div>
+    <span style="font-size:9px;flex:1">Base Lunar ZAR 🌙</span>
+    <span id="ind-lunar" style="font-size:8px;color:var(--purple)">🔒 NV10</span>
+  </div>
+
+  <div style="padding:7px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);font-size:8px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px">Rotación</div>
+  <div style="padding:7px 10px;display:flex;gap:4px">
+    <button class="btn" onclick="setSpeed(0)" style="flex:1;font-size:8px">PAUSA</button>
+    <button class="btn" onclick="setSpeed(0.3)" style="flex:1;font-size:8px">0.3x</button>
+    <button class="btn" onclick="setSpeed(1.5)" style="flex:1;font-size:8px">1.5x</button>
+  </div>
+
+  <div style="padding:7px 10px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:8px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase">Estado del Fondo</div>
+  <div style="padding:8px 10px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:9px;color:var(--text-muted)">Turno</span><span id="s-turn" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#c89040">—</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:9px;color:var(--text-muted)">AUM</span><span id="s-aum" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#c89040">—</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:9px;color:var(--text-muted)">LP</span><span id="s-lp" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#00c896">—</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:9px;color:var(--text-muted)">Nivel</span><span id="s-level" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#4a9eff;text-align:right;max-width:120px">—</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="font-size:9px;color:var(--text-muted)">Reputación</span><span id="s-rep" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#4a9eff">—</span></div>
+  </div>
+
+  <!-- DATA FEEDS STATUS -->
+  <div style="padding:6px 10px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div style="font-size:7px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Data Feeds en Tiempo Real</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span style="font-size:8px;color:var(--text-muted)">GDELT Events</span>
+      <span id="gdelt-status" style="font-size:8px;color:var(--text-dim);letter-spacing:.5px">○ OFF</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span style="font-size:8px;color:var(--text-muted)">ACLED Conflicts</span>
+      <span id="acled-status" style="font-size:8px;color:var(--text-dim);letter-spacing:.5px">○ SIN KEY</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span style="font-size:8px;color:var(--text-muted)">CelesTrak Sats</span>
+      <span id="celestrak-status" style="font-size:8px;color:var(--text-dim);letter-spacing:.5px">○ OFF</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:8px;color:var(--text-muted)">OpenSky Militar</span>
+      <span id="opensky-status" style="font-size:8px;color:var(--text-dim);letter-spacing:.5px">○ NV3</span>
+    </div>
+    <div style="display:flex;gap:4px">
+      <button class="btn" onclick="fetchGDELT()" style="flex:1;font-size:8px;border-color:#00d4ff;color:#00d4ff;padding:3px">↻ GDELT</button>
+      <button class="btn" onclick="showACLEDConfig()" style="flex:1;font-size:8px;border-color:#8860ff;color:#8860ff;padding:3px">⚙ ACLED</button>
+    </div>
+    <div style="margin-top:4px">
+      <button class="btn" onclick="fetchCelesTrak()" style="width:100%;font-size:8px;border-color:#00d4ff;color:#00d4ff;padding:3px">↻ CelesTrak Satélites</button>
+    </div>
+  </div>
+
+  <div style="padding:7px 10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px">
+    <button class="btn" onclick="generateWorldEvent()" style="border-color:#e84040;color:#e84040;width:100%;padding:5px">Cisne Negro Manual</button>
+    <button class="btn" onclick="refreshSimState()" style="width:100%;padding:4px">Sincronizar Simulador</button>
+    <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:2px">
+      <div style="font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">Modo del Universo</div>
+      <div style="display:flex;gap:3px">
+        <button id="modo-real" onclick="setModoUniverso('real')" class="btn" style="flex:1;font-size:8px;border-color:#00c896;color:#00c896;padding:4px">Real</button>
+        <button id="modo-hibrido" onclick="setModoUniverso('hibrido')" class="btn" style="flex:1;font-size:8px;border-color:#c89040;color:#c89040;padding:4px;background:rgba(200,144,64,.15)">Híbrido</button>
+        <button id="modo-ficcion" onclick="setModoUniverso('ficcion')" class="btn" style="flex:1;font-size:8px;padding:4px">Ficción</button>
+      </div>
+      <div id="modo-label" style="font-size:8px;color:#c89040;margin-top:4px;text-align:center;letter-spacing:.5px">Modo: Híbrido</div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL: EVENT FEED -->
+<div class="panel" style="top:80px;right:12px;width:268px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;overflow:hidden">
+  <div style="padding:7px 10px;border-bottom:1px solid var(--border);font-size:8px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;flex-shrink:0;display:flex;justify-content:space-between;align-items:center">
+    <span>Feed de Eventos</span>
+    <span id="feed-modo-badge" style="font-size:7px;padding:1px 5px;background:rgba(200,144,64,.12);color:#c89040;border:1px solid #c89040;letter-spacing:.5px">HÍBRIDO</span>
+  </div>
+  <div id="event-feed" style="flex:1;overflow-y:auto"></div>
+  <div id="detail-panel" style="display:none;border-top:2px solid #c89040;flex-shrink:0">
+    <div style="padding:7px 10px;font-size:8px;color:#c89040;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)">Marcador Seleccionado</div>
+    <div id="detail-content" style="padding:10px"></div>
+  </div>
+</div>
+
+<!-- BOTTOM STATUS BAR -->
+<div style="position:fixed;bottom:0;left:0;right:0;height:32px;background:var(--bg-panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:24px;z-index:20;backdrop-filter:blur(8px)">
+  <span style="font-size:8px;color:var(--text-muted);letter-spacing:1px">ZAR CAPITAL — MERIDIAN STRATEGY — WORLDMONITOR v2.8 — CABLES · RUTAS MARÍTIMAS · RUTAS AÉREAS · OPENSKY MILITAR · JOURNAL · CISNES NEGROS AUTO</span>
+  <span id="coord-display" style="font-size:8px;color:var(--text-dim);letter-spacing:1px;margin-left:auto">LAT — LNG —</span>
+  <span id="layer-count" style="font-size:8px;color:var(--text-dim);letter-spacing:1px">— capas activas</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.3/satellite.min.js"></script>
+<script src="https://unpkg.com/globe.gl" onerror="console.warn('globe.gl no cargó')"></script>
+<script>
+
+// ══════════════════════════════════════════════════════════════
+// DATA — PORTFOLIO / HQ / CONFLICTOS / EVENTOS (sin cambios)
+// ══════════════════════════════════════════════════════════════
+const PORTFOLIO=[
+  {lat:40.71,lng:-74.01,label:'New York',sub:'Índices US · UST 20%',alloc:'35% AUM',color:'#4a9eff',radius:.55,alt:.015,type:'portfolio'},
+  {lat:51.51,lng:-.13,label:'London',sub:'GBP/CAD · Forex activo',alloc:'12% AUM',color:'#4a9eff',radius:.38,alt:.015,type:'portfolio'},
+  {lat:41.88,lng:-87.63,label:'Chicago',sub:'Commodities · Futuros',alloc:'10% AUM',color:'#e84040',radius:.35,alt:.015,type:'portfolio'},
+  {lat:48.86,lng:2.35,label:'Frankfurt/Paris',sub:'CEDEARs Europa · ETFs',alloc:'8% AUM',color:'#4a9eff',radius:.32,alt:.015,type:'portfolio'},
+  {lat:35.69,lng:139.69,label:'Tokyo',sub:'Expansión Futura — Nivel 4',alloc:'0% AUM',color:'#1e2c3a',radius:.28,alt:.01,type:'portfolio'},
+  {lat:55.75,lng:37.62,label:'Moscow',sub:'Expansión Futura — Nivel 4',alloc:'0% AUM',color:'#1e2c3a',radius:.28,alt:.01,type:'portfolio'},
+  {lat:-33.86,lng:151.21,label:'Sydney',sub:'AUD commodities · oro',alloc:'3% AUM',color:'#e84040',radius:.25,alt:.01,type:'portfolio'},
+];
+
+const HQ=[
+  {lat:-34.60,lng:-58.38,label:'Buenos Aires',sub:'Sede Operativa — ZAR Capital Partners',alloc:'CER · CEDEARs · HQ Operativo',color:'#c89040',radius:.75,alt:.025,type:'hq'},
+  {lat:-34.90,lng:-56.20,label:'Montevideo',sub:'Vehículo Legal — Meridian Fund I',alloc:'Estructura Uruguay · LPs',color:'#c89040',radius:.55,alt:.025,type:'hq'},
+];
+
+// G-06 Gemini — 21 zonas de conflicto activas 2026
+// Fallback estático cuando ACLED no tiene key configurada
+const CONFLICTS=[
+  {lat:48.3794,lng:31.1656,label:'Ucrania — Frente Este',sub:'Guerra convencional / Artillería',level:'CRÍTICO',color:'#e84040',radius:1.4,alt:.008,type:'conflict'},
+  {lat:31.5,lng:34.46,label:'Gaza / Sur de Líbano',sub:'Conflicto asimétrico / Misiles',level:'CRÍTICO',color:'#e84040',radius:1.2,alt:.008,type:'conflict'},
+  {lat:24.8,lng:120.0,label:'Estrecho de Taiwán',sub:'Tensión naval / Ejercicios militares',level:'ALTO',color:'#c89040',radius:1.0,alt:.008,type:'conflict'},
+  {lat:15.3,lng:44.2,label:'Mar Rojo / Yemen',sub:'Ataques a rutas marítimas (Hutíes)',level:'ALTO',color:'#e84040',radius:1.1,alt:.008,type:'conflict'},
+  {lat:14.6,lng:-4.0,label:'Sahel (Mali/Burkina Faso)',sub:'Insurgencia y golpes de estado',level:'ALTO',color:'#e84040',radius:.9,alt:.008,type:'conflict'},
+  {lat:-1.6,lng:29.2,label:'Kivu del Norte (RDC)',sub:'Conflicto por recursos (M23)',level:'MEDIO',color:'#c89040',radius:.8,alt:.008,type:'conflict'},
+  {lat:13.5,lng:22.3,label:'Sudán / Darfur',sub:'Guerra civil (SAF vs RSF)',level:'CRÍTICO',color:'#e84040',radius:1.3,alt:.008,type:'conflict'},
+  {lat:39.8,lng:46.7,label:'Alto Karabaj / AM-AZ',sub:'Tensiones fronterizas',level:'MEDIO',color:'#c89040',radius:.7,alt:.008,type:'conflict'},
+  {lat:33.3,lng:44.3,label:'Irak / Siria (Milicias)',sub:'Ataques a bases y logística',level:'ALTO',color:'#e84040',radius:.9,alt:.008,type:'conflict'},
+  {lat:33.9,lng:72.8,label:'Frontera India-Pakistán',sub:'Escaramuzas en Cachemira',level:'MEDIO',color:'#c89040',radius:.6,alt:.008,type:'conflict'},
+  {lat:16.0,lng:113.0,label:'Mar de China Meridional',sub:'Fricción China-Filipinas',level:'MEDIO',color:'#c89040',radius:.8,alt:.008,type:'conflict'},
+  {lat:38.0,lng:127.0,label:'Península Coreana',sub:'Pruebas balísticas / DMZ',level:'MEDIO',color:'#c89040',radius:.7,alt:.008,type:'conflict'},
+  {lat:-10.9,lng:40.0,label:'Cabo Delgado (Mozambique)',sub:'Insurgencia contra hubs de gas',level:'MEDIO',color:'#c89040',radius:.6,alt:.008,type:'conflict'},
+  {lat:5.0,lng:46.0,label:'Cuerno de África / Somalia',sub:'Insurgencia y piratería remanente',level:'ALTO',color:'#e84040',radius:.8,alt:.008,type:'conflict'},
+  {lat:18.5,lng:-72.3,label:'Haití (Puerto Príncipe)',sub:'Colapso estatal / Violencia pandillas',level:'ALTO',color:'#e84040',radius:.8,alt:.008,type:'conflict'},
+  {lat:25.0,lng:-100.0,label:'Norte de México',sub:'Violencia de cárteles / Rutas logísticas',level:'MEDIO',color:'#c89040',radius:.7,alt:.008,type:'conflict'},
+  {lat:10.0,lng:-66.0,label:'Venezuela (Essequibo)',sub:'Tensiones territoriales geopolíticas',level:'MEDIO',color:'#c89040',radius:.6,alt:.008,type:'conflict'},
+  {lat:20.0,lng:95.0,label:'Myanmar (Guerra Civil)',sub:'Junta militar vs Rebeldes',level:'ALTO',color:'#e84040',radius:1.0,alt:.008,type:'conflict'},
+  {lat:42.0,lng:20.0,label:'Balcanes (Kosovo/Serbia)',sub:'Tensión interétnica latente',level:'BAJO',color:'#4a9eff',radius:.5,alt:.008,type:'conflict'},
+  {lat:2.0,lng:-75.0,label:'Amazonía Colombiana',sub:'Guerrillas / Rutas de narcotráfico',level:'MEDIO',color:'#c89040',radius:.6,alt:.008,type:'conflict'},
+  {lat:-2.0,lng:-79.0,label:'Ecuador (Guayaquil)',sub:'Narcoterrorismo en hub portuario',level:'ALTO',color:'#e84040',radius:.7,alt:.008,type:'conflict'},
+];
+
+const WORLD_EVENTS=[
+  {lat:38.9,lng:-77.0,label:'Fed — FOMC Decision',sub:'Tasas sin cambio. Señal dovish para H2 2025.',date:'Abr 2025',impact:'ALTO',color:'#4a9eff',radius:.5,alt:.02,type:'event'},
+  {lat:52.52,lng:13.40,label:'BCE — Política Monetaria',sub:'Recorte de 25bps. EUR/USD bajo presión.',date:'Mar 2025',impact:'MEDIO',color:'#4a9eff',radius:.4,alt:.02,type:'event'},
+  {lat:-23.55,lng:-46.63,label:'Brasil — Volatilidad EM',sub:'Lula presiona al Banco Central. CEDEARs BR afectados.',date:'Abr 2025',impact:'MEDIO',color:'#c89040',radius:.45,alt:.02,type:'event'},
+  {lat:1.35,lng:103.82,label:'OPEC+ — Reunión Singapur',sub:'Recorte producción +1M bbl/día. Petróleo +8%.',date:'May 2025',impact:'ALTO',color:'#c89040',radius:.45,alt:.02,type:'event'},
+  {lat:31.23,lng:121.47,label:'China — Estímulo Fiscal',sub:'CNY 2T de estímulo. Commodities base disparan.',date:'Mar 2025',impact:'ALTO',color:'#4a9eff',radius:.5,alt:.02,type:'event'},
+  {lat:28.63,lng:77.22,label:'India — Bonos Soberanos',sub:'Inclusión en índice JPM. Flujos EM positivos.',date:'Jun 2025',impact:'BAJO',color:'#00c896',radius:.35,alt:.02,type:'event'},
+];
+
+const ROUTES=[
+  {startLat:-34.60,startLng:-58.38,endLat:40.71,endLng:-74.01,color:'rgba(74,158,255,.8)',label:'BA → NY · Capital Flow'},
+  {startLat:-34.60,startLng:-58.38,endLat:-34.90,endLng:-56.20,color:'rgba(200,144,64,.9)',label:'BA → MVD · Estructura legal'},
+  {startLat:-34.90,startLng:-56.20,endLat:40.71,endLng:-74.01,color:'rgba(200,144,64,.6)',label:'MVD → NY · LP institucional'},
+  {startLat:40.71,startLng:-74.01,endLat:51.51,endLng:-.13,color:'rgba(74,158,255,.6)',label:'NY → LON · Forex GBP/CAD'},
+  {startLat:40.71,startLng:-74.01,endLat:41.88,endLng:-87.63,color:'rgba(232,64,64,.5)',label:'NY → CHI · Commodities'},
+  {startLat:-34.60,startLng:-58.38,endLat:48.86,endLng:2.35,color:'rgba(74,158,255,.3)',label:'BA → EUR · CEDEARs Europa'},
+];
+
+const RINGS_DATA=[
+  {lat:-34.60,lng:-58.38,maxR:3,propagationSpeed:1.5,repeatPeriod:800,color:'#c89040'},
+  {lat:40.71,lng:-74.01,maxR:3,propagationSpeed:1.5,repeatPeriod:1000,color:'#4a9eff'},
+  {lat:49.0,lng:32.0,maxR:4,propagationSpeed:2,repeatPeriod:600,color:'#e84040'},
+  {lat:31.5,lng:34.75,maxR:3.5,propagationSpeed:1.8,repeatPeriod:700,color:'#e84040'},
+  {lat:12.8,lng:45.0,maxR:3,propagationSpeed:1.6,repeatPeriod:900,color:'#e84040'},
+  {lat:-34.90,lng:-56.20,maxR:2.5,propagationSpeed:1.2,repeatPeriod:1200,color:'#c89040'},
+  {lat:51.51,lng:-.13,maxR:2.5,propagationSpeed:1.3,repeatPeriod:1100,color:'#4a9eff'},
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — CABLES SUBMARINOS REALES (TeleGeography-inspired)
+// ══════════════════════════════════════════════════════════════
+// Formato pathsData: coords = [[lat,lng], ...]
+const SUBMARINE_CABLES=[
+  {
+    name:'SEA-ME-WE 3',color:'rgba(0,212,255,.82)',
+    coords:[[1.3,103.8],[7.0,79.9],[18.9,72.8],[23.6,58.5],[11.5,43.2],[12.8,45.0],[29.0,32.5],[31.2,29.9],[31.5,25.0],[38.0,14.5],[41.0,9.0],[43.3,5.3],[43.6,3.9],[43.4,2.3],[51.5,0.0]]
+  },
+  {
+    name:'SEA-ME-WE 4',color:'rgba(0,212,255,.75)',
+    coords:[[1.3,103.8],[5.9,80.0],[20.0,68.0],[24.0,57.0],[11.8,43.5],[31.2,30.0],[31.0,25.0],[37.0,15.0],[41.3,2.3],[48.4,-4.5],[43.4,-8.6]]
+  },
+  {
+    name:'Trans-Atlantic (MAREA)',color:'rgba(0,212,255,.78)',
+    coords:[[40.7,-74.0],[42.0,-65.0],[44.0,-50.0],[45.5,-35.0],[44.0,-20.0],[43.4,-8.6],[36.5,-6.3]]
+  },
+  {
+    name:'Trans-Atlantic (TAT-14)',color:'rgba(0,212,255,.68)',
+    coords:[[39.9,-74.1],[41.5,-60.0],[44.0,-45.0],[46.0,-30.0],[48.5,-17.0],[50.3,-4.0],[51.5,0.0]]
+  },
+  {
+    name:'Trans-Pacific (TGN-Pacific)',color:'rgba(0,212,255,.75)',
+    coords:[[37.8,-122.4],[34.0,-140.0],[30.0,-155.0],[25.0,-165.0],[21.3,-157.8],[20.0,-155.0],[25.0,-140.0],[30.0,-130.0],[35.7,139.7]]
+  },
+  {
+    name:'Pacific Crossing (PC-1)',color:'rgba(0,212,255,.62)',
+    coords:[[40.7,-74.0],[47.0,-130.0],[48.0,-160.0],[40.0,-175.0],[35.0,-170.0],[35.7,139.7]]
+  },
+  {
+    name:'Africa West (SAT-3/WASC)',color:'rgba(0,212,255,.68)',
+    coords:[[40.4,-3.7],[36.0,-5.4],[33.0,-8.0],[28.5,-13.5],[20.0,-17.0],[14.7,-17.4],[5.5,-0.2],[4.0,9.7],[0.4,9.5],[-4.3,15.3],[-8.8,13.2],[-12.3,13.6],[-22.9,14.3],[-33.9,18.4]]
+  },
+  {
+    name:'India-ME-WE',color:'rgba(0,212,255,.62)',
+    coords:[[22.0,88.0],[13.0,80.5],[7.0,79.9],[10.0,66.0],[22.0,59.5],[25.0,56.0],[24.5,54.5],[26.2,50.6]]
+  },
+  {
+    name:'Southern Cross (Australia-USA)',color:'rgba(0,212,255,.62)',
+    coords:[[-33.9,151.2],[-28.0,168.0],[-15.0,178.0],[0.0,175.0],[21.3,-157.8],[37.8,-122.4]]
+  },
+  {
+    name:'Arctic Fiber (Iceland-UK)',color:'rgba(0,212,255,.48)',
+    coords:[[51.5,-0.1],[55.5,-6.0],[60.0,-15.0],[64.0,-21.9],[65.6,-18.1],[66.0,-14.0],[68.0,14.0],[70.0,25.0],[69.0,33.0]]
+  },
+  {
+    name:'EASSy (East Africa)',color:'rgba(0,212,255,.62)',
+    coords:[[31.0,32.0],[22.0,37.0],[11.5,43.2],[0.0,42.0],[-4.0,39.7],[-11.7,37.6],[-15.0,35.5],[-26.0,32.5],[-33.9,18.4]]
+  },
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — RUTAS COMERCIALES MARÍTIMAS PRINCIPALES
+// ══════════════════════════════════════════════════════════════
+// G-07 Gemini — Waypoints exactos de 7 rutas marítimas estratégicas
+const SHIPPING_ROUTES=[
+  {
+    name:'Trans-Pacific (Asia → USA)',color:'rgba(200,144,64,.78)',volume:'HIGH',
+    coords:[[31.2,121.5],[28.0,140.0],[25.0,155.0],[20.0,170.0],[21.3,-157.8],[34.0,-140.0],[33.7,-118.2]]
+  },
+  {
+    name:'Asia → Europe via Suez',color:'rgba(200,144,64,.82)',volume:'HIGH',
+    coords:[[31.2,121.5],[22.0,113.9],[1.3,103.8],[5.5,79.5],[12.8,45.0],[11.5,43.2],[29.0,32.5],[31.5,32.0],[32.3,27.0],[35.5,23.0],[37.9,23.7],[37.0,15.0],[38.1,13.3],[43.0,5.5],[43.4,3.8],[51.5,4.5]]
+  },
+  {
+    name:'Trans-Atlantic (USA → Europe)',color:'rgba(74,158,255,.72)',volume:'HIGH',
+    coords:[[40.7,-74.0],[42.0,-60.0],[44.0,-45.0],[46.0,-30.0],[48.0,-15.0],[51.9,4.5]]
+  },
+  {
+    name:'Persian Gulf → Asia',color:'rgba(200,144,64,.68)',volume:'HIGH',
+    coords:[[26.0,56.5],[19.0,60.0],[12.0,65.0],[7.0,72.0],[1.3,103.8],[22.3,113.9],[31.2,121.5]]
+  },
+  {
+    name:'Cape of Good Hope (Alt Suez)',color:'rgba(200,144,64,.62)',volume:'MEDIUM',
+    coords:[[31.2,121.5],[1.3,103.8],[-10.0,57.5],[-20.0,45.0],[-33.9,18.4],[-35.0,5.0],[-20.0,-15.0],[-5.0,-35.0],[1.4,-9.4],[20.0,-25.0],[40.0,-10.0],[43.6,3.9],[51.5,4.5]]
+  },
+  {
+    name:'South America → USA',color:'rgba(0,200,150,.70)',volume:'MEDIUM',
+    coords:[[-34.9,-56.2],[-23.5,-43.2],[-5.0,-35.0],[9.0,-79.5],[14.5,-90.5],[25.0,-90.0],[30.0,-89.0],[29.9,-90.0],[40.7,-74.0]]
+  },
+  {
+    name:'Ruta Polar Ártica',color:'rgba(136,96,255,.62)',volume:'LOW',
+    coords:[[51.5,4.5],[55.0,10.0],[60.0,5.0],[65.0,-5.0],[70.0,-20.0],[75.0,-50.0],[78.0,-80.0],[76.0,-110.0],[72.0,-130.0],[65.0,-168.0],[64.5,-165.0],[59.0,-153.4]]
+  },
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — RUTAS AÉREAS COMERCIALES PRINCIPALES
+// ══════════════════════════════════════════════════════════════
+// GEM-03 Gemini — 15 rutas aéreas más transitadas del mundo
+// Color: rgba(200,200,255,.4) — azul pálido, diferenciado de
+// rutas marítimas (dorado) y cables submarinos (cyan)
+const AIR_ROUTES=[
+  {
+    name:'JFK (New York) ✈ LHR (London)',color:'rgba(200,200,255,.45)',
+    coords:[[40.64,-73.77],[45.0,-60.0],[50.0,-30.0],[51.47,-0.45]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:35000
+  },
+  {
+    name:'LHR (London) ✈ DXB (Dubai)',color:'rgba(200,200,255,.42)',
+    coords:[[51.47,-0.45],[48.0,15.0],[40.0,30.0],[25.25,55.36]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:38000
+  },
+  {
+    name:'DXB (Dubai) ✈ HKG (Hong Kong)',color:'rgba(200,200,255,.40)',
+    coords:[[25.25,55.36],[20.0,75.0],[22.0,95.0],[22.30,113.91]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:40000
+  },
+  {
+    name:'LAX (Los Angeles) ✈ NRT (Tokyo)',color:'rgba(200,200,255,.45)',
+    coords:[[33.94,-118.40],[45.0,-150.0],[48.0,180.0],[40.0,150.0],[35.77,140.39]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:42000
+  },
+  {
+    name:'NRT (Tokyo) ✈ SIN (Singapore)',color:'rgba(200,200,255,.38)',
+    coords:[[35.77,140.39],[25.0,125.0],[15.0,115.0],[1.36,103.99]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:36000
+  },
+  {
+    name:'SIN (Singapore) ✈ SYD (Sydney)',color:'rgba(200,200,255,.38)',
+    coords:[[1.36,103.99],[-10.0,115.0],[-20.0,130.0],[-33.93,151.17]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:37000
+  },
+  {
+    name:'FRA (Frankfurt) ✈ JFK (New York)',color:'rgba(200,200,255,.42)',
+    coords:[[50.03,8.57],[51.0,-10.0],[48.0,-40.0],[40.64,-73.77]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:36000
+  },
+  {
+    name:'CDG (Paris) ✈ GRU (São Paulo)',color:'rgba(200,200,255,.40)',
+    coords:[[49.00,2.55],[30.0,-20.0],[10.0,-35.0],[-23.43,-46.47]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:39000
+  },
+  {
+    name:'GRU (São Paulo) ✈ MIA (Miami)',color:'rgba(200,200,255,.38)',
+    coords:[[-23.43,-46.47],[-10.0,-55.0],[10.0,-75.0],[25.79,-80.28]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:34000
+  },
+  {
+    name:'EZE (Buenos Aires) ✈ MAD (Madrid)',color:'rgba(200,200,255,.50)',
+    coords:[[-34.81,-58.53],[-20.0,-40.0],[10.0,-25.0],[30.0,-15.0],[40.49,-3.56]],
+    stroke:.5,dashLen:.015,dashGap:.008,animTime:40000
+  },
+  {
+    name:'BJS (Beijing) ✈ SFO (San Francisco)',color:'rgba(200,200,255,.42)',
+    coords:[[40.07,116.59],[55.0,150.0],[60.0,-170.0],[50.0,-140.0],[37.61,-122.37]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:43000
+  },
+  {
+    name:'ICN (Seoul-Incheon) ✈ DEL (Delhi)',color:'rgba(200,200,255,.38)',
+    coords:[[37.46,126.44],[35.0,110.0],[30.0,90.0],[28.55,77.10]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:35000
+  },
+  {
+    name:'JNB (Johannesburg) ✈ LHR (London)',color:'rgba(200,200,255,.38)',
+    coords:[[-26.13,28.24],[-10.0,25.0],[15.0,20.0],[35.0,10.0],[51.47,-0.45]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:41000
+  },
+  {
+    name:'MEX (Mexico City) ✈ BOG (Bogotá)',color:'rgba(200,200,255,.36)',
+    coords:[[19.43,-99.07],[15.0,-90.0],[10.0,-80.0],[4.70,-74.14]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:30000
+  },
+  {
+    name:'ORD (Chicago) ✈ HNL (Honolulu)',color:'rgba(200,200,255,.38)',
+    coords:[[41.97,-87.90],[40.0,-110.0],[35.0,-135.0],[21.31,-157.92]],
+    stroke:.4,dashLen:.015,dashGap:.008,animTime:38000
+  },
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — ETIQUETAS FLOTANTES BLOOMBERG-STYLE
+// ══════════════════════════════════════════════════════════════
+const WORLD_LABELS=[
+  {lat:40.71,lng:-74.01,text:'NEW YORK\n$23.4T',color:'#4a9eff',size:.4,dotR:.3,altitude:.02},
+  {lat:51.51,lng:-.13,text:'LONDON\nFX Hub',color:'#4a9eff',size:.35,dotR:.25,altitude:.02},
+  {lat:35.69,lng:139.69,text:'TOKYO\n¥Markets',color:'#c89040',size:.35,dotR:.25,altitude:.02},
+  {lat:31.23,lng:121.47,text:'SHANGHAI\n#1 Puerto',color:'#00c896',size:.38,dotR:.28,altitude:.02},
+  {lat:22.3,lng:114.2,text:'HONG KONG\nFinHUB',color:'#4a9eff',size:.32,dotR:.22,altitude:.02},
+  {lat:1.35,lng:103.82,text:'SINGAPUR\nMalaca Gate',color:'#c89040',size:.35,dotR:.25,altitude:.02},
+  {lat:4.0,lng:100.5,text:'ESTRECHO\nMALACA',color:'#e84040',size:.3,dotR:.2,altitude:.015},
+  {lat:29.5,lng:32.3,text:'CANAL\nSUEZ',color:'#e84040',size:.3,dotR:.2,altitude:.015},
+  {lat:9.1,lng:-79.5,text:'CANAL\nPANAMÁ',color:'#e84040',size:.3,dotR:.2,altitude:.015},
+  {lat:-34.60,lng:-58.38,text:'BUENOS AIRES\nZAR HQ',color:'#c89040',size:.38,dotR:.28,altitude:.02},
+  {lat:48.86,lng:2.35,text:'PARIS/FRÁNCFORT\nECB Zone',color:'#c89040',size:.3,dotR:.2,altitude:.015},
+  {lat:25.2,lng:55.3,text:'DUBAI\nGolfo Hub',color:'#c89040',size:.32,dotR:.22,altitude:.015},
+  {lat:55.75,lng:37.62,text:'MOSCÚ\nSanciones',color:'#e84040',size:.3,dotR:.2,altitude:.015},
+  {lat:12.8,lng:45.0,text:'GOLFO ADÉN\n⚠ RIESGO',color:'#e84040',size:.32,dotR:.22,altitude:.015},
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — CAPAS BLOQUEADAS (estructura lista para futuros niveles)
+// ══════════════════════════════════════════════════════════════
+const LOCKED_LAYERS={
+  planes:{
+    minLevel:3,
+    points:[
+      {lat:51.5,lng:-0.1,label:'RAF Northolt',sub:'Patrulla OTAN activa',color:'#8860ff',radius:.3,alt:.04,type:'plane'},
+      {lat:38.9,lng:-77.0,label:'Pentagon Air',sub:'B-52 en patrulla',color:'#8860ff',radius:.3,alt:.04,type:'plane'},
+      {lat:35.7,lng:139.7,label:'JASDF Tokyo',sub:'F-35 en intercepción',color:'#8860ff',radius:.25,alt:.04,type:'plane'},
+      {lat:55.8,lng:37.6,label:'Moscú Air',sub:'Tu-160 ejercicio',color:'#8860ff',radius:.25,alt:.04,type:'plane'},
+      {lat:40.9,lng:100.3,label:'PLAAF Jiuquan',sub:'Bombardero H-6K en ejercicio',color:'#8860ff',radius:.25,alt:.04,type:'plane'},
+    ]
+  },
+  satellites:{
+    minLevel:5,
+    points:[
+      {lat:0,lng:0,label:'Starlink LEO-1',sub:'Órbita: 550km · SpaceX',color:'#00d4ff',radius:.15,alt:.12,type:'satellite'},
+      {lat:20,lng:90,label:'ISS',sub:'Estación Espacial Intl. · 408km',color:'#00d4ff',radius:.2,alt:.1,type:'satellite'},
+      {lat:-15,lng:-60,label:'Inmarsat-4F3',sub:'Cobertura LatAm · GEO 35.800km',color:'#00d4ff',radius:.15,alt:.2,type:'satellite'},
+      {lat:30,lng:120,label:'Beidou MEO-12',sub:'Constelación Nav China · MEO',color:'#e84040',radius:.15,alt:.15,type:'satellite'},
+      {lat:45,lng:30,label:'GPS Block III-6',sub:'USAF · MEO 20.200km',color:'#ffffff',radius:.15,alt:.18,type:'satellite'},
+      {lat:55,lng:-20,label:'Galileo FOC-23',sub:'ESA · MEO 23.222km',color:'#4a9eff',radius:.15,alt:.19,type:'satellite'},
+      {lat:-40,lng:150,label:'Starlink LEO-2',sub:'Órbita: 550km · SpaceX southern',color:'#00d4ff',radius:.12,alt:.11,type:'satellite'},
+      {lat:60,lng:-100,label:'GLONASS-K2',sub:'Roscosmos · MEO 19.100km',color:'#e84040',radius:.14,alt:.17,type:'satellite'},
+    ]
+  },
+  defense:{
+    minLevel:7,
+    points:[
+      {lat:-34.6,lng:-58.4,label:'ZAR Defense HQ',sub:'Sede central ZAR Defense Systems',color:'#e84040',radius:.5,alt:.04,type:'defense'},
+      {lat:32.0,lng:35.0,label:'ZAR Shield-1',sub:'Escudo balístico regional · Fase I',color:'#e84040',radius:.4,alt:.04,type:'defense'},
+      {lat:28.5,lng:-80.6,label:'ZAR Defense Florida',sub:'Acuerdo logístico · Cape Canaveral',color:'#e84040',radius:.35,alt:.04,type:'defense'},
+    ]
+  },
+  orbital:{
+    minLevel:9,
+    points:[
+      {lat:0,lng:-60,label:'ZAR-SAT-01',sub:'CubeSat propio · LEO 550km · Monitoreo LatAm',color:'#c89040',radius:.2,alt:.12,type:'orbital'},
+      {lat:0,lng:60,label:'ZAR-SAT-02',sub:'CubeSat #2 · LEO · Cobertura global',color:'#c89040',radius:.2,alt:.12,type:'orbital'},
+      {lat:30,lng:-30,label:'ZAR-SAT-03',sub:'CubeSat #3 · LEO · Atlántico Norte',color:'#c89040',radius:.18,alt:.13,type:'orbital'},
+    ]
+  },
+  lunar:{
+    minLevel:10,
+    points:[
+      {lat:0,lng:0,label:'ZAR Lunar Base Alpha',sub:'Primera base ZAR · Zona Ecuatorial Lunar · Turno 10+',color:'#8860ff',radius:.4,alt:.35,type:'lunar'},
+      {lat:15,lng:30,label:'ZAR Lunar Mining-1',sub:'Extracción Helio-3 · Fase experimental',color:'#8860ff',radius:.3,alt:.34,type:'lunar'},
+      {lat:-10,lng:-20,label:'ZAR Lunar Relay',sub:'Estación de comunicaciones · Gateway lunar',color:'#8860ff',radius:.25,alt:.33,type:'lunar'},
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// DATA — SATÉLITES VIVOS (destellantes, activos desde inicio)
+// ══════════════════════════════════════════════════════════════
+// Constelaciones reales + lanzamientos recientes — se renderizan
+// como htmlElements con animación CSS flicker independiente
+
+const SATELLITES_LIVE=[
+  // Starlink SpaceX — LEO 550km — distribuidos globalmente
+  {lat:52,lng:0,alt:.09,cls:'sat-starlink',label:'Starlink SL-6·142',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:35,lng:45,alt:.09,cls:'sat-starlink',label:'Starlink SL-6·218',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:-20,lng:120,alt:.09,cls:'sat-starlink',label:'Starlink SL-7·31',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:60,lng:-120,alt:.09,cls:'sat-starlink',label:'Starlink SL-7·88',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:25,lng:-80,alt:.09,cls:'sat-starlink',label:'Starlink SL-8·12',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:-35,lng:-60,alt:.09,cls:'sat-starlink',label:'Starlink SL-8·45',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:48,lng:20,alt:.09,cls:'sat-starlink',label:'Starlink SL-9·7',owner:'SpaceX',orbit:'LEO 550km'},
+  {lat:-5,lng:30,alt:.09,cls:'sat-starlink',label:'Starlink SL-9·91',owner:'SpaceX',orbit:'LEO 550km'},
+  // ISS — LEO 408km — única posición aprox
+  {lat:28,lng:-10,alt:.07,cls:'sat-iss',label:'ISS',owner:'NASA/Roscosmos/ESA/JAXA/CSA',orbit:'LEO 408km · 92min órbita'},
+  // GPS Block III — MEO — 6 planos orbitales
+  {lat:45,lng:-60,alt:.18,cls:'sat-gps',label:'GPS Block III SV-1',owner:'USAF',orbit:'MEO 20.200km'},
+  {lat:45,lng:0,alt:.18,cls:'sat-gps',label:'GPS Block III SV-2',owner:'USAF',orbit:'MEO 20.200km'},
+  {lat:45,lng:60,alt:.18,cls:'sat-gps',label:'GPS Block III SV-3',owner:'USAF',orbit:'MEO 20.200km'},
+  {lat:-45,lng:120,alt:.18,cls:'sat-gps',label:'GPS Block III SV-4',owner:'USAF',orbit:'MEO 20.200km'},
+  {lat:-45,lng:-120,alt:.18,cls:'sat-gps',label:'GPS Block III SV-5',owner:'USAF',orbit:'MEO 20.200km'},
+  // Galileo — MEO — ESA
+  {lat:56,lng:40,alt:.19,cls:'sat-galileo',label:'Galileo FOC-23',owner:'ESA',orbit:'MEO 23.222km'},
+  {lat:56,lng:-80,alt:.19,cls:'sat-galileo',label:'Galileo FOC-24',owner:'ESA',orbit:'MEO 23.222km'},
+  {lat:-56,lng:160,alt:.19,cls:'sat-galileo',label:'Galileo FOC-25',owner:'ESA',orbit:'MEO 23.222km'},
+  // Beidou CNSA — MEO + GEO
+  {lat:35,lng:80,alt:.15,cls:'sat-beidou',label:'Beidou-3 MEO-18',owner:'CNSA',orbit:'MEO 21.528km'},
+  {lat:35,lng:160,alt:.15,cls:'sat-beidou',label:'Beidou-3 MEO-20',owner:'CNSA',orbit:'MEO 21.528km'},
+  {lat:0,lng:110,alt:.22,cls:'sat-beidou',label:'Beidou-3 GEO-2',owner:'CNSA',orbit:'GEO 35.786km'},
+  // OneWeb — LEO
+  {lat:70,lng:20,alt:.10,cls:'sat-starlink',label:'OneWeb OW-112',owner:'OneWeb',orbit:'LEO 1.200km'},
+  {lat:70,lng:-140,alt:.10,cls:'sat-starlink',label:'OneWeb OW-158',owner:'OneWeb',orbit:'LEO 1.200km'},
+  // GLONASS — Roscosmos
+  {lat:65,lng:60,alt:.17,cls:'sat-gps',label:'GLONASS-K2 #15',owner:'Roscosmos',orbit:'MEO 19.100km'},
+  {lat:65,lng:-60,alt:.17,cls:'sat-gps',label:'GLONASS-K2 #21',owner:'Roscosmos',orbit:'MEO 19.100km'},
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — LANZADERAS ESPACIALES (puntos en tierra + rings)
+// ══════════════════════════════════════════════════════════════
+const LAUNCHPADS=[
+  {lat:28.5,lng:-80.6,label:'Cape Canaveral SLC-40',sub:'SpaceX Falcon 9/Heavy · NASA',company:'SpaceX/NASA',color:'#00ff88',radius:.4,alt:.01,type:'launchpad'},
+  {lat:34.6,lng:-120.6,label:'Vandenberg SLC-4E',sub:'SpaceX Falcon 9 · Polar & SSO',company:'SpaceX',color:'#00ff88',radius:.35,alt:.01,type:'launchpad'},
+  {lat:45.6,lng:63.3,label:'Baikonur LC-1',sub:'Roscosmos Soyuz · Kazajistán',company:'Roscosmos',color:'#e84040',radius:.38,alt:.01,type:'launchpad'},
+  {lat:5.2,lng:-52.8,label:'Centre Spatial Guyanais',sub:'ESA Ariane 6 · Guayana Francesa',company:'ESA/ArianeGroup',color:'#4a9eff',radius:.35,alt:.01,type:'launchpad'},
+  {lat:40.9,lng:100.3,label:'Jiuquan SLC-43',sub:'CNSA Long March · Misiones tripuladas',company:'CNSA',color:'#c89040',radius:.38,alt:.01,type:'launchpad'},
+  {lat:28.2,lng:102.0,label:'Xichang Satellite LC',sub:'CNSA Long March-3B · GEO',company:'CNSA',color:'#c89040',radius:.32,alt:.01,type:'launchpad'},
+  {lat:13.7,lng:80.2,label:'Satish Dhawan SDSC',sub:'ISRO PSLV/GSLV · India',company:'ISRO',color:'#00c896',radius:.35,alt:.01,type:'launchpad'},
+  {lat:-39.3,lng:177.9,label:'Mahia Launch Complex',sub:'RocketLab Electron · Nueva Zelanda',company:'RocketLab',color:'#8860ff',radius:.3,alt:.01,type:'launchpad'},
+  {lat:69.0,lng:16.0,label:'Andøya Space Center',sub:'ESA/NorSat · Noruega · Polar SSO',company:'Andøya',color:'#4a9eff',radius:.25,alt:.01,type:'launchpad'},
+];
+
+const LAUNCHPAD_RINGS=LAUNCHPADS.map((p,i)=>({
+  lat:p.lat,lng:p.lng,
+  maxR:2.5,propagationSpeed:1.2,
+  repeatPeriod:4000+i*800,
+  color:p.color
+}));
+
+// ══════════════════════════════════════════════════════════════
+// DATA — PUERTOS GLOBALES (G-02 Gemini)
+// ══════════════════════════════════════════════════════════════
+const GLOBAL_PORTS=[
+  {lat:31.22,lng:121.48,label:'Shanghai',sub:'#1 · 47.3M TEU/año · Yangshan Deep',color:'#4a9eff',radius:.45,alt:.012,type:'port'},
+  {lat:22.3,lng:114.2,label:'Hong Kong',sub:'#4 · 18.3M TEU · Kvetch Container',color:'#4a9eff',radius:.35,alt:.012,type:'port'},
+  {lat:1.35,lng:103.82,label:'Singapur',sub:'#2 · 37.5M TEU · Hub regional Asia',color:'#4a9eff',radius:.42,alt:.012,type:'port'},
+  {lat:35.5,lng:129.4,label:'Busan',sub:'#6 · 22.7M TEU · Corea del Sur',color:'#4a9eff',radius:.32,alt:.012,type:'port'},
+  {lat:51.9,lng:4.5,label:'Rotterdam',sub:'#11 · 14.5M TEU · Mayor puerto Europa',color:'#00c896',radius:.35,alt:.012,type:'port'},
+  {lat:37.5,lng:126.8,label:'Incheon',sub:'#9 · 16.3M TEU · Seoul gateway',color:'#4a9eff',radius:.3,alt:.012,type:'port'},
+  {lat:25.3,lng:55.4,label:'Jebel Ali / Dubai',sub:'#10 · 14.8M TEU · Hub Golfo Pérsico',color:'#c89040',radius:.33,alt:.012,type:'port'},
+  {lat:40.7,lng:-74.0,label:'Puerto de NY/NJ',sub:'#14 · 9.5M TEU · USA East Coast',color:'#00c896',radius:.28,alt:.012,type:'port'},
+  {lat:33.7,lng:-118.2,label:'Los Ángeles / Long Beach',sub:'#17 · 18.0M TEU · USA West Coast',color:'#00c896',radius:.3,alt:.012,type:'port'},
+  {lat:-34.6,lng:-58.4,label:'Buenos Aires',sub:'Latam · 1.5M TEU · Hub ZAR Capital',color:'#e84040',radius:.25,alt:.012,type:'port'},
+  {lat:-23.0,lng:-43.2,label:'Puerto de Santos',sub:'#32 · Mayor Brasil · 4.2M TEU',color:'#c89040',radius:.28,alt:.012,type:'port'},
+  {lat:22.5,lng:88.3,label:'Kolkata/Haldia',sub:'India · 1.1M TEU',color:'#00c896',radius:.22,alt:.012,type:'port'},
+];
+
+// ══════════════════════════════════════════════════════════════
+// DATA — RUTA TIERRA → LUNA (desbloqueable NV10)
+// ══════════════════════════════════════════════════════════════
+const LUNAR_ROUTES=[
+  {
+    name:'Ruta ZAR Tierra-Luna',color:'rgba(136,96,255,.75)',
+    coords:[[28.5,-80.6],[20,-40],[5,0],[0,45]],
+    stroke:0.6,dashLen:.015,dashGap:.006,animTime:25000
+  }
+];
+
+// ══════════════════════════════════════════════════════════════
+// BLOOMBERG MATRIX DATA
+// ══════════════════════════════════════════════════════════════
+const BLOOMBERG_ITEMS=[
+  {sym:'SPY',val:'527.40',chg:'+0.82%',dir:'up'},
+  {sym:'GBP/USD',val:'1.2743',chg:'-0.21%',dir:'dn'},
+  {sym:'XAU/USD',val:'2,341',chg:'+1.14%',dir:'up'},
+  {sym:'BRENT',val:'87.32',chg:'+2.31%',dir:'up'},
+  {sym:'US10Y',val:'4.38%',chg:'+3bps',dir:'dn'},
+  {sym:'BTC',val:'67,420',chg:'+3.42%',dir:'up'},
+  {sym:'EUR/USD',val:'1.0821',chg:'-0.15%',dir:'dn'},
+  {sym:'USD/ARS',val:'1,056',chg:'+0.8%',dir:'dn'},
+  {sym:'DXY',val:'104.2',chg:'+0.12%',dir:'up'},
+  {sym:'VIX',val:'14.8',chg:'-0.9',dir:'dn'},
+  {sym:'MERVAL',val:'1.52M',chg:'+2.1%',dir:'up'},
+  {sym:'COPPER',val:'4.52',chg:'+1.7%',dir:'up'},
+  {sym:'NATGAS',val:'2.14',chg:'-0.5%',dir:'dn'},
+  {sym:'USD/CNY',val:'7.234',chg:'+0.04%',dir:'dn'},
+  {sym:'USDT 2Y',val:'4.87%',chg:'+2bps',dir:'dn'},
+  {sym:'NIKKEI',val:'38,840',chg:'+0.65%',dir:'up'},
+];
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+const L={portfolio:true,hq:true,routes:true,cables:true,shipping:true,airroutes:true,conflicts:true,events:true,labels:true,rings:false,satellites_live:true,launchpads:true,ports:true,planes:false,satellites:false,defense:false,orbital:false,lunar:false};
+let world=null;
+let _modoUniverso='hibrido';
+let _simLevel=1;
+let _autoBlackSwanTimer=null;
+let _nextEventIn=null;
+let _openskyPoints=[]; // GEM-04 — aviones militares OpenSky (NV3)
+
+// ══════════════════════════════════════════════════════════════
+// GLOBE INIT
+// ══════════════════════════════════════════════════════════════
+function initGlobe(){
+  if(typeof Globe==='undefined'){
+    document.getElementById('globe-wrap').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-family:\'IBM Plex Mono\',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;flex-direction:column;gap:10px"><div>Cargando globo...</div><div style="font-size:8px;color:var(--border)">Verificá tu conexión</div></div>';
+    setTimeout(initGlobe,2000);return;
+  }
+
+  world=Globe()
+    .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
+    .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+    .atmosphereColor('#0a2040')
+    .atmosphereAltitude(0.25)
+    .width(window.innerWidth)
+    .height(window.innerHeight-72)
+    .pointLabel(d=>tooltip(d))
+    .onPointClick(d=>showDetail(d))
+    .arcLabel(d=>`<div style="background:var(--bg-panel);border:1px solid var(--border);padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-main)">${d.label||d.name||''}</div>`)
+    .ringsData([])
+    .ringColor(()=>'#c89040')
+    .ringMaxRadius('maxR')
+    .ringPropagationSpeed('propagationSpeed')
+    .ringRepeatPeriod('repeatPeriod')
+    // PATHS — cables + rutas marítimas
+    .pathsData([])
+    .pathPoints(d=>d.coords)
+    .pathColor(d=>d.color)
+    .pathStroke(d=>d.stroke||0.5)
+    .pathDashLength(d=>d.dashLen||0.01)
+    .pathDashGap(d=>d.dashGap||0.004)
+    .pathDashAnimateTime(d=>d.animTime||80000)
+    // LABELS
+    .labelsData([])
+    .labelText(d=>d.text)
+    .labelLat(d=>d.lat)
+    .labelLng(d=>d.lng)
+    .labelColor(d=>d.color||'#4a9eff')
+    .labelSize(d=>d.size||.3)
+    .labelDotRadius(d=>d.dotR||.2)
+    .labelAltitude(d=>d.altitude||.02)
+    .labelResolution(2)
+    // HTML ELEMENTS — satélites destellantes
+    .htmlElementsData([])
+    .htmlElement(d=>{
+      const el=document.createElement('div');
+      el.className='sat-dot '+d.cls;
+      el.style.animationDelay=(Math.random()*3)+'s';
+      el.title=d.label+' | '+d.owner+' | '+d.orbit;
+      return el;
+    })
+    .htmlLat(d=>d.lat)
+    .htmlLng(d=>d.lng)
+    .htmlAltitude(d=>d.alt)
+    (document.getElementById('globe-wrap'));
+
+  world.controls().autoRotate=true;
+  world.controls().autoRotateSpeed=0.3;
+  world.controls().enableZoom=true;
+
+  // Coordenadas on hover
+  document.getElementById('globe-wrap').addEventListener('mousemove',e=>{
+    const coords=world.toGlobeCoords(e.clientX,e.clientY-72);
+    if(coords){
+      const txt=`LAT ${coords.lat.toFixed(2)}° LNG ${coords.lng.toFixed(2)}°`;
+      document.getElementById('coord-display').textContent=txt;
+      document.getElementById('coord-display').style.color='var(--text-muted)';
+      document.getElementById('coord-display-tk').textContent=txt;
+    }
+  });
+
+  window.addEventListener('resize',()=>{
+    world.width(window.innerWidth).height(window.innerHeight-72);
+  });
+
+  updateGlobe();
+  initBloombergBar();
+}
+
+// ══════════════════════════════════════════════════════════════
+// UPDATE GLOBE — todas las capas
+// ══════════════════════════════════════════════════════════════
+function updateGlobe(){
+  if(!world)return;
+
+  // PUNTOS
+  let pts=[];
+  if(L.portfolio)pts=pts.concat(PORTFOLIO);
+  if(L.hq)pts=pts.concat(HQ);
+  if(L.conflicts)pts=pts.concat(CONFLICTS);
+  if(L.events)pts=pts.concat(WORLD_EVENTS);
+  // Capas desbloqueadas por nivel
+  if(L.planes&&_simLevel>=3)pts=pts.concat(LOCKED_LAYERS.planes.points);
+  if(L.satellites&&_simLevel>=5)pts=pts.concat(LOCKED_LAYERS.satellites.points);
+  if(L.defense&&_simLevel>=7)pts=pts.concat(LOCKED_LAYERS.defense.points);
+  if(L.orbital&&_simLevel>=9)pts=pts.concat(LOCKED_LAYERS.orbital.points);
+  if(L.lunar&&_simLevel>=10)pts=pts.concat(LOCKED_LAYERS.lunar.points);
+  // Puertos globales (G-02)
+  if(L.ports)pts=pts.concat(GLOBAL_PORTS);
+  // Lanzaderas espaciales
+  if(L.launchpads)pts=pts.concat(LAUNCHPADS);
+  // Puntos dinámicos en tiempo real
+  if(_gdeltPoints.length) pts=pts.concat(_gdeltPoints);
+  if(_acledPoints.length) pts=pts.concat(_acledPoints);
+  if(_celestrakPoints.length && L.satellites_live) pts=pts.concat(_celestrakPoints);
+  // GEM-16: Unicornios PE — puntos clickeables NV4+
+  if(L.planes&&_simLevel>=4){
+    const pePoints=DEFENSE_UNICORNS.map(u=>({
+      lat:u.lat, lng:u.lng,
+      label:`${u.flag} ${u.name}`,
+      sub:`${u.riesgo} · $${u.ticket}M min · ${u.multiplo}`,
+      level:'PE',
+      color:u.color,
+      radius:.28,
+      alt:.025,
+      type:'unicorn',
+      onClick:()=>openPEModal(u.id)
+    }));
+    pts=pts.concat(pePoints);
+  }
+
+  // ARCS (flujos de capital)
+  const arcsData=L.routes?ROUTES:[];
+
+  // PATHS (cables + rutas marítimas + ruta lunar)
+  let pathsData=[];
+  if(L.cables){
+    pathsData=pathsData.concat(SUBMARINE_CABLES.map(c=>({...c,stroke:.6,dashLen:.01,dashGap:.004,animTime:100000})));
+  }
+  if(L.shipping){
+    pathsData=pathsData.concat(SHIPPING_ROUTES.map(r=>({...r,stroke:1.0,dashLen:.025,dashGap:.01,animTime:50000})));
+  }
+  if(L.airroutes){
+    pathsData=pathsData.concat(AIR_ROUTES);
+  }
+  if(L.lunar&&_simLevel>=10){
+    pathsData=pathsData.concat(LUNAR_ROUTES);
+  }
+
+  // LABELS
+  const labelsData=L.labels?WORLD_LABELS:[];
+
+  // RINGS — base + lanzaderas si activas
+  let ringsData=L.rings?[...RINGS_DATA]:[];
+  if(L.launchpads)ringsData=ringsData.concat(LAUNCHPAD_RINGS);
+
+  // HTML ELEMENTS — satélites destellantes
+  const htmlData=L.satellites_live?SATELLITES_LIVE:[];
+
+  world
+    .pointsData(pts)
+    .pointColor('color')
+    .pointRadius('radius')
+    .pointAltitude('alt')
+    .arcsData(arcsData)
+    .arcColor('color')
+    .arcAltitude(0.25)
+    .arcStroke(.5)
+    .arcDashLength(.3)
+    .arcDashGap(.15)
+    .arcDashAnimateTime(2200)
+    .pathsData(pathsData)
+    .labelsData(labelsData)
+    .htmlElementsData(htmlData)
+    .ringsData(ringsData)
+    .ringColor(d=>d.color)
+    .ringMaxRadius('maxR')
+    .ringPropagationSpeed('propagationSpeed')
+    .ringRepeatPeriod('repeatPeriod');
+
+  // Update layer count
+  const activeCount=Object.entries(L).filter(([k,v])=>v).length;
+  document.getElementById('layer-count').textContent=activeCount+' capas activas';
+  document.getElementById('bl-layers').textContent=activeCount;
+}
+
+// ══════════════════════════════════════════════════════════════
+// LAYER TOGGLE
+// ══════════════════════════════════════════════════════════════
+function toggleLayer(name){
+  L[name]=!L[name];
+  const ind=document.getElementById('ind-'+name);
+  const dot=document.getElementById('dot-'+name);
+  if(ind){ind.textContent=L[name]?'ON':'OFF';ind.style.color=L[name]?'#00c896':'var(--text-muted)';}
+  if(dot){dot.style.opacity=L[name]?'1':'.25';}
+  updateGlobe();
+}
+
+function tryUnlock(name,requiredLevel){
+  if(_simLevel>=requiredLevel){
+    // Lunar requiere además turno 10+
+    if(name==='lunar'){
+      try{
+        const sim=JSON.parse(localStorage.getItem('zcp_state_v3')||'{}');
+        if((sim.turn||1)<10){
+          showUnlockToast('🌙 Base Lunar disponible en Turno 10+. Ahora: Turno '+(sim.turn||1));
+          return;
+        }
+      }catch(e){}
+    }
+    L[name]=!L[name];
+    const row=document.getElementById('row-'+name);
+    const ind=document.getElementById('ind-'+name);
+    if(row)row.classList.remove('locked');
+    if(ind){ind.textContent=L[name]?'ACTIVO 🔓':'OFF';ind.style.color=L[name]?'#8860ff':'var(--text-muted)';}
+    updateGlobe();
+  }else{
+    showUnlockToast('🔒 Necesitás NV.'+requiredLevel+' para esta capa. Nivel actual: NV.'+_simLevel);
+  }
+}
+
+function checkAndUnlockLayers(level){
+  const toCheck=[
+    {name:'planes',lv:3,row:'row-planes',ind:'ind-planes',label:'Aviones Militares'},
+    {name:'satellites',lv:5,row:'row-satellites',ind:'ind-satellites',label:'Red Satelital'},
+    {name:'defense',lv:7,row:'row-defense',ind:'ind-defense',label:'ZAR Defense'},
+    {name:'orbital',lv:9,row:'row-orbital',ind:'ind-orbital',label:'ZAR Orbital'},
+    {name:'lunar',lv:10,row:'row-lunar',ind:'ind-lunar',label:'Base Lunar 🌙'},
+  ];
+  toCheck.forEach(c=>{
+    if(level>=c.lv){
+      const row=document.getElementById(c.row);
+      const ind=document.getElementById(c.ind);
+      if(row&&row.classList.contains('locked')){
+        row.classList.remove('locked');
+        if(ind)ind.textContent=`✓ NV${c.lv} ACTIVO`;
+        if(ind)ind.style.color='#8860ff';
+        showUnlockToast(`🔓 CAPA DESBLOQUEADA: ${c.name.toUpperCase()} (NV.${c.lv})`);
+      }
+    }
+  });
+}
+
+function setSpeed(s){
+  if(!world)return;
+  world.controls().autoRotate=s>0;
+  world.controls().autoRotateSpeed=s;
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOOLTIP & DETAIL PANEL
+// ══════════════════════════════════════════════════════════════
+function tooltip(d){
+  const typeLabel={portfolio:'PORTFOLIO',hq:'SEDE',conflict:'CONFLICTO',event:'EVENTO',plane:'AVIÓN MIL.',satellite:'SATÉLITE',defense:'ZAR DEFENSE',orbital:'ZAR ORBITAL',lunar:'LUNAR'}[d.type]||d.type;
+  return`<div style="background:var(--bg-panel);border:1px solid ${d.color};padding:9px 13px;font-family:'IBM Plex Mono',monospace;min-width:180px;max-width:240px">
+    <div style="font-size:8px;color:${d.color};letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">${typeLabel}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${d.color};letter-spacing:1px;margin-bottom:3px">${d.label}</div>
+    <div style="font-size:9px;color:var(--text-main);line-height:1.5">${d.sub||''}</div>
+    ${d.alloc?`<div style="font-size:9px;color:var(--text-muted);margin-top:3px">Exposición: ${d.alloc}</div>`:''}
+    ${d.level?`<div style="font-size:9px;color:#e84040;margin-top:2px">Riesgo: ${d.level}</div>`:''}
+    ${d.impact?`<div style="font-size:9px;color:#c89040;margin-top:2px">Impacto: ${d.impact}</div>`:''}
+    <div style="font-size:8px;color:var(--text-dim);margin-top:5px">Click para detalle</div>
+  </div>`;
+}
+
+function showDetail(d){
+  const dp=document.getElementById('detail-panel');
+  const dc=document.getElementById('detail-content');
+  dp.style.display='block';
+  const col=d.color||'var(--text-main)';
+  dc.innerHTML=`
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:${col};letter-spacing:1px;margin-bottom:3px">${d.label}</div>
+    <div style="font-size:9px;color:var(--text-main);line-height:1.5;margin-bottom:6px">${d.sub||''}</div>
+    ${d.alloc?`<div style="font-size:9px;color:var(--text-muted);margin-bottom:2px">Exposición: <span style="color:#c89040">${d.alloc}</span></div>`:''}
+    ${d.level?`<div style="font-size:9px;color:var(--text-muted);margin-bottom:2px">Riesgo: <span style="color:#e84040">${d.level}</span></div>`:''}
+    ${d.impact?`<div style="font-size:9px;color:var(--text-muted);margin-bottom:2px">Impacto: <span style="color:#c89040">${d.impact}</span></div>`:''}
+    <div style="display:flex;gap:5px;margin-top:8px">
+      <button onclick="flyTo(${d.lat},${d.lng})" style="flex:1;font-size:9px;padding:4px;background:transparent;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-family:'IBM Plex Mono',monospace;letter-spacing:1px" onmouseover="this.style.borderColor='#c89040';this.style.color='#c89040'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Zoom</button>
+      <button onclick="injectToSim('${d.label.replace(/'/g,"\\'")}','${(d.sub||'').replace(/'/g,"\\'")}','${col}')" style="flex:2;font-size:9px;padding:4px;background:transparent;border:1px solid ${col};color:${col};cursor:pointer;font-family:'IBM Plex Mono',monospace;letter-spacing:1px">→ Al Simulador</button>
+    </div>`;
+  flyTo(d.lat,d.lng);
+}
+
+function flyTo(lat,lng){
+  if(world)world.pointOfView({lat,lng,altitude:1.8},1200);
+}
+
+// ══════════════════════════════════════════════════════════════
+// BLOOMBERG BAR
+// ══════════════════════════════════════════════════════════════
+function initBloombergBar(){
+  const items=BLOOMBERG_ITEMS.concat(BLOOMBERG_ITEMS); // duplicar para scroll infinito
+  const inner=document.getElementById('bloomberg-inner');
+  inner.innerHTML=items.map(it=>`
+    <div class="bm-item">
+      <span class="bm-sym">${it.sym}</span>
+      <span class="bm-val ${it.dir}">${it.val}</span>
+      <span class="bm-chg ${it.dir}">${it.chg}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// TICKERS UPDATE
+// ══════════════════════════════════════════════════════════════
+function updateTickers(sim){
+  if(!sim)return;
+  const tot=(sim.aum||0)+(sim.lp||0);
+  const fmtA=v=>v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+v;
+  const LVNAMES=['','Analista Solitario','Firma Boutique','Hedge Fund','Jugador Global','Dinastía Estelar'];
+
+  // TL - Fondo
+  document.getElementById('tl-aum').textContent=fmtA(tot);
+  document.getElementById('tl-turn').textContent=(sim.turn||1)+'/12';
+  document.getElementById('tl-level').textContent='NV.'+(sim.lvId||1)+' '+(LVNAMES[sim.lvId||1]||'').toUpperCase().slice(0,12);
+  document.getElementById('tl-rep').textContent=(sim.m?.rep||0)+'/100';
+
+  // TR - Métricas
+  const risk=sim.m?.risk||45;
+  const riskEl=document.getElementById('tr-risk');
+  riskEl.textContent=risk+'/100';
+  riskEl.style.color=risk>65?'#e84040':risk>45?'#c89040':'#00c896';
+  document.getElementById('tr-mor').textContent=(sim.m?.mor||70)+'/100';
+  document.getElementById('tr-cmp').textContent=(sim.m?.cmp||85)+'/100';
+  document.getElementById('tr-lp').textContent=fmtA(sim.lp||0);
+
+  // BR - Próximo unlock
+  const lv=sim.lvId||1;
+  const nextUnlock=lv<3?3:lv<5?5:lv<7?7:lv<9?9:lv<10?10:12;
+  const unlockNames={3:'Aviones',5:'Satélites',7:'ZAR Defense',9:'ZAR Orbital',10:'Lunar',12:'MAX'};
+  document.getElementById('br-unlock').textContent=`NV${nextUnlock} →${unlockNames[nextUnlock]||'—'}`;
+  document.getElementById('br-evts').textContent=_autoEventCount||0;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SIM STATE REFRESH
+// ══════════════════════════════════════════════════════════════
+function refreshSimState(){
+  try{
+    const raw=localStorage.getItem('zcp_state_v3');
+    const st=document.getElementById('sim-status');
+    if(raw){
+      const sim=JSON.parse(raw);
+      const tot=(sim.aum||0)+(sim.lp||0);
+      const fmtA=v=>v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+v;
+      document.getElementById('s-turn').textContent=(sim.turn||1)+'/12';
+      document.getElementById('s-aum').textContent=fmtA(tot);
+      document.getElementById('s-lp').textContent=fmtA(sim.lp||0);
+      document.getElementById('s-rep').textContent=(sim.m?.rep||0)+'/100';
+      const LVNAMES=['','Analista Solitario','Firma Boutique','Hedge Fund','Jugador Global','Dinastía Estelar'];
+      document.getElementById('s-level').textContent='NV.'+(sim.lvId||1)+' '+(LVNAMES[sim.lvId||1]||'');
+      st.textContent='● SIMULADOR CONECTADO';
+      st.style.color='#00c896';st.style.borderColor='#00c896';
+
+      const prevLevel=_simLevel;
+      _simLevel=sim.lvId||1;
+      if(_simLevel>prevLevel)checkAndUnlockLayers(_simLevel);
+
+      updateTickers(sim);
+      updateDifficultyBadge(_simLevel);
+      scheduleNextAutoEvent(_simLevel);
+    }else{
+      st.textContent='○ SIN PARTIDA ACTIVA';
+      st.style.color='var(--text-muted)';st.style.borderColor='var(--border)';
+    }
+  }catch(e){document.getElementById('sim-status').textContent='○ ERROR';}
+}
+
+// ══════════════════════════════════════════════════════════════
+// DIFICULTAD Y CISNES NEGROS AUTOMÁTICOS
+// ══════════════════════════════════════════════════════════════
+let _autoEventCount=0;
+let _nextEventTimestamp=null;
+
+function updateDifficultyBadge(level){
+  const badge=document.getElementById('diff-badge');
+  const blDif=document.getElementById('bl-dif');
+  let label,col;
+  if(level<=3){label='PRINCIPIANTE';col='#00c896';}
+  else if(level<=7){label='INTERMEDIO';col='#c89040';}
+  else{label='PROFESIONAL';col='#e84040';}
+  badge.textContent=label.slice(0,6)+'.';badge.style.display='block';
+  badge.style.color=col;badge.style.borderColor=col;badge.style.background=`rgba(${col==='#00c896'?'0,200,150':col==='#c89040'?'200,144,64':'232,64,64'},.08)`;
+  if(blDif){blDif.textContent=label;blDif.style.color=col;}
+}
+
+function getDifficultyConfig(level){
+  if(level<=3)return{label:'PRINCIPIANTE',intervalMs:8*60*1000,prob:.25,maxImpact:.05};
+  if(level<=7)return{label:'INTERMEDIO',intervalMs:5*60*1000,prob:.50,maxImpact:.15};
+  return{label:'PROFESIONAL',intervalMs:3*60*1000,prob:.75,maxImpact:.30};
+}
+
+function scheduleNextAutoEvent(level){
+  if(_autoBlackSwanTimer)clearTimeout(_autoBlackSwanTimer);
+  const cfg=getDifficultyConfig(level);
+  _nextEventTimestamp=Date.now()+cfg.intervalMs;
+  _autoBlackSwanTimer=setTimeout(()=>tryAutoBlackSwan(level),cfg.intervalMs);
+  // Update ticker
+  const el=document.getElementById('bl-next');
+  if(el)el.textContent=Math.round(cfg.intervalMs/60000)+'min';
+  const autoEl=document.getElementById('auto-status');
+  if(autoEl){autoEl.textContent='AUTO ●';autoEl.style.color='#00c896';}
+}
+
+async function tryAutoBlackSwan(level){
+  const cfg=getDifficultyConfig(level);
+  if(Math.random()<cfg.prob){
+    await generateAutoBlackSwan(level,cfg);
+  }else{
+    scheduleNextAutoEvent(level);
+  }
+}
+
+const AUTO_EVENT_POOL_EASY=[
+  {titulo:'Volatilidad intradiaria en índices US',desc:'El VIX sube 12% sin catalizador claro. Movimiento técnico de corto plazo. Impacto moderado en el lado agresivo del barbell.',region:'USA',impacto:'BAJO'},
+  {titulo:'Datos de empleo UK sorprenden al alza',desc:'Cifras de empleo británicas superan estimaciones. GBP/USD gana 0.4%. Oportunidad para el eje de Forex.',region:'UK',impacto:'BAJO'},
+  {titulo:'China anuncia nuevas reservas de oro',desc:'PBoC agrega 50 toneladas métricas a reservas. XAU/USD reacciona positivamente.',region:'China',impacto:'BAJO'},
+];
+const AUTO_EVENT_POOL_MED=[
+  {titulo:'Crisis bancaria regional en Europa',desc:'Tres bancos regionales en Europa del Este reportan pérdidas inesperadas. Contagio sistémico contenido pero monitoreable. Flujos hacia UST y CHF.',region:'Europa',impacto:'MEDIO'},
+  {titulo:'Escalada en el Estrecho de Taiwán',desc:'Ejercicios militares chinos bloquean rutas marítimas temporalmente. Semiconductores bajo presión. Tech global -4% intradiario.',region:'Asia-Pacífico',impacto:'ALTO'},
+  {titulo:'Huelga portuaria en Rotterdam 72hs',desc:'El mayor puerto europeo paralizado. Supply chain bajo presión. Commodities industriales repuntan por expectativas de escasez.',region:'Europa',impacto:'MEDIO'},
+];
+const AUTO_EVENT_POOL_HARD=[
+  {titulo:'Colapso soberano — mercado emergente G20',desc:'Un miembro del G20 activa cláusula de force majeure en sus bonos. Contagio EM inmediato. Fuga global hacia activos de reserva. VIX +45%.',region:'EM Global',impacto:'CRÍTICO'},
+  {titulo:'Cyberattack sistémico — SWIFT network',desc:'Ataque coordinado interrumpe transferencias internacionales por 18hs. Todos los fondos con exposición cross-border bajo revisión urgente.',region:'Global',impacto:'CRÍTICO'},
+  {titulo:'Ruptura del acuerdo petro-dólar',desc:'Arabia Saudita anuncia aceptar pagos en CNY para ventas de crudo a China. USD pierde reserva parcial. Macro shift histórico en curso.',region:'Medio Oriente',impacto:'CRÍTICO'},
+];
+
+async function generateAutoBlackSwan(level,cfg){
+  const simKey=localStorage.getItem('zcp_apikey');
+  let ev;
+
+  if(simKey){
+    try{
+      const modo=_modoUniverso||'hibrido';
+      const modoInstr={
+        real:'Evento basado solo en riesgos reales del mundo actual 2025.',
+        hibrido:'Evento mezclando riesgos reales con el universo ficticio de ZAR Capital Partners.',
+        ficcion:'Evento completamente ficticio del universo alternativo de ZAR Capital Partners.'
+      };
+      let simCtx='';
+      try{const sim=JSON.parse(localStorage.getItem('zcp_state_v3')||'{}');simCtx=`AUM: USD ${((sim.aum||50000)+(sim.lp||0)).toLocaleString()} | Turno: ${sim.turn||1}/12 | Nivel: NV.${level}`;}catch(e){}
+      const prompt=`Sos el Motor de Riesgo Autónomo de ZAR Capital Partners. Dificultad: ${cfg.label}. ${simCtx}
+${modoInstr[modo]}
+Impacto máximo permitido por nivel de dificultad: ${Math.round(cfg.maxImpact*100)}% del AUM.
+Generá UN evento cisne negro para esta dificultad. Debe ser apropiado para el nivel actual.
+SOLO JSON sin markdown: {"titulo":"string","descripcion":"2 oraciones concisas con impacto financiero específico","region":"string","impacto":"BAJO|MEDIO|ALTO|CRÍTICO"}`;
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':simKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
+      const d=await r.json();
+      const parsed=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+      ev=parsed;
+    }catch(e){ev=null;}
+  }
+
+  if(!ev){
+    // Fallback por dificultad
+    const pool=level<=3?AUTO_EVENT_POOL_EASY:level<=7?AUTO_EVENT_POOL_MED:AUTO_EVENT_POOL_HARD;
+    ev=pool[Math.floor(Math.random()*pool.length)];
+  }
+
+  // Inyectar al simulador
+  injectToSim(ev.titulo,ev.descripcion,'#e84040');
+  _autoEventCount++;
+  document.getElementById('br-evts').textContent=_autoEventCount;
+
+  // Mostrar toast
+  const toast=document.getElementById('auto-event-toast');
+  toast.textContent=`🦢 AUTO [${cfg.label}]: ${ev.titulo.slice(0,40)}...`;
+  toast.style.display='block';
+  setTimeout(()=>toast.style.display='none',4000);
+
+  // Hacer zoom a la región del evento
+  autoZoomToRegion(ev.region);
+
+  // Re-schedule
+  scheduleNextAutoEvent(level);
+}
+
+function autoZoomToRegion(region){
+  if(!world)return;
+  const regionMap={
+    'USA':{lat:38.9,lng:-77.0},'UK':{lat:51.5,lng:-0.1},
+    'China':{lat:31.2,lng:121.5},'Asia-Pacífico':{lat:25.0,lng:115.0},
+    'Europa':{lat:48.0,lng:12.0},'Medio Oriente':{lat:25.0,lng:45.0},
+    'EM Global':{lat:15.0,lng:30.0},'Global':{lat:20.0,lng:20.0},
+    'LatAm':{lat:-15.0,lng:-60.0}
+  };
+  const coords=regionMap[region]||{lat:20.0,lng:20.0};
+  world.pointOfView({lat:coords.lat,lng:coords.lng,altitude:2.2},1500);
+  setTimeout(()=>world.pointOfView({lat:coords.lat,lng:coords.lng,altitude:3.0},2000),3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// EVENT FEED + RENDER
+// ══════════════════════════════════════════════════════════════
+function renderFeed(){
+  const all=[...WORLD_EVENTS,...CONFLICTS];
+  const feed=document.getElementById('event-feed');
+  feed.innerHTML=all.map(e=>`
+    <div class="ev-row" onclick='showDetail(${JSON.stringify(e).replace(/'/g,"&#39;")})'>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">
+        <span style="font-size:9px;font-weight:600;color:${e.color};line-height:1.3;flex:1;margin-right:4px">${e.label}</span>
+        <span style="font-size:8px;color:${e.color};border:1px solid ${e.color};padding:0 4px;flex-shrink:0;letter-spacing:.5px">${e.impact||e.level||''}</span>
+      </div>
+      <div style="font-size:9px;color:var(--text-muted);line-height:1.45">${e.sub}</div>
+      ${e.date?`<div style="font-size:8px;color:var(--text-dim);margin-top:2px">${e.date}</div>`:''}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// INJECT TO SIMULATOR
+// ══════════════════════════════════════════════════════════════
+function refreshSimState(){}; // override más abajo
+
+function injectToSim(label,sub,color){
+  try{
+    const ev={
+      id:'world_'+Date.now(),cat:'GEOPOLÍTICO',urg:'high',edu:null,
+      title:'WorldMonitor: '+label,
+      desc:sub+' El WorldMonitor v2.0 detectó este evento con impacto potencial sobre el portfolio de ZAR Capital Partners.',
+      opts:[
+        {k:'A',lbl:'Cobertura preventiva',dsc:'Ajustar exposición antes del impacto.',fx:{risk:-8,cmp:5,mor:3},con:{t:'pos',ti:'Cobertura Anticipada',bo:'Portfolio ajustado preventivamente. <b style="color:#00c896">Riesgo reducido.</b>'}},
+        {k:'B',lbl:'Mantener y monitorear',dsc:'El evento puede no materializarse.',fx:{risk:5},con:{t:'neu',ti:'Posición Mantenida',bo:'Decisión de esperar. El mercado digiere el evento.'}},
+        {k:'C',lbl:'Capitalizar la volatilidad',dsc:'Caos = oportunidad agresiva.',fx:{risk:15,mor:5},roll:{p:.50,win:9000,los:-5500,rw:8,rl:-6},con:null}
+      ],
+      resolved:false
+    };
+    localStorage.setItem('zcp_world_event',JSON.stringify(ev));
+    const msg=document.createElement('div');
+    msg.style.cssText='position:fixed;top:82px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:1px solid #00c896;color:#00c896;font-family:"IBM Plex Mono",monospace;font-size:9px;padding:8px 16px;z-index:999;letter-spacing:1px;transition:opacity .5s';
+    msg.textContent='✓ EVENTO INYECTADO — Abrí el Simulador para verlo';
+    document.body.appendChild(msg);
+    setTimeout(()=>{msg.style.opacity='0';setTimeout(()=>msg.remove(),600);},2500);
+  }catch(e){alert('Error al inyectar evento.');}
+}
+
+// ══════════════════════════════════════════════════════════════
+// GENERATE WORLD EVENT (manual)
+// ══════════════════════════════════════════════════════════════
+async function generateWorldEvent(){
+  playAlertaCisneNegro(); // GEM-09 SFX
+  if(_soundEnabled && _soundSystem?.cisne_negro) _soundSystem.cisne_negro.play(); // GEM-08 Howler
+  const simKey=localStorage.getItem('zcp_apikey');
+  const pool=[
+    {label:'Terremoto Mag.7+ en Japón',sub:'Mercados asiáticos bajo presión. Yen volátil.'},
+    {label:'Colapso bancario en Europa Central',sub:'Contagio sistémico. Fuga hacia UST y oro.'},
+    {label:'Huelga portuaria China — 30 días',sub:'Rutas comerciales del Pacífico bloqueadas.'},
+    {label:'Elecciones relámpago en Argentina',sub:'Volatilidad extrema en CER y CEDEARs.'},
+    {label:'Escalada militar en Taiwán',sub:'Semiconductores en crisis. Tech global -12%.'},
+  ];
+  if(!simKey){const ev=pool[Math.floor(Math.random()*pool.length)];injectToSim(ev.label,ev.sub,'#e84040');return;}
+  const modo=_modoUniverso||'hibrido';
+  const modoInstr={
+    real:'Generá un evento de cisne negro basado solo en riesgos reales del mundo actual.',
+    hibrido:'Generá un evento de cisne negro mezclando riesgos reales con el universo ficticio de ZAR Capital Partners.',
+    ficcion:'Generá un evento de cisne negro completamente ficticio del universo alternativo de ZAR Capital Partners.'
+  };
+  let simCtx='';
+  try{const sim=JSON.parse(localStorage.getItem('zcp_state_v3')||'{}');simCtx=`AUM: USD ${((sim.aum||50000)+(sim.lp||0)).toLocaleString()} | Turno: ${sim.turn||1}/12`;}catch(e){}
+  const prompt=`Sos el Monitor de Riesgo Global de ZAR Capital Partners. ${simCtx}
+${modoInstr[modo]} El evento debe ser dramático, inesperado y con impacto financiero claro.
+Respondé SOLO en JSON sin markdown: {"titulo":"string","descripcion":"2 oraciones con impacto específico al fondo","region":"string","impacto":"string"}`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':simKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const parsed=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+    injectToSim(parsed.titulo,parsed.descripcion,'#e84040');
+  }catch(e){
+    const ev=pool[Math.floor(Math.random()*pool.length)];
+    injectToSim(ev.label,ev.sub,'#e84040');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// CLOCK + MARKET STATUS
+// ══════════════════════════════════════════════════════════════
+function updateClock(){
+  const now=new Date();
+  const d=now.toUTCString();
+  document.getElementById('world-clock').textContent=d.slice(5,25)+' UTC';
+  try{
+    const nyNow=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    const t=nyNow.getHours()*60+nyNow.getMinutes();
+    const wd=nyNow.getDay();
+    const ms=document.getElementById('market-status');
+    if(wd===0||wd===6){ms.textContent='MERCADOS CERRADOS';ms.style.color='var(--text-dim)';ms.style.borderColor='var(--border)';}
+    else if(t>=570&&t<960){ms.textContent='● NYSE ABIERTO';ms.style.color='#00c896';ms.style.borderColor='#00c896';}
+    else if(t>=240&&t<570){ms.textContent='◐ PRE-MARKET NY';ms.style.color='#c89040';ms.style.borderColor='#c89040';}
+    else if(t>=960&&t<1200){ms.textContent='◑ AFTER-HOURS';ms.style.color='#c89040';ms.style.borderColor='#c89040';}
+    else{ms.textContent='○ MERCADOS CERRADOS';ms.style.color='var(--text-dim)';ms.style.borderColor='var(--border)';}
+  }catch(e){}
+  // Update next event countdown
+  if(_nextEventTimestamp){
+    const remaining=_nextEventTimestamp-Date.now();
+    if(remaining>0){
+      const m=Math.floor(remaining/60000);
+      const s=Math.floor((remaining%60000)/1000);
+      const el=document.getElementById('bl-next');
+      if(el)el.textContent=m+'m '+s+'s';
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODO UNIVERSO
+// ══════════════════════════════════════════════════════════════
+function setModoUniverso(modo){
+  _modoUniverso=modo;
+  const modos={real:'Real',hibrido:'Híbrido',ficcion:'Ficción'};
+  const cols={real:'#00c896',hibrido:'#c89040',ficcion:'#8860ff'};
+  const col=cols[modo];
+  ['real','hibrido','ficcion'].forEach(m=>{
+    const btn=document.getElementById('modo-'+m);
+    if(!btn)return;
+    btn.style.background=m===modo?`rgba(${m==='real'?'0,200,150':m==='hibrido'?'200,144,64':'136,96,255'},.15)`:'transparent';
+    btn.style.borderColor=m===modo?cols[m]:'var(--border)';
+    btn.style.color=m===modo?cols[m]:'var(--text-muted)';
+  });
+  const lbl=document.getElementById('modo-label');
+  if(lbl){lbl.textContent='Modo: '+modos[modo];lbl.style.color=col;}
+  const badge=document.getElementById('feed-modo-badge');
+  if(badge){badge.textContent=modos[modo].toUpperCase();badge.style.color=col;badge.style.borderColor=col;badge.style.background=`rgba(${modo==='real'?'0,200,150':modo==='hibrido'?'200,144,64':'136,96,255'},.1)`;}
+  const blModo=document.getElementById('bl-modo');
+  if(blModo){blModo.textContent=modos[modo].toUpperCase();blModo.style.color=col;}
+  localStorage.setItem('zcp_modo_universo',modo);
+  updateAmbientAudio(); // GEM-08
+  renderFeed();
+}
+
+// ══════════════════════════════════════════════════════════════
+// UNLOCK TOAST
+// ══════════════════════════════════════════════════════════════
+function showUnlockToast(msg){
+  const el=document.getElementById('unlock-toast');
+  el.textContent=msg;el.style.display='block';
+  setTimeout(()=>el.style.display='none',4000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// REFRESH SIM STATE (override real)
+// ══════════════════════════════════════════════════════════════
+// Ya definida arriba como función vacía; la redefinimos aquí completamente:
+(function(){
+  window.refreshSimState=function(){
+    try{
+      const raw=localStorage.getItem('zcp_state_v3');
+      const st=document.getElementById('sim-status');
+      if(raw){
+        const sim=JSON.parse(raw);
+        const tot=(sim.aum||0)+(sim.lp||0);
+        const fmtA=v=>v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1000?'$'+Math.round(v/1000)+'K':'$'+v;
+        document.getElementById('s-turn').textContent=(sim.turn||1)+'/12';
+        document.getElementById('s-aum').textContent=fmtA(tot);
+        document.getElementById('s-lp').textContent=fmtA(sim.lp||0);
+        document.getElementById('s-rep').textContent=(sim.m?.rep||0)+'/100';
+        const LVNAMES=['','Analista Solitario','Firma Boutique','Hedge Fund','Jugador Global','Dinastía Estelar'];
+        document.getElementById('s-level').textContent='NV.'+(sim.lvId||1)+' '+(LVNAMES[sim.lvId||1]||'');
+        st.textContent='● SIMULADOR CONECTADO';st.style.color='#00c896';st.style.borderColor='#00c896';
+        const prevLevel=_simLevel;
+        _simLevel=sim.lvId||1;
+        if(_simLevel>prevLevel)checkAndUnlockLayers(_simLevel);
+        updateTickers(sim);
+        updateDifficultyBadge(_simLevel);
+        if(!_autoBlackSwanTimer)scheduleNextAutoEvent(_simLevel);
+      }else{
+        st.textContent='○ SIN PARTIDA ACTIVA';st.style.color='var(--text-muted)';st.style.borderColor='var(--border)';
+      }
+    }catch(e){document.getElementById('sim-status').textContent='○ ERROR';}
+  };
+})();
+
+
+
+// ══════════════════════════════════════════════════════════════
+// G-05: CELESTRAK — Satélites reales en órbita con satellite.js
+// ══════════════════════════════════════════════════════════════
+// Nota de performance (Gemini): calcular propagación cada 5s con
+// setInterval — NUNCA en cada frame. Límite: 500 satélites max.
+
+const LS_CELESTRACK_CACHE = 'zcp_celestrak_cache';
+const CELESTRAK_CACHE_TTL  = 60 * 60 * 1000; // 1 hora (TLE cambia poco)
+
+let _celestrakPoints  = []; // satélites en tiempo real
+let _celestrakTimer   = null;
+let _celestrakLoaded  = false;
+
+// Grupos y sus colores en el globo
+const CELESTRAK_GROUPS = [
+  { group:'stations', label:'ISS/Estaciones',  color:'#c89040', cls:'sat-iss',      max:5   },
+  { group:'starlink',  label:'Starlink',        color:'#00d4ff', cls:'sat-starlink', max:150 },
+  { group:'gnss',      label:'GPS/GNSS',        color:'#ffffff', cls:'sat-gps',      max:80  },
+];
+
+async function fetchCelesTrak(){
+  // Requiere satellite.js cargado
+  if(typeof satellite === 'undefined'){
+    console.warn('satellite.js no disponible aún');
+    return;
+  }
+
+  const statusEl = document.getElementById('celestrak-status');
+
+  // Verificar cache TLE
+  try{
+    const cached = JSON.parse(localStorage.getItem(LS_CELESTRACK_CACHE) || 'null');
+    if(cached && (Date.now() - cached.ts) < CELESTRAK_CACHE_TTL){
+      _celestrakLoaded = true;
+      propagateSatellites(cached.tleData);
+      startSatellitePropagation(cached.tleData);
+      if(statusEl){ statusEl.textContent = '● TLE CACHE · ' + _celestrakPoints.length + ' sats'; statusEl.style.color = '#00c896'; }
+      return;
+    }
+  }catch(e){}
+
+  if(statusEl){ statusEl.textContent = '◌ CARGANDO TLE...'; statusEl.style.color = '#c89040'; }
+
+  const allTLE = [];
+
+  try{
+    // Cargar cada grupo secuencialmente para no sobrecargar
+    for(const grp of CELESTRAK_GROUPS){
+      try{
+        const url = `https://celestrak.org/NORAD/elements/gp.php?GROUP=${grp.group}&FORMAT=json`;
+        const res = await fetch(url);
+        const data = await res.json();
+        // Limitar por grupo según config
+        const slice = data.slice(0, grp.max);
+        slice.forEach(sat => allTLE.push({ ...sat, _grp: grp }));
+        await new Promise(r => setTimeout(r, 300)); // pequeña pausa entre requests
+      }catch(e){ /* CORS en local — silencioso */ }
+    }
+
+    if(allTLE.length > 0){
+      // Guardar TLE en cache
+      localStorage.setItem(LS_CELESTRACK_CACHE, JSON.stringify({ ts: Date.now(), tleData: allTLE }));
+      _celestrakLoaded = true;
+      propagateSatellites(allTLE);
+      startSatellitePropagation(allTLE);
+      if(statusEl){ statusEl.textContent = '● LIVE · ' + _celestrakPoints.length + ' sats'; statusEl.style.color = '#00c896'; }
+      addFeedItem('CelesTrak: ' + _celestrakPoints.length + ' satélites en órbita cargados', '#00d4ff');
+    } else {
+      // CORS local — usar posiciones estáticas de SATELLITES_LIVE
+      if(statusEl){ statusEl.textContent = '○ CORS — sats estáticos'; statusEl.style.color = 'var(--text-muted)'; }
+    }
+  }catch(e){
+    if(statusEl){ statusEl.textContent = '○ CORS — sats estáticos'; statusEl.style.color = 'var(--text-muted)'; }
+  }
+}
+
+function propagateSatellites(tleData){
+  // PERFORMANCE: calcular posición actual para cada TLE
+  // Esto se llama cada 5 segundos desde setInterval
+  const now = new Date();
+  const newPoints = [];
+
+  for(const sat of tleData){
+    try{
+      if(!sat.TLE_LINE1 || !sat.TLE_LINE2) continue;
+      const satrec   = satellite.twoline2satrec(sat.TLE_LINE1, sat.TLE_LINE2);
+      const posVel   = satellite.propagate(satrec, now);
+      if(!posVel || !posVel.position) continue;
+
+      const gmst = satellite.gstime(now);
+      const posGd = satellite.eciToGeodetic(posVel.position, gmst);
+
+      const lat = satellite.degreesLat(posGd.latitude);
+      const lng = satellite.degreesLong(posGd.longitude);
+      const alt = Math.max(0.05, posGd.height / 6371); // escala globe.gl
+
+      if(isNaN(lat) || isNaN(lng)) continue;
+
+      const grp = sat._grp || { color:'#00d4ff', label:'Satélite' };
+
+      newPoints.push({
+        lat, lng, alt,
+        label: sat.OBJECT_NAME || 'SAT',
+        sub: `${grp.label} · Alt: ${Math.round(posGd.height)}km`,
+        color: grp.color,
+        radius: 0.12,
+        type: 'satellite_live',
+        source: 'CelesTrak'
+      });
+    }catch(e){ /* skip sat inválido */ }
+  }
+
+  _celestrakPoints = newPoints;
+  updateGlobe();
+}
+
+function startSatellitePropagation(tleData){
+  // PERFORMANCE: actualizar posición cada 5 segundos (Gemini rec.)
+  if(_celestrakTimer) clearInterval(_celestrakTimer);
+  _celestrakTimer = setInterval(() => propagateSatellites(tleData), 5000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// G-03: ACLED — Armed Conflict Location & Event Data
+// ══════════════════════════════════════════════════════════════
+// Requiere registro gratuito en acleddata.com (email + API key)
+// Cache en localStorage para no quemar cuota (2hs de refresh)
+
+const LS_ACLED_CACHE = 'zcp_acled_cache';
+const LS_ACLED_KEY   = 'zcp_acled_key';
+const LS_ACLED_EMAIL = 'zcp_acled_email';
+const ACLED_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 horas
+
+let _acledPoints = []; // puntos dinámicos de conflicto
+
+async function fetchACLED(){
+  const key   = localStorage.getItem(LS_ACLED_KEY);
+  const email = localStorage.getItem(LS_ACLED_EMAIL);
+  const statusEl = document.getElementById('acled-status');
+
+  if(!key || !email){
+    if(statusEl){ statusEl.textContent = '○ SIN KEY'; statusEl.style.color = 'var(--text-dim)'; }
+    return;
+  }
+
+  // Verificar cache
+  try{
+    const cached = JSON.parse(localStorage.getItem(LS_ACLED_CACHE) || 'null');
+    if(cached && (Date.now() - cached.ts) < ACLED_CACHE_TTL){
+      _acledPoints = cached.points;
+      renderACLEDPoints();
+      if(statusEl){ statusEl.textContent = '● CACHE ' + new Date(cached.ts).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); statusEl.style.color = '#c89040'; }
+      return;
+    }
+  }catch(e){}
+
+  if(statusEl){ statusEl.textContent = '◌ CARGANDO...'; statusEl.style.color = '#c89040'; }
+
+  try{
+    const url = `https://api.acleddata.com/acled/read?email=${encodeURIComponent(email)}&key=${key}&event_date=30&event_date_where=>&limit=300&fields=event_date,event_type,country,latitude,longitude,fatalities,notes`;
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if(!json.data){ throw new Error('Sin datos ACLED'); }
+
+    _acledPoints = json.data
+      .filter(e => e.latitude && e.longitude)
+      .map(e => {
+        const fat = parseInt(e.fatalities || 0);
+        const col = fat > 50 ? '#e84040' : fat > 10 ? '#c89040' : '#8860ff';
+        const rad = fat > 50 ? 0.9 : fat > 10 ? 0.6 : 0.35;
+        return {
+          lat: parseFloat(e.latitude),
+          lng: parseFloat(e.longitude),
+          label: `[ACLED] ${e.event_type} — ${e.country}`,
+          sub: `${e.event_date} · Bajas: ${fat}`,
+          level: fat > 50 ? 'CRÍTICO' : fat > 10 ? 'ALTO' : 'ACTIVO',
+          color: col,
+          radius: rad,
+          alt: 0.008,
+          type: 'conflict',
+          source: 'ACLED'
+        };
+      });
+
+    // Guardar cache
+    localStorage.setItem(LS_ACLED_CACHE, JSON.stringify({ ts: Date.now(), points: _acledPoints }));
+
+    renderACLEDPoints();
+    if(statusEl){ statusEl.textContent = `● LIVE · ${_acledPoints.length} eventos`; statusEl.style.color = '#00c896'; }
+    addFeedItem(`ACLED: ${_acledPoints.length} conflictos cargados (últimos 30 días)`, '#8860ff');
+
+  }catch(err){
+    console.error('ACLED error:', err);
+    if(statusEl){ statusEl.textContent = '✕ ERROR'; statusEl.style.color = '#e84040'; }
+  }
+}
+
+function renderACLEDPoints(){
+  // Merge con puntos estáticos y re-renderizar
+  if(world) updateGlobe();
+}
+
+function showACLEDConfig(){
+  const savedKey   = localStorage.getItem(LS_ACLED_KEY)   || '';
+  const savedEmail = localStorage.getItem(LS_ACLED_EMAIL) || '';
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `
+    <div style="background:#0c101a;border:1px solid #8860ff;padding:20px;width:340px;font-family:'IBM Plex Mono',monospace">
+      <div style="font-size:8px;color:#8860ff;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">ACLED API — Configuración</div>
+      <div style="font-size:9px;color:var(--text-muted);margin-bottom:12px;line-height:1.6">
+        Registrá gratis en <span style="color:#4a9eff">acleddata.com</span> para obtener tu email y API key. Datos de conflictos armados en tiempo real.
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:8px;color:var(--text-muted);margin-bottom:4px;letter-spacing:1px">EMAIL DE REGISTRO</div>
+        <input id="acled-email-input" type="text" value="${savedEmail}" placeholder="tu@email.com"
+          style="width:100%;background:#121824;border:1px solid #1a2535;color:#c0cbd8;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:6px 9px;outline:none">
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:8px;color:var(--text-muted);margin-bottom:4px;letter-spacing:1px">API KEY</div>
+        <input id="acled-key-input" type="password" value="${savedKey}" placeholder="tu-api-key-acled"
+          style="width:100%;background:#121824;border:1px solid #1a2535;color:#c0cbd8;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:6px 9px;outline:none">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="this.closest('div[style]').remove()" style="flex:1;padding:6px;background:transparent;border:1px solid #1a2535;color:#3a4f65;font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px">CANCELAR</button>
+        <button onclick="saveACLEDConfig()" style="flex:2;padding:6px;background:rgba(136,96,255,.15);border:1px solid #8860ff;color:#8860ff;font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:1px">GUARDAR Y CONECTAR</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  window._acledModal = modal;
+}
+
+function saveACLEDConfig(){
+  const email = document.getElementById('acled-email-input')?.value?.trim();
+  const key   = document.getElementById('acled-key-input')?.value?.trim();
+  if(email) localStorage.setItem(LS_ACLED_EMAIL, email);
+  if(key)   localStorage.setItem(LS_ACLED_KEY, key);
+  window._acledModal?.remove();
+  fetchACLED();
+}
+
+// ══════════════════════════════════════════════════════════════
+// G-04: GDELT 2.0 — Global Database of Events, Language & Tone
+// ══════════════════════════════════════════════════════════════
+// 100% gratuito, sin API key. GeoJSON endpoint V2.
+// Cache 30 minutos en localStorage para no sobrecargar.
+// GEM-07: Cloudflare Worker proxy para resolver CORS en GitHub Pages
+// → Deployar Worker en dash.cloudflare.com y actualizar GDELT_PROXY_URL
+
+// ⚙ CONFIGURAR: pegá tu URL de Cloudflare Worker aquí
+const GDELT_PROXY_URL = 'https://zar-gdelt-proxyf.pzacarias18.workers.dev'; // CF Worker deployado 25/05/2026
+const GDELT_DIRECT_URL = 'https://api.gdeltproject.org/api/v2/geo/geo';
+// CAMEO codes: 14=Protest, 18=Assault, 19=Fight, 20=UseConvForce, 03=CoopEcon, 04=Consult
+const GDELT_PARAMS = '?query=(EventRootCode:14 OR EventRootCode:18 OR EventRootCode:19 OR EventRootCode:20 OR EventRootCode:03 OR EventRootCode:04)&timespan=24h&format=geojson';
+
+const LS_GDELT_CACHE = 'zcp_gdelt_cache';
+const GDELT_CACHE_TTL = 30 * 60 * 1000; // 30 minutos
+
+let _gdeltPoints = []; // puntos dinámicos de eventos globales
+
+async function fetchGDELT(){
+  const statusEl = document.getElementById('gdelt-status');
+  if(statusEl){ statusEl.textContent = '◌ CARGANDO...'; statusEl.style.color = '#c89040'; }
+
+  // Verificar cache
+  try{
+    const cached = JSON.parse(localStorage.getItem(LS_GDELT_CACHE) || 'null');
+    if(cached && (Date.now() - cached.ts) < GDELT_CACHE_TTL){
+      _gdeltPoints = cached.points;
+      updateGlobe();
+      if(statusEl){ statusEl.textContent = '● CACHE ' + new Date(cached.ts).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); statusEl.style.color = '#c89040'; }
+      return;
+    }
+  }catch(e){}
+
+  // GEM-07: usar proxy si está configurado, sino intentar directo (funciona en localhost)
+  const GDELT_URL = (GDELT_PROXY_URL ? GDELT_PROXY_URL : GDELT_DIRECT_URL) + GDELT_PARAMS;
+
+  try{
+    const res = await fetch(GDELT_URL);
+    const geojson = await res.json();
+
+    if(!geojson.features){ throw new Error('Sin features GDELT'); }
+
+    // Deduplicar por coordenadas aproximadas (agrupar eventos cercanos)
+    const seen = new Set();
+    _gdeltPoints = geojson.features
+      .filter(f => {
+        const key = `${Math.round(f.geometry.coordinates[1])}_${Math.round(f.geometry.coordinates[0])}`;
+        if(seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .slice(0, 80) // máximo 80 puntos para no saturar el globo
+      .map(f => ({
+        lat: f.geometry.coordinates[1], // GeoJSON: [lng, lat]
+        lng: f.geometry.coordinates[0],
+        label: '[GDELT] ' + (f.properties.name || 'Evento Global'),
+        sub: f.properties.html
+          ? f.properties.html.replace(/<[^>]+>/g, '').slice(0, 80)
+          : 'Evento detectado por GDELT en tiempo real',
+        level: 'ACTIVO',
+        color: '#8860ff',
+        radius: 0.28,
+        alt: 0.012,
+        type: 'event',
+        source: 'GDELT',
+        url: f.properties.url
+      }));
+
+    localStorage.setItem(LS_GDELT_CACHE, JSON.stringify({ ts: Date.now(), points: _gdeltPoints }));
+    updateGlobe();
+
+    const modoGdelt = GDELT_PROXY_URL ? '· PROXY ✓' : '· DIRECTO';
+    if(statusEl){ statusEl.textContent = `● LIVE ${modoGdelt} · ${_gdeltPoints.length} ev`; statusEl.style.color = '#00c896'; }
+    addFeedItem(`GDELT: ${_gdeltPoints.length} eventos globales cargados (últimas 24hs)`, '#8860ff');
+
+    // Refresh automático cada 30 minutos
+    setTimeout(fetchGDELT, GDELT_CACHE_TTL);
+
+  }catch(err){
+    // CORS es esperado cuando se ejecuta desde archivo local o GitHub Pages
+    // GDELT requiere proxy para uso en browser — no es error del código
+    if(statusEl){
+      statusEl.textContent = '○ CORS — datos estáticos activos';
+      statusEl.style.color = 'var(--text-muted)';
+    }
+    // Intentar usar caché anterior si existe
+    try{
+      const cached = JSON.parse(localStorage.getItem(LS_GDELT_CACHE) || 'null');
+      if(cached && cached.points){
+        _gdeltPoints = cached.points;
+        updateGlobe();
+        if(statusEl){ statusEl.textContent = '● CACHE · '+cached.points.length+' eventos'; statusEl.style.color = '#c89040'; }
+      }
+    }catch(e2){}
+    // No loguear como error — es comportamiento esperado
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// GEM-04: OPENSKY NETWORK — Aviones Militares en Tiempo Real
+// ══════════════════════════════════════════════════════════════
+// 100% gratuito, CORS nativo. Sin API key requerida.
+// Filtro OSINT: callsign prefixes militares conocidos.
+// Rate limit anónimo: ~400 calls/día → refresh cada 90s = 960/día
+// Se activa solo cuando el jugador alcanza NV3.
+
+const OPENSKY_URL='https://opensky-network.org/api/states/all';
+const OPENSKY_REFRESH=90*1000; // 90 segundos
+// Prefijos OSINT militares confirmados
+const MIL_PREFIXES=/^(RCH|SPAR|RRR|NATO|FORTE|DUKE|JAKE|CNV|BART|CASA|FAB|AFA|AMX|VTOL|HAWK|EAGLE|BISON|ATLAS)/;
+
+async function fetchOpenSky(){
+  const statusEl=document.getElementById('opensky-status');
+
+  // Solo funciona si el jugador desbloqueó NV3
+  if(_simLevel<3){
+    if(statusEl){statusEl.textContent='○ NV3 BLOQUEADO';statusEl.style.color='var(--text-dim)';}
+    return;
+  }
+
+  if(statusEl){statusEl.textContent='◌ CARGANDO...';statusEl.style.color='#c89040';}
+
+  try{
+    // Bounding box global amplio — cubre zonas de interés estratégico
+    // Evita traer datos de océanos vacíos (reduce payload)
+    const bbox='?lamin=-60&lomin=-130&lamax=75&lomax=160';
+    const res=await fetch(OPENSKY_URL+bbox);
+    if(!res.ok) throw new Error('OpenSky HTTP '+res.status);
+    const data=await res.json();
+
+    if(!data.states||!Array.isArray(data.states)) throw new Error('Sin estados OpenSky');
+
+    _openskyPoints=data.states
+      .filter(s=>
+        s[1]&&                          // tiene callsign
+        MIL_PREFIXES.test(s[1].trim())&&// callsign militar
+        s[5]!=null&&s[6]!=null&&        // tiene coordenadas
+        !s[8]                            // no está en tierra
+      )
+      .map(s=>{
+        const cs=s[1].trim();
+        const baroAlt=s[7]||5000;
+        // Escalar altitud barométrica para globe.gl
+        const altGlobe=Math.max(0.01, (baroAlt/12000)*0.08+0.02);
+        // Clasificar tipo por prefijo
+        let sub='Aeronave militar';
+        let color='rgba(255,100,100,0.85)';
+        if(/^RCH/.test(cs)){sub='USAF — Air Mobility Command';color='rgba(255,120,80,0.9)';}
+        else if(/^SPAR/.test(cs)){sub='USAF — VIP / Ejecutivo';color='rgba(255,180,50,0.9)';}
+        else if(/^RRR/.test(cs)){sub='RAF — Royal Air Force UK';color='rgba(100,180,255,0.9)';}
+        else if(/^NATO/.test(cs)){sub='OTAN — AWACS / Vigilancia';color='rgba(200,100,255,0.9)';}
+        else if(/^FORTE/.test(cs)){sub='USAF — Drone Global Hawk ISR';color='rgba(255,80,80,0.95)';}
+        else if(/^JAKE|^CNV/.test(cs)){sub='US Navy — P-8 Poseidon';color='rgba(80,160,255,0.9)';}
+        else if(/^FAB/.test(cs)){sub='Fuerza Aérea Brasileña';color='rgba(0,200,100,0.85)';}
+        return {
+          lat:s[6], lng:s[5],
+          label:`✈ ${cs}`,
+          sub:`${sub} · ${Math.round(baroAlt)}m · ${s[2]||''}`,
+          level:'LIVE',
+          color, radius:.32, alt:altGlobe,
+          type:'plane',
+          velocity:s[9]?Math.round(s[9]*1.94)+'kts':null,
+          heading:s[10]?Math.round(s[10])+'°':null,
+          source:'OpenSky'
+        };
+      });
+
+    updateGlobe();
+
+    const count=_openskyPoints.length;
+    if(statusEl){
+      statusEl.textContent=count>0?`● LIVE · ${count} militares`:'● LIVE · sin datos';
+      statusEl.style.color=count>0?'#e84040':'#c89040';
+    }
+    if(count>0) addFeedItem(`OpenSky: ${count} aeronaves militares detectadas en tránsito`,'#e84040');
+
+  }catch(err){
+    // CORS esperado en localhost — silencioso
+    if(statusEl){
+      statusEl.textContent='○ CORS — sin datos';
+      statusEl.style.color='var(--text-dim)';
+    }
+    // Limpiar puntos viejos si falla
+    _openskyPoints=[];
+  }
+}
+
+// Agregar punto dinámico al feed de eventos del panel derecho
+function addFeedItem(text, color){
+  playBeepNotificacion(); // GEM-09 — beep sutil en cada evento nuevo
+  const feed = document.getElementById('event-feed');
+  if(!feed) return;
+  const div = document.createElement('div');
+  div.className = 'ev-row';
+  div.style.borderLeft = '2px solid ' + color;
+  div.innerHTML = `<div style="font-size:9px;font-weight:600;color:${color}">${text}</div>
+    <div style="font-size:8px;color:var(--text-dim)">${new Date().toLocaleTimeString('es-AR')}</div>`;
+  feed.insertBefore(div, feed.firstChild);
+}
+
+// ══════════════════════════════════════════════════════════════
+// GEM-09: SFX — Web Audio API Nativa (sin archivos externos)
+// ══════════════════════════════════════════════════════════════
+// 3 efectos de sonido institucionales para la UI de ZAR Capital
+// No requieren Howler.js ni archivos .ogg — generados en tiempo real
+
+function playBeepNotificacion(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='sine';osc.frequency.setValueAtTime(880,ctx.currentTime);
+    gain.gain.setValueAtTime(0.2,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2);
+    osc.start();osc.stop(ctx.currentTime+0.2);
+  }catch(e){}
+}
+
+function playTonoUnlock(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='triangle';
+    osc.frequency.setValueAtTime(440,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880,ctx.currentTime+0.5);
+    gain.gain.setValueAtTime(0.2,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6);
+    osc.start();osc.stop(ctx.currentTime+0.6);
+  }catch(e){}
+}
+
+function playAlertaCisneNegro(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='sawtooth';osc.frequency.setValueAtTime(110,ctx.currentTime);
+    gain.gain.setValueAtTime(0.4,ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0,ctx.currentTime+1.0);
+    osc.start();osc.stop(ctx.currentTime+1.0);
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════════════════════════
+// GEM-10: LP_MECHANICS — Penalizaciones por LP activo
+// ══════════════════════════════════════════════════════════════
+const LP_MECHANICS=[
+  {lp_id:'lp_001',nombre:'Zacarias Family Office',metrica:'n/a',operador:'n/a',umbral:0,consecuencia:'ninguna',porcentaje_retiro:0,penalidad_extra:{},turnos_cooldown:0,trigger:'ninguno',mensaje_evento:'Base estable. Capital semilla inamovible.'},
+  {lp_id:'lp_002',nombre:'Oxford-Crest',metrica:'moral',operador:'<',umbral:65,consecuencia:'retiro_parcial',porcentaje_retiro:30,penalidad_extra:{reputacion:-10},turnos_cooldown:2,trigger:'cada_turno',mensaje_evento:'Oxford-Crest retira el 30% de su posición. Las métricas ESG del fondo no cumplen los estándares requeridos.'},
+  {lp_id:'lp_003',nombre:'Kowloon Strategic',metrica:'exposicion',operador:'<',umbral:40,consecuencia:'retiro_total',porcentaje_retiro:100,penalidad_extra:{reputacion:-20},turnos_cooldown:5,trigger:'cada_turno',mensaje_evento:'Kowloon retira su capital: falta de alineación estratégica en Asia.'},
+  {lp_id:'lp_004',nombre:'Vostok Capital',metrica:'compliance',operador:'<',umbral:50,consecuencia:'retiro_parcial',porcentaje_retiro:50,penalidad_extra:{reputacion:-30},turnos_cooldown:3,trigger:'cada_turno',mensaje_evento:'Vostok Capital liquida posición: escrutinio internacional detectado.'},
+  {lp_id:'lp_005',nombre:'Takeda-Mitsui',metrica:'riesgo',operador:'>',umbral:70,consecuencia:'retiro_parcial',porcentaje_retiro:20,penalidad_extra:{reputacion:-5},turnos_cooldown:2,trigger:'cada_turno',mensaje_evento:'Takeda-Mitsui reduce exposición: perfil de riesgo fuera de mandato.'},
+  {lp_id:'lp_006',nombre:'Nexus Sovereign',metrica:'aum',operador:'baja_dos_turnos',umbral:0,consecuencia:'retiro_parcial',porcentaje_retiro:50,penalidad_extra:{reputacion:-40},turnos_cooldown:10,trigger:'cada_turno',mensaje_evento:'Nexus retira 50% por falta de rentabilidad sostenida dos turnos consecutivos.'},
+  {lp_id:'lp_007',nombre:'Temasek-Lion',metrica:'riesgo',operador:'>',umbral:60,consecuencia:'congelamiento',porcentaje_retiro:0,penalidad_extra:{reputacion:-10},turnos_cooldown:3,trigger:'instantaneo',mensaje_evento:'Temasek-Lion congela aportes por inestabilidad en rutas comerciales estratégicas.'},
+  {lp_id:'lp_008',nombre:'Consorcio OMEGA-7',metrica:'reputacion',operador:'<',umbral:40,consecuencia:'retiro_total',porcentaje_retiro:100,penalidad_extra:{reputacion:-50},turnos_cooldown:99,trigger:'cada_turno',mensaje_evento:'OMEGA-7 retira fondos: tu reputación no garantiza acceso a tecnología clasificada.'}
+];
+
+// ══════════════════════════════════════════════════════════════
+// GEM-05: GLOBAL JOURNAL — Toggle + Render + Claude API
+// ══════════════════════════════════════════════════════════════
+const LS_JOURNAL='zcp_journal_v1';
+const TAG_COLORS={
+  'MARKET':'var(--cyan)','ZAR INTEL':'var(--gold)',
+  'GLOBAL ALERT':'var(--red)','GEOPOLITICS':'var(--green)',
+  'FICTION':'var(--purple)','SIMULATOR':'var(--blue)'
+};
+const TAG_CLASSES={
+  'MARKET':'tag-market','ZAR INTEL':'tag-intel',
+  'GLOBAL ALERT':'tag-alert','GEOPOLITICS':'tag-geo',
+  'FICTION':'tag-fiction','SIMULATOR':'tag-market'
+};
+
+function toggleJournal(){
+  const panel=document.getElementById('journal-panel');
+  const isOpen=panel.style.display==='flex';
+  panel.style.display=isOpen?'none':'flex';
+  if(!isOpen) renderJournal();
+}
+
+function renderJournal(){
+  const feed=document.getElementById('journal-feed');
+  if(!feed) return;
+  let entries=[];
+  try{ entries=JSON.parse(localStorage.getItem(LS_JOURNAL)||'[]'); }catch(e){}
+  if(!entries.length) return; // Mantiene los entries de ejemplo si no hay datos
+  feed.innerHTML='';
+  entries.slice(0,20).forEach(e=>{
+    const tag=e.tags?.[0]||'MARKET';
+    const borderColor=TAG_COLORS[tag]||'var(--text-dim)';
+    const tagClass=TAG_CLASSES[tag]||'tag-market';
+    const metricsHtml=e.impact_metrics
+      ? `<div class="jrn-metrics">${Object.entries(e.impact_metrics).map(([k,v])=>`${k}: <span style="color:${v.startsWith('-')?'var(--red)':'var(--green)'}">${v}</span>`).join(' · ')}</div>`
+      : '';
+    feed.innerHTML+=`
+    <div class="jrn-entry" style="border-left-color:${borderColor}">
+      <div class="jrn-top">
+        <span class="jrn-tag ${tagClass}">[${tag}]</span>
+        <span class="jrn-date">${e.date_display||''}</span>
+      </div>
+      <div class="jrn-headline">${e.headline||''}</div>
+      <div class="jrn-body">${e.content||''}</div>
+      ${metricsHtml}
+      <div class="jrn-source">FUENTE: ${e.source||'ZAR Intelligence'}</div>
+    </div>`;
+  });
+}
+
+async function generateJournalEntry(){
+  const btn=document.querySelector('#journal-panel .jrn-footer button');
+  if(btn){btn.textContent='◌ GENERANDO...';btn.style.color='var(--gold)';}
+  const apiKey=localStorage.getItem('zcp_apikey')||'';
+  if(!apiKey){
+    if(btn){btn.textContent='✦ GENERAR ENTRADA — CLAUDE API';btn.style.color='var(--cyan)';}
+    addFeedItem('Journal: ingresá tu API Key en el Simulador primero','#e84040');
+    return;
+  }
+  let simContext='Sin partida activa.';
+  try{
+    const sim=JSON.parse(localStorage.getItem('zcp_state_v3')||'{}');
+    simContext=`Turno ${sim.turn||1}/12, AUM $${sim.aum||50000}, Nivel ${sim.level||1}, Reputación ${sim.reputation||50}`;
+  }catch(e){}
+  const worldEvent=localStorage.getItem('zcp_world_event')||'Sin evento reciente.';
+  const modo=localStorage.getItem('zcp_modo_universo')||'hibrido';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:300,
+        messages:[{role:'user',content:`Eres el sistema de inteligencia de ZAR Capital Partners.
+Generá UNA entrada de journal institucional en formato JSON estricto.
+Estado del fondo: ${simContext}
+Último evento mundial: ${worldEvent}
+Modo universo: ${modo}
+Responde SOLO con JSON válido, sin markdown ni backticks:
+{"id":"jrn_${Date.now()}","timestamp":${Date.now()},"date_display":"${new Date().toISOString().slice(0,16).replace('T',' ')} UTC","type":"NARRATIVE_LORE","tags":["FICTION"],"headline":"(titular breve, máx 12 palabras)","content":"(2-3 oraciones institucionales, tono Bloomberg/geopolítico)","impact_metrics":null,"source":"ZAR Intelligence Feed"}`}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'{}';
+    const entry=JSON.parse(text.replace(/```json|```/g,'').trim());
+    let entries=[];
+    try{entries=JSON.parse(localStorage.getItem(LS_JOURNAL)||'[]');}catch(e){}
+    entries.unshift(entry);
+    if(entries.length>50) entries=entries.slice(0,50);
+    localStorage.setItem(LS_JOURNAL,JSON.stringify(entries));
+    renderJournal();
+    addFeedItem(`Journal: nueva entrada — ${entry.headline?.slice(0,40)}...`,'#8860ff');
+  }catch(err){
+    addFeedItem('Journal: error generando entrada Claude','#e84040');
+  }
+  if(btn){btn.textContent='✦ GENERAR ENTRADA — CLAUDE API';btn.style.color='var(--cyan)';}
+}
+
+// ══════════════════════════════════════════════════════════════
+// GEM-12/13: PRIVATE EQUITY — Stage 2 (NV4+)
+// ══════════════════════════════════════════════════════════════
+const DEFENSE_UNICORNS=[
+  {id:'u_01',name:'AeroDrone',flag:'🇺🇸',lat:38.9072,lng:-77.0369,riesgo:'BAJO',ticket:10,multiplo:'1.5x–3x',turnos:4,color:'#00c896',
+   lore:'Líder en drones de vigilancia autónomos para defensa costera. Pipeline con Marina de EEUU en fase avanzada.',
+   eventos:[{tipo:'pos',texto:'Contrato renovado con DARPA por USD 180M'},{tipo:'neu',texto:'Expansión a mercado europeo en evaluación'}]},
+  {id:'u_02',name:'CyberShield',flag:'🇬🇧',lat:51.5074,lng:-0.1278,riesgo:'MEDIO',ticket:15,multiplo:'2x–5x',turnos:6,color:'#4a9eff',
+   lore:'Defensa cibernética de infraestructura crítica. Contratos con OTAN y gobierno británico.',
+   eventos:[{tipo:'pos',texto:'Audit de seguridad exitoso — certificación NATO clearance'},{tipo:'neg',texto:'Competidor chino lanzó producto similar a menor costo'}]},
+  {id:'u_03',name:'QuantumLink',flag:'🇺🇸',lat:40.7128,lng:-74.0060,riesgo:'ALTO',ticket:25,multiplo:'3x–10x',turnos:10,color:'#e84040',
+   lore:'Computación cuántica aplicada a criptografía militar. Potencial disruptivo total en comunicaciones seguras.',
+   eventos:[{tipo:'neu',texto:'Pivot técnico: nuevo enfoque en QKD (distribución cuántica de claves)'}]},
+  {id:'u_04',name:'NeuralWarfare',flag:'🇮🇱',lat:32.0853,lng:34.7818,riesgo:'ALTO',ticket:30,multiplo:'4x–12x',turnos:12,color:'#e84040',
+   lore:'IA táctica para sistemas de toma de decisiones en combate. Controversia ética eleva el riesgo regulatorio.',
+   eventos:[{tipo:'neg',texto:'Investigación del Congreso sobre uso de IA autónoma letal'}]},
+  {id:'u_05',name:'HyperOrbit',flag:'🇺🇸',lat:28.3922,lng:-80.6077,riesgo:'MEDIO',ticket:20,multiplo:'2.5x–6x',turnos:8,color:'#c89040',
+   lore:'Lanzadores hipersónicos de pequeña escala para cargas militares. Joint venture con DARPA en curso.',
+   eventos:[{tipo:'pos',texto:'Test de vuelo exitoso Mach 8 · Certificación en progreso'}]},
+  {id:'u_06',name:'BioGuard',flag:'🇩🇪',lat:52.5200,lng:13.4050,riesgo:'BAJO',ticket:5,multiplo:'1.2x–2.5x',turnos:4,color:'#00c896',
+   lore:'Biodefensa y detección temprana de agentes CBRN. Mercado estable, bajo riesgo, crecimiento orgánico.',
+   eventos:[{tipo:'pos',texto:'Contrato Bundeswehr renovado por 3 años'}]},
+  {id:'u_07',name:'StealthSystem',flag:'🇺🇸',lat:34.0522,lng:-118.2437,riesgo:'ALTO',ticket:40,multiplo:'5x–15x',turnos:12,color:'#e84040',
+   lore:'Materiales de baja observabilidad de nueva generación. Proyecto clasificado con DoD. Máximo potencial.',
+   eventos:[{tipo:'neu',texto:'CEO anterior reemplazado · Nuevo liderazgo con foco en ejecución'}]},
+  {id:'u_08',name:'DroneSwarm',flag:'🇦🇺',lat:-35.2809,lng:149.1300,riesgo:'MEDIO',ticket:15,multiplo:'2x–4x',turnos:6,color:'#c89040',
+   lore:'Enjambres de drones coordinados por IA para reconocimiento en zonas de conflicto.',
+   eventos:[{tipo:'pos',texto:'Piloto exitoso con Fuerzas Australianas · Expansión Indo-Pacífico'}]},
+  {id:'u_09',name:'LaserDef',flag:'🇫🇷',lat:48.8566,lng:2.3522,riesgo:'ALTO',ticket:25,multiplo:'3x–8x',turnos:9,color:'#e84040',
+   lore:'Sistemas láser de alta energía para defensa antidron y antimisil. Tecnología de frontera.',
+   eventos:[{tipo:'neg',texto:'Retraso en prototipo por supply chain de semiconductores especiales'}]},
+  {id:'u_10',name:'SecureData',flag:'🇸🇬',lat:1.3521,lng:103.8198,riesgo:'BAJO',ticket:8,multiplo:'1.5x–2x',turnos:5,color:'#00c896',
+   lore:'Gestión segura de datos de inteligencia para alianzas Five Eyes. Negocio recurrente y predecible.',
+   eventos:[{tipo:'pos',texto:'Renovación automática contratos Five Eyes por USD 120M'}]},
+  {id:'u_11',name:'TacticalAI',flag:'🇰🇷',lat:37.5665,lng:126.9780,riesgo:'MEDIO',ticket:20,multiplo:'2x–7x',turnos:7,color:'#c89040',
+   lore:'Análisis predictivo de amenazas para fuerzas especiales. Expansión agresiva en Asia-Pacífico.',
+   eventos:[{tipo:'neu',texto:'Fusión en negociación con startup surcoreana de drones'}]},
+  {id:'u_12',name:'FutureFront',flag:'🇺🇸',lat:37.7749,lng:-122.4194,riesgo:'ALTO',ticket:50,multiplo:'4x–10x',turnos:11,color:'#e84040',
+   lore:'Plataforma integrada de defensa autónoma terrestre-aérea-naval. La apuesta más ambiciosa del sector.',
+   eventos:[{tipo:'pos',texto:'Anduril considera adquisición · Valorización +40% en 90 días'}]},
+];
+
+let _peCurrentUnicorn=null;
+
+function openPEModal(unicornId){
+  if(_simLevel<4){
+    addFeedItem('Private Equity requiere NV4 — seguí avanzando','#8860ff');
+    return;
+  }
+  const u=DEFENSE_UNICORNS.find(x=>x.id===unicornId);
+  if(!u)return;
+  _peCurrentUnicorn=u;
+
+  // Header
+  document.getElementById('pe-flag').textContent=u.flag;
+  document.getElementById('pe-name').textContent=u.name.toUpperCase();
+  const rb=document.getElementById('pe-risk-badge');
+  rb.textContent=u.riesgo;
+  rb.className='pe-risk-'+u.riesgo.toLowerCase();
+
+  // Métricas
+  document.getElementById('pe-lore').textContent=u.lore;
+  document.getElementById('pe-ticket').textContent='$'+u.ticket+'M';
+  document.getElementById('pe-multiplo').textContent=u.multiplo;
+  document.getElementById('pe-turnos').textContent=u.turnos+' T';
+
+  // Eventos
+  const evList=document.getElementById('pe-events-list');
+  evList.innerHTML=u.eventos.map(e=>{
+    const col=e.tipo==='pos'?'var(--green)':e.tipo==='neg'?'var(--red)':'var(--text-dim)';
+    const icon=e.tipo==='pos'?'↑':e.tipo==='neg'?'↓':'→';
+    return `<div class="pe-event-item"><span style="color:${col}">${icon}</span>${e.texto}</div>`;
+  }).join('');
+
+  // KPIs del fondo
+  let simAum=50000,simRiesgo=30,simRep=50,simTurno=1;
+  try{
+    const sim=JSON.parse(localStorage.getItem('zcp_state_v3')||'{}');
+    simAum=sim.aum||50000; simRiesgo=sim.riesgo||30;
+    simRep=sim.reputation||50; simTurno=sim.turn||1;
+  }catch(e){}
+  const fmtA=v=>v>=1000000000?'$'+(v/1000000000).toFixed(1)+'B':v>=1000000?'$'+(v/1000000).toFixed(1)+'M':'$'+Math.round(v/1000)+'K';
+  document.getElementById('pe-kpi-aum').textContent=fmtA(simAum);
+  document.getElementById('pe-kpi-riesgo').textContent=simRiesgo+'/100';
+  document.getElementById('pe-kpi-rep').textContent=simRep+'/100';
+  document.getElementById('pe-kpi-turno').textContent=simTurno+'/12';
+  document.getElementById('pe-exit-info').textContent=`Exit estimado: Turno ${Math.min(12,simTurno+u.turnos)}`;
+
+  // Slider
+  document.getElementById('pe-slider').value=5;
+  updatePESlider();
+
+  document.getElementById('pe-overlay').classList.add('open');
+}
+
+function closePEModal(){
+  document.getElementById('pe-overlay').classList.remove('open');
+  _peCurrentUnicorn=null;
+}
+
+function updatePESlider(){
+  const u=_peCurrentUnicorn;if(!u)return;
+  const pct=parseInt(document.getElementById('pe-slider').value);
+  let simAum=50000;
+  try{const sim=JSON.parse(localStorage.getItem('zcp_state_v3')||'{}');simAum=sim.aum||50000;}catch(e){}
+  const monto=simAum*(pct/100);
+  const fmtA=v=>v>=1000000000?'$'+(v/1000000000).toFixed(2)+'B':v>=1000000?'$'+(v/1000000).toFixed(1)+'M':'$'+Math.round(v/1000)+'K';
+  document.getElementById('pe-monto-display').textContent=fmtA(monto);
+  const riesgoImpacto=u.riesgo==='ALTO'?'+15':u.riesgo==='MEDIO'?'+8':'+3';
+  document.getElementById('pe-impact-preview').textContent=`Riesgo ${riesgoImpacto} · Exposición +${pct}% · ${pct}% AUM bloqueado ${u.turnos}T`;
+  const ticketMin=u.ticket*1000000;
+  const btn=document.getElementById('pe-btn-invest');
+  btn.disabled=monto<ticketMin;
+  if(btn.disabled)btn.textContent=`Mínimo $${u.ticket}M`;
+  else btn.textContent='✦ INVERTIR';
+}
+
+function confirmarInversion(){
+  const u=_peCurrentUnicorn;if(!u)return;
+  const pct=parseInt(document.getElementById('pe-slider').value);
+  addFeedItem(`PE: Inversión en ${u.name} — ${pct}% AUM · ${u.turnos} turnos hasta exit`,'#8860ff');
+  playTonoUnlock();
+  closePEModal();
+}
+
+// ══════════════════════════════════════════════════════════════
+// GEM-08: SOUND MANAGER — Howler.js + Web Audio API
+// ══════════════════════════════════════════════════════════════
+// Tracks ambientales via Howler.js (.ogg desde /assets/audio/)
+// SFX de UI via Web Audio API nativa (GEM-09 — ya integrado)
+//
+// ARCHIVOS PENDIENTES DE VERIFICAR EN FREESOUND.ORG:
+//   market_open.ogg   → freesound.org/s/651372
+//   market_closed.ogg → freesound.org/s/582315
+//   modo_ficcion.ogg  → freesound.org/s/448086
+//   cisne_negro.ogg   → freesound.org/s/369124
+// Descargar como .ogg y subir a /assets/audio/ en el repo
+
+let _soundEnabled = false; // OFF por defecto — el usuario activa
+let _currentTrack = null;
+let _soundSystem = null;
+
+function initSoundManager(){
+  // Verificar si Howler está disponible
+  if(typeof Howl === 'undefined'){
+    console.log('[ZAR Audio] Howler.js no cargado — SFX nativos activos');
+    return;
+  }
+  // Try/catch global: si los .ogg no existen (404), la UI no se rompe
+  try {
+    _soundSystem = {
+      market_open: new Howl({
+        src:['assets/audio/market_open.ogg'],
+        loop:true, volume:0.25,
+        onloaderror:(id,err)=>{ console.warn('[ZAR Audio] market_open.ogg no disponible — continuando sin audio'); _soundSystem.market_open = null; }
+      }),
+      market_closed: new Howl({
+        src:['assets/audio/market_closed.ogg'],
+        loop:true, volume:0.18,
+        onloaderror:(id,err)=>{ console.warn('[ZAR Audio] market_closed.ogg no disponible — continuando sin audio'); _soundSystem.market_closed = null; }
+      }),
+      modo_ficcion: new Howl({
+        src:['assets/audio/modo_ficcion.ogg'],
+        loop:true, volume:0.22,
+        onloaderror:(id,err)=>{ console.warn('[ZAR Audio] modo_ficcion.ogg no disponible — continuando sin audio'); _soundSystem.modo_ficcion = null; }
+      }),
+      cisne_negro: new Howl({
+        src:['assets/audio/cisne_negro.ogg'],
+        loop:false, volume:0.5,
+        onloaderror:(id,err)=>{ console.warn('[ZAR Audio] cisne_negro.ogg no disponible — continuando sin audio'); _soundSystem.cisne_negro = null; }
+      })
+    };
+    console.log('[ZAR Audio] SoundManager inicializado — aguardando archivos .ogg');
+  } catch(e) {
+    console.warn('[ZAR Audio] SoundManager falló al inicializar — globo no afectado:', e.message);
+    _soundSystem = null;
+  }
+}
+
+function updateAmbientAudio(){
+  if(!_soundEnabled || !_soundSystem) return;
+  // Detectar modo universo
+  const modo = _modoUniverso || 'hibrido';
+  if(modo === 'ficcion'){
+    _playTrack('modo_ficcion'); return;
+  }
+  // Detectar estado mercado NY
+  const now = new Date();
+  const nyNow = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+  const t = nyNow.getHours()*60 + nyNow.getMinutes();
+  const wd = nyNow.getDay();
+  const marketOpen = wd>0 && wd<6 && t>=570 && t<960;
+  _playTrack(marketOpen ? 'market_open' : 'market_closed');
+}
+
+function _playTrack(name){
+  if(!_soundSystem) return;
+  if(_currentTrack === name) return; // ya está sonando
+  // Detener todo
+  Object.values(_soundSystem).forEach(h=>{ try{h.stop();}catch(e){} });
+  _currentTrack = name;
+  if(_soundSystem[name]) _soundSystem[name].play();
+}
+
+function toggleSound(){
+  _soundEnabled = !_soundEnabled;
+  const btn = document.getElementById('btn-sound');
+  if(_soundEnabled){
+    updateAmbientAudio();
+    if(btn){btn.textContent='🔊';btn.style.color='#00c896';btn.style.borderColor='#00c896';}
+  } else {
+    if(_soundSystem) Object.values(_soundSystem).forEach(h=>{try{h.stop();}catch(e){}});
+    _currentTrack = null;
+    if(btn){btn.textContent='🔇';btn.style.color='var(--text-dim)';btn.style.borderColor='var(--border)';}
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  initGlobe();
+  initSoundManager(); // GEM-08
+  const savedModo=localStorage.getItem('zcp_modo_universo')||'hibrido';
+  setModoUniverso(savedModo);
+  renderFeed();
+  refreshSimState();
+  updateClock();
+  setInterval(updateClock,1000);
+  setInterval(refreshSimState,4000);
+  // Cargar datos en tiempo real
+  fetchGDELT();
+  fetchACLED();      // Solo actúa si hay key configurada
+  fetchCelesTrak();  // CelesTrak — TLE reales, CORS silencioso en local
+  fetchOpenSky();    // GEM-04 — OpenSky aviones militares (requiere NV3)
+  // Refresh periódicos
+  setInterval(fetchACLED, 2 * 60 * 60 * 1000);   // ACLED cada 2hs
+  setInterval(fetchCelesTrak, 60 * 60 * 1000);    // TLE cada 1h
+  setInterval(fetchOpenSky, 90 * 1000);            // OpenSky cada 90s (NV3+)
+});
+</script>
+</body>
+</html>

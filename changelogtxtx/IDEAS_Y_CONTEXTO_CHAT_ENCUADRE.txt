@@ -1,0 +1,747 @@
+═══════════════════════════════════════════════════════════════════════════════
+ RESUMEN DE IDEAS — Chat de Encuadre y Estructuración (2026-05-23)
+═══════════════════════════════════════════════════════════════════════════════
+
+PROPÓSITO DE ESTE ARCHIVO:
+Este documento contiene TODAS las ideas, decisiones y contexto discutido en el
+chat de encuadre. Podés copiar/pegar las secciones relevantes en los chats
+correspondientes SIN tener que subir capturas (que consumen muchos tokens).
+
+PROYECTOS DISCUTIDOS:
+1. WorldMonitor 3D Enhancement (ZAR Capital Simulator)
+2. SAVT (Sistema Autónomo de Vigilancia Territorial) — PROYECTO PRINCIPAL
+3. Palantir AIP Discussion (contexto de APIs)
+4. Coordinación Multi-IA (Claude + Gemini)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ PROYECTO 1: WORLDMONITOR 3D ENHANCEMENT (ZAR Capital Simulator)
+═══════════════════════════════════════════════════════════════════════════════
+
+CONTEXTO:
+Tenés un simulador de trading (ZAR Capital) con 3 componentes:
+- worldmonitor.html (visor geopolítico 3D)
+- zar_capital_simulator.html (simulador de gestión de fondo)
+- zar_command_center.html (centro de operaciones)
+
+OBJETIVO:
+Mejorar worldmonitor.html para que tenga visualización tipo Bloomberg/Reuters
+con datos fluyendo en tiempo real, similar a las imágenes de referencia que
+compartiste.
+
+───────────────────────────────────────────────────────────────────────────────
+ QUÉ AGREGAR AL WORLDMONITOR:
+───────────────────────────────────────────────────────────────────────────────
+
+1. CAPA DE FLUJOS DE CAPITAL
+   - Líneas animadas de portfolio moviéndose entre regiones
+   - Grosor = volumen de capital
+   - Color = tipo de instrumento (FX azul, commodities oro, renta fija verde)
+
+2. GEOLOCALIZACIÓN DE EVENTOS
+   - Eventos del simulador aparecen como puntos pulsantes en el mapa
+   - Colores según riesgo (rojo=conflicto, naranja=volatilidad, verde=oportunidad)
+   - Efecto de "onda expansiva" al generarse
+
+3. DATA OVERLAY (Esquinas de la pantalla)
+   - Top-left: Ticker de precios en vivo (SPY, GBP/USD, BRENT, etc.)
+   - Top-right: Métricas del simulador (AUM, Reputación, Riesgo)
+   - Bottom: Eventos activos del mundo en scroll horizontal
+
+4. ANIMACIONES DE TRANSICIÓN
+   - Cuando pasa un evento, el globo hace "zoom" a esa región
+   - Partículas de impacto visual
+   - Cambios de color smooth en la paleta del globo
+
+5. MODO NOCHE/DÍA CON LUMINISCENCIA
+   - Mantener dark mode actual
+   - Agregar luminiscencia en ciudades (HQs del portfolio)
+   - Rutas brillan cuando hay actividad de capital
+
+───────────────────────────────────────────────────────────────────────────────
+ BRIEF PARA EL CHAT DE DESARROLLO:
+───────────────────────────────────────────────────────────────────────────────
+
+Copiar esto cuando vayas al chat del Simulator:
+
+"""
+🎯 PROYECTO: ZAR Capital Simulator — WorldMonitor 3D Enhancement
+
+📂 CONTEXTO:
+Tengo un simulador de fondo de inversión con 3 componentes. WorldMonitor 3D
+es el visor geopolítico del proyecto. YA EXISTE y funciona, pero necesita
+mejora VISUAL.
+
+🎨 OBJETIVO:
+Transformar el worldmonitor.html para que tenga el estilo visual de las
+imágenes adjuntas:
+- Datos fluyendo dinámicamente en pantalla (capital, eventos, flujos)
+- Geolocalización de riesgos/oportunidades en el mapa
+- Animaciones tipo Bloomberg/Reuters
+- Data overlays en esquinas (ticker, métricas, eventos)
+- Efectos de impacto cuando ocurren eventos
+
+📋 LO QUE NECESITO AGREGAR:
+1. Capa de flujos de capital (líneas animadas entre regiones)
+2. Eventos como puntos pulsantes en el globo (rojo=riesgo, verde=oportunidad)
+3. Ticker vivo en esquinas + métricas del simulador
+4. Animaciones suave en transiciones
+5. Mejor contraste/luminiscencia en el globo (tema noche/día)
+
+⚠️ IMPORTANTE:
+- NO reescribas todo, MODIFICA el worldmonitor.html que adjunto
+- Mantén la arquitectura actual (localStorage, botones, capas de mapa)
+- Agrega las visualizaciones COMO CAPAS NUEVAS en el canvas/SVG
+- El archivo debe seguir siendo standalone HTML/CSS/JS
+
+Vamos a trabajar en vivo: vos mostrás progreso, yo ajusto, iteramos rápido.
+"""
+
+ARCHIVOS A ADJUNTAR EN ESE CHAT:
+- worldmonitor.html (el que tenés)
+- Las 2 imágenes de referencia visual (las primeras que me mostraste)
+
+───────────────────────────────────────────────────────────────────────────────
+ IDEAS ADICIONALES: MECÁNICAS AVANZADAS DEL SIMULADOR
+───────────────────────────────────────────────────────────────────────────────
+
+Estas son ideas de gameplay más avanzadas para agregar DESPUÉS del MVP:
+
+PANTALLA 2: MOTOR GRÁFICO, DIARIO Y DIFICULTAD
+- Sistema Visual, Multimedia y Algoritmos Inteligentes
+- Globo Terreno 3D: Renderizado dinámico del planeta usando Three.js
+- Sistema de Partículas: Animación vectorial de fuego/humo al lugar cohetes orbitales
+- Agenda de Noticias: Solapa de diario crónico estilo militar/periodístico en barra
+- Lecturas de Órbitas: El diario inyecta fotos en tiempo real de tu globo 3D según
+  la constelación de satélites
+- Dificultad Inteligente (JS): Árboles de decisión que analizan tus hábitos de
+  trading y te bloquean. Los fondos rivales se anticipan, inflan valuaciones de
+  startups y te bloquean
+
+MÓDULO CORPORATIVO: FINANZAS, RONDAS Y COMPETENCIA
+- Rondas de Inversión y Cap Table: Empezás como empresa privada. Diseñá un
+  algoritmo de valor de tu empresa (Valuation) según tus contratos ficticios
+  firmados. Podés simular rondas Seed, Serie A y B, donde cedés porcentaje de la
+  empresa a fondos de Venture Capital simulados a cambio de capital para expandir
+  fábricas de drones.
+- Salida a Bolsa (IPO): Si decidís hacerla pública, podés vincular el precio de
+  tu acción ficticia a variables reales (por ejemplo, si el índice S&P 500 o las
+  acciones de Lockheed Martin suben en la realidad, la acción de tu empresa gana
+  tracción en el simulador).
+- Brazo Financiero (Corporate Venture Capital): Creá una sección de "Tesorería".
+  El efectivo que gane tu empresa por vender escudos balísticos no puede quedar
+  quieto. Podés programar un módulo que ofrezca valores reales retrasados para
+  "invertir" los fondos de la empresa en bonos, commodities (oro, petróleo) o
+  comprar competidores de ficción para absorber su tecnología.
+
+1. EL ÍNDICE DE CORRUPCIÓN Y "CURRO" DE PROVEEDORES (COMPLIANCE MILITAR)
+En el mundo de la defensa real, no todo es eficiencia lineal. Para simular esto,
+podés agregar una variable llamada riesgo_compliance o friccion_burocratica:
+- La lógica: Al contratar proveedores ficticios de piezas de drones o software,
+  los más baratos deberían tener un "dado oculto" de probabilidad de retraso por
+  aduanas, problemas de calidad, o auditorías del Estado.
+- El impacto en el juego: Te obliga a decidir entre comprar componentes locales
+  caros pero seguros (cumpliendo normativas), o arriesgarte con proveedores
+  internacionales baratos que te pueden clavar la producción de drones por 2
+  trimestres virtuales debido a un cambio de ley imprevisto.
+
+2. EL "CEREBRO COLECTIVO" (FUGA DE CEREBROS VS. RETENCIÓN)
+Mencionaste medir la moral del personal, pero en tecnología e IA, el activo más
+valioso es el conocimiento acumulado. Podés agregar una métrica de Recursos Humanos:
+- La lógica: Si la moral cae por debajo de 60 por exceso de trabajo o falta de
+  presupuesto, los ingenieros del Sector no solo renuncian, sino que se llevan
+  "Puntos de Tecnología" acumulados.
+- El impacto en el juego: Simula la fuga de cerebros hacia tus competidores
+  directos de EE.UU. o China. Perder un ingeniero clave podría retrasar el
+  desarrollo de tu Escudo Balístico un año entero en el juego, obligándote a
+  gastar el doble en tesorería para salir a cazar talento (headhunting).
+
+3. CONTRATOS DE COMPRA FUTURA (OPCIÓN DE VENTA DE OPCIONES / COBERTURA FINANCIERA)
+Como hacés trading y estudiás economía, la tesorería de tu empresa no puede ser
+solo una cuenta corriente estática. Necesitás un módulo de Hedging de Materias
+Primas:
+- La lógica: Para fabricar drones y satélites necesitás semiconductores avanzados,
+  litio y titanio. El precio de estos commodities debería fluctuar según las
+  noticias de las APIs reales.
+- El impacto en el juego: Tu "brazo financiero" puede usar la tesorería para
+  comprar contratos de futuros de estas materias primas. Si olfateás que la tensión
+  geopolítica real va a subir el precio del litio hoy para congelar el costo de
+  producción de tus drones para los próximos 4 trimestres virtuales. Si acertás la
+  operación, blindás financieramente a la compañía frente a la inflación global de
+  costos de defensa.
+
+EL MÓDULO ORBITAL: CONSTELACIÓN ASIMÉTRICA DE ALERTA TEMPRANA
+Podés agregar a la lógica de tu simulador el desarrollo de tu propia red soberana
+en el espacio:
+- Lógica de Lanzamiento: Al principio de la simulación pagás suscripciones a
+  L3Harris o Sentinel (gasto fijo alto). A medida que tu tesorería crece, el juego
+  te permite desbloquear la opción de fabricar y lanzar tus propios CubeSats.
+- La ventaja en el juego: Cada satélite propio que ponés en órbita reduce a cero
+  el costo de las suscripciones y aumenta la precisión de tu Escudo Balístico. Si
+  lográs lanzar una red de 12 CubeSats en el simulador, tu IA de detección predice
+  los ataques misilísticos con un 100% de efectividad.
+- Riesgo Espacial: Introducir la variable de basura espacial o tormentas solares.
+  Un evento aleatorio real (como una eyección de masa coronal del sol) puede quemar
+  uno de tus satélites en órbita, obligándote a tu brazo financiero a activar un
+  seguro o lanzar un reemplazo de urgencia.
+
+
+───────────────────────────────────────────────────────────────────────────────
+ PASOS TÉCNICOS PARA IMPLEMENTACIÓN MULTI-IA
+───────────────────────────────────────────────────────────────────────────────
+
+Para implementar el sistema de coordinación Claude + Gemini, debes seguir estos pasos:
+
+1. MIGRAR A LAS APIs:
+   - Crear cuenta en Anthropic Console y API de OpenAI
+   - Dejar de pagar suscripciones fijas
+   - Empezar a pagar por volumen de texto procesado
+
+2. ADOPTAR UN FRAMEWORK DE AGENTES:
+   - Investigar herramientas de código abierto como:
+     * LangChain
+     * CrewAI
+     * AnythingLLM (interfaces locales)
+   - Estas plataformas permiten conectar Claude y Gemini simultáneamente a la
+     misma base de datos de Gemini
+
+3. AUTOMATIZAR TUS REGISTROS:
+   - En lugar de mover manualmente changelogs.txt entre chats
+   - El framework leerá automáticamente una carpeta local en tu Mac
+   - Ambos modelos consultan la misma información sin duplicar consumo de tokens
+
+
+───────────────────────────────────────────────────────────────────────────────
+ TU PLAN DE RUTA TECNOLÓGICO (De la UBA a la Startup)
+───────────────────────────────────────────────────────────────────────────────
+
+No necesitás fábricas de fibra de carbono todavía. El software de defensa
+moderno se gana ganando la carrera del software. Podés empezar a construir las
+bases de tu startup desde tu setup actual en Buenos Aires:
+
+1. DOMINÁ LOS MODELOS DE VISIÓN ARTIFICIAL:
+   - Usá tu Mac M3 para aprender a entrenar modelos de reconocimiento de objetos
+   - Descargá sets de datos abiertos de imágenes térmicas y satelitales
+   - Enseñale a un código local a diferenciar entre una vaca, un caballo, un
+     operario rural y un intruso armado
+
+2. SISTEMAS DE MAPAS E INFORMACIÓN GEOGRÁFICA (GIS):
+   - Vinculá tus conocimientos de geopolítica con herramientas como QGIS o APIs
+     cartográficas
+   - Aprendé a automatizar cómo una IA lee mapas topográficos para trazar rutas
+     de vuelo óptimas para drones que esquiven radares o aprovechen el terreno
+     para misiones de infiltración/vigilancia
+
+3. MODELADO DE MODELOS DE SUSCRIPCIÓN (SaaS DE DEFENSA):
+   - El modelo de negocio que proponés (monitoreo de terreno y mantenimiento
+     preventivo por suscripción para estancieros de Corrientes o fuerzas de
+     seguridad) es el más rentable de la industria actual
+   - Usá tus materias de economía en la UBA para estructurar los flujos de caja,
+     costos de importación de componentes críticos (como cámaras térmicas FLIR)
+     y análisis de viabilidad financiera de este tipo de contratos a largo plazo
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ PROYECTO 2: SAVT (Sistema Autónomo de Vigilancia Territorial)
+═══════════════════════════════════════════════════════════════════════════════
+
+ESTE ES EL PROYECTO PRINCIPAL DE ESTE CHAT DE ENCUADRE.
+
+NOMBRE COMPLETO: Sistema Autónomo de Vigilancia Territorial (SAVT)
+
+OBJETIVO:
+Plataforma de inteligencia geopolítica/militar con análisis OSINT,
+triangulación de datos, visualización geoespacial y capacidad de comando
+financiero para operaciones de defensa/contrainteligencia.
+
+IMPORTANTE:
+- Es un proyecto EXPLORATORIO, sin deadline
+- NO es una startup con timeline de lanzamiento
+- Puede convertirse en empresa en el futuro, pero sin presión
+- Desarrollo a ritmo propio, sin culpa si avanza lento
+
+───────────────────────────────────────────────────────────────────────────────
+ FASE 1: INFRAESTRUCTURA LÓGICA Y VALIDACIÓN (2026-2027)
+───────────────────────────────────────────────────────────────────────────────
+
+OBJETIVO:
+Construir el "cerebro de software" y los modelos financieros ANTES de gastar
+en hardware, drones o componentes físicos.
+
+FLUJO:
+[Datos Críticos] → [Filtro de IA Local (M3)] → [Dashboard en Streamlit] → [Est]
+
+4 PASOS PRINCIPALES:
+
+PASO 1: CONFIGURACIÓN DEL ECOSISTEMA DE ARCHIVOS
+Crear estructura:
+PROYECTO_SAVT_DEFENSA/
+├── 01_Modelos_Economicos/ (costos, proyecciones, análisis de mercado)
+├── 02_Logica_GIS_Fronteras/ (coordenadas, mapas topográficos, rutas de vuelo)
+├── 03_Desarrollo_Dashboard/ (scripts Python, bases de datos locales .json)
+└── master_changelog.txt
+
+PASO 2: TABLERO DE COMANDO FINANCIERO (Excel/Streamlit)
+- Simulador financiero usando Streamlit (Python)
+- Ingresar costos estimados de ensamblaje, costos operativos, precios de suscripción
+- Encontrar "punto de equilibrio"
+- Guardar modelo en PDF para buscar inversores
+
+PASO 3: MÓDULO DE INTELIGENCIA GEOGRÁFICA (GIS)
+- Usar Gemini Pro para recopilar reportes públicos
+- Crear archivo .json con coordenadas geográficas de eventos
+- Usar Claude para crear mapa de calor con Python
+- Desarrollar mapa digitalizado de rutas aéreas óptimas
+
+PASO 4: ENTRENAMIENTO DE VISIÓN DE COMPUTADORA LOCAL
+- Descargar bases de datos de imágenes de código abierto
+- Ejecutar modelo de visión artificial básico en Mac
+- Hacer que el script procese un video de prueba
+
+───────────────────────────────────────────────────────────────────────────────
+ APIS OSINT A CONECTAR
+───────────────────────────────────────────────────────────────────────────────
+
+FUENTES CLAVE:
+
+✓ Institute for the Study of War (ISW)
+  - Reportes diarios de conflictos
+  - URL: https://www.understandingwar.org/
+
+✓ ACLED (Armed Conflict Location & Event Data Project)
+  - API gratuita para datos de conflictos
+  - URL: https://acleddata.com/
+
+✓ Janis / Oryx (OSINT militar)
+  - Feeds de pérdidas de equipos
+  - Documentación fotográfica
+
+✓ GDELT (Global Database of Events, Language, and Tone)
+  - Monitoreo de noticias global
+  - Actualización cada 15 minutos
+  - URL: https://www.gdeltproject.org/
+
+✓ Copernicus Open Access Hub (ESA)
+  - Datos satelitales gratuitos
+  - Sentinel imagery
+
+✓ EOSDA LandViewer
+  - Visualización de imágenes satelitales
+
+✓ NASA EOSDIS
+  - Acceso a Landsat/Sentinel
+
+✓ NewsAPI
+  - Noticias globales, gratis 100 req/día
+
+✓ Mediastack
+  - Noticias globales
+
+✓ World Bank API
+  - Datos económicos
+
+✓ UN Comtrade
+  - Comercio internacional
+
+✓ OpenStreetMap + Overpass API
+  - Geolocalización, infraestructura
+
+✓ ADS-B Exchange
+  - Rastreo de aviones militares, GRATIS
+
+ROL DEL FILTRO:
+- Script de fondo lee APIs cada hora
+- Detecta eventos críticos (ej: nueva contramedida electrónica rusa)
+- Filtro IA (M3 local) clasifica la amenaza
+- Sistema alerta al operador
+- Se actualizan algoritmos de navegación inercial
+
+SERVICIO DE IMAGEN SATELITAL POST-FUEGO (BDA):
+- Battle Damage Assessment
+- Proveedores: Planet Labs, Maxar SecureWatch, Sentinel Hub, EOSDA LandViewer
+- Flujo: Acción → Registro → Solicitud automática → Imagen → Análisis CV → Reporte
+
+───────────────────────────────────────────────────────────────────────────────
+ STACK TÉCNICO COMPLETO
+───────────────────────────────────────────────────────────────────────────────
+
+BACKEND:
+- Python 3.11+
+- FastAPI (para APIs internas)
+- Node.js (agregadores de datos)
+
+FRONTEND:
+- Streamlit (dashboard principal)
+- React (dashboard avanzado opcional)
+- Folium/Plotly (mapas interactivos)
+
+DATOS:
+- Firebase (base de datos tiempo real)
+- PostgreSQL + PostGIS (datos geoespaciales)
+- JSON local (cache rápido)
+
+INTELIGENCIA:
+- Claude API (análisis, generación de scripts)
+- Gemini Pro (recopilación de reportes)
+- M3 Local (filtro IA en Mac)
+
+GEOESPACIAL:
+- GeoPandas
+- Folium
+- Plotly
+- OpenStreetMap + Overpass API
+
+COMPUTER VISION:
+- OpenCV
+- PyTorch
+- YOLO (detección de objetos)
+
+DEPLOYMENT:
+- GitHub (código versionado)
+- GitHub Actions (CI/CD)
+- Mac mini (hardware dedicado local)
+
+───────────────────────────────────────────────────────────────────────────────
+ PRIORIDADES PRÓXIMOS 30 DÍAS
+───────────────────────────────────────────────────────────────────────────────
+
+1. ⚡ URGENTE: Crear estructura de carpetas PROYECTO_SAVT_DEFENSA
+2. ⚡ URGENTE: Setup de GitHub repo
+3. 🔥 ALTA: Conectar primera API OSINT (GDELT o ACLED)
+4. 🔥 ALTA: Prototipo de tablero financiero en Streamlit
+5. 📊 MEDIA: Script Python básico para mapas GIS
+6. 📊 MEDIA: Investigar proveedores de imágenes satelitales
+7. 🔬 BAJA: Research de modelos de computer vision
+
+───────────────────────────────────────────────────────────────────────────────
+ VISIÓN A LARGO PLAZO (Posibilidad Exploratoria)
+───────────────────────────────────────────────────────────────────────────────
+
+CONTEXTO:
+Estamos en la era de empresas ultra-lean potenciadas por IA:
+- Midjourney: ~11 empleados, millones en revenue
+- Notion: <50 personas, valuación multimillonaria
+
+PREGUNTA EXPLORATORIA:
+¿Podría SAVT convertirse en una empresa de intelligence/OSINT siguiendo
+este modelo? ¿1-5 analistas + IA generando más valor que equipos
+tradicionales de 50+ personas?
+
+RESPUESTA: Tal vez. No es el objetivo actual, pero es una posibilidad.
+
+ETAPA ACTUAL (2026-2027):
+✓ Desarrollo de capacidades técnicas
+✓ Portfolio project
+✓ Exploración de viabilidad
+✓ Experimentación sin presión de monetización
+✓ Aprendizaje de workflows IA-humano
+
+CONTEXTO DE PEDRO:
+- Estudiante de Lic. Economía (CBC UBA)
+- Estudiante de análisis técnico
+- Trabajo en relación de dependencia (sector público)
+- NO tiene "energía infinita" ni tiempo ilimitado
+
+POSIBLE FUTURO (3-5-10 años?):
+SI se alinean:
+✓ Pedro terminó UBA
+✓ Ganó experiencia laboral relevante
+✓ Tiene energía y capital disponible
+✓ El proyecto técnico está validado
+✓ Existe demanda real del mercado
+
+ENTONCES podría convertirse en:
+- B2B/B2G: Reportes de intelligence bajo demanda
+- Suscripción: Dashboards en tiempo real
+- Consultoría: Análisis profundos ad-hoc
+- SaaS: Plataforma self-service
+
+CLIENTES POTENCIALES:
+- Empresas multinacionales (riesgo país, supply chain)
+- Hedge funds (geopolítica que afecta mercados)
+- ONGs (monitoreo de conflictos)
+- Gobiernos/fuerzas de seguridad
+- Medios de comunicación
+
+EQUIPO PROYECTADO:
+- 1-5 humanos (analistas senior, desarrolladores)
+- Stack IA robusto
+- Alta automatización
+- Operación remota, gastos mínimos
+
+BENCHMARK:
+- Bellingcat: 20 personas, impacto global
+- SAVT?: Intelligence as a Service, team ultra-lean
+
+DISCLAIMER:
+Esto es una POSIBILIDAD, no un plan. Puede no ocurrir nunca, y está bien.
+
+───────────────────────────────────────────────────────────────────────────────
+ COORDINACIÓN MULTI-IA (Claude + Gemini + Pedro)
+───────────────────────────────────────────────────────────────────────────────
+
+FILOSOFÍA:
+Las IAs no son "herramientas" — son "colaboradores virtuales".
+Estás construyendo workflows de colaboración IA-humano.
+
+ROLES:
+
+🤖 CLAUDE (Arquitecto + Desarrollador + Validador Técnico):
+✓ Diseño de arquitectura
+✓ Código (Python, JavaScript, SQL, APIs)
+✓ Integración de servicios
+✓ Dashboards/frontends
+✓ Validación técnica
+✓ Debugging
+
+🤖 GEMINI (Analista Geopolítico + Investigador + Data Collector):
+✓ Recopilación de reportes OSINT
+✓ Síntesis de noticias
+✓ Análisis de tendencias macro
+✓ Generación de coordenadas GIS
+✓ Research profundo
+✓ Extracción de datos
+
+👤 PEDRO (Estratega + Decision-Maker + Control de Calidad):
+✓ Visión estratégica
+✓ Priorización
+✓ Decisiones críticas
+✓ Control de calidad
+✓ Validación de análisis
+✓ Relación con clientes (futuro)
+
+PROTOCOLO DE HANDOFF:
+- CHANGELOG.txt compartido en GitHub
+- Flujo: Pedro define → Gemini investiga → Claude desarrolla → Pedro valida
+- Cada IA lee CHANGELOG al inicio
+- Cada IA actualiza CHANGELOG al finalizar
+
+VENTAJAS:
+✓ Especialización
+✓ Escalabilidad
+✓ Aprendizaje de orquestación IA
+✓ Flexibilidad
+✓ Preparación para posible empresa
+
+───────────────────────────────────────────────────────────────────────────────
+ INSTRUCCIONES DE COMPORTAMIENTO PARA CHATS
+───────────────────────────────────────────────────────────────────────────────
+
+El chat SAVT debe ser ACTIVO, no complaciente:
+
+1. CHECKPOINT FLEXIBLE (basado en contexto, no temporal)
+   - Dispara cuando Pedro menciona avance, pregunta "siguiente paso", o comparte código
+   - EXCEPCIÓN: urgencias disparan checkpoint inmediato
+
+2. DETECTOR DE BURNOUT
+   - Señales: múltiples proyectos, features antes de básico, cansancio
+   - Respuesta: "🛑 FRENO" + lista de compromisos
+
+3. DETECTOR DE SCOPE CREEP
+   - Señales: "estaría bueno agregar..." antes de MVP
+   - Respuesta: bloqueo, terminar básico primero
+
+4. ACCOUNTABILITY
+   - Si dijiste "voy a hacer X" → próxima sesión pregunta "¿Lo hiciste?"
+   - Pide evidencia
+
+5. VALIDACIÓN TÉCNICA
+   - Cuestiona soluciones overcomplicated
+   - Ofrece alternativas simples
+
+6. RECORDATORIO DE LÍMITES
+   - Contexto de compromisos (UBA, trading, gaming, etc.)
+   - Pregunta: "¿Qué vas a PAUSAR?"
+
+7. TONO DIRECTO
+   - "Bofetadas cibernéticas" permitidas
+   - Duro pero respetuoso
+
+OBJETIVO:
+Que Pedro complete proyectos, no que inicie 10 y termine 0.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ PROYECTO 3: PALANTIR AIP — CONTEXTO DE APIS (NO ES PARA USAR)
+═══════════════════════════════════════════════════════════════════════════════
+
+ACLARACIÓN IMPORTANTE:
+Viste el GitHub de Palantir AIP Community Registry y preguntaste si servía.
+
+RESPUESTA: NO es para usar directamente.
+
+QUÉ ES PALANTIR AIP:
+- Plataforma empresarial de AI-Powered Operations
+- COSTO: PAGO, muy cara (para Fortune 500, gobiernos)
+- Qué ofrece: Foundry (data stack), APIs, Ontology, SDKs
+
+QUÉ ES EL GITHUB:
+- Repositorio PÚBLICO de ejemplos
+- COSTO: GRATIS
+- Contiene: SDKs de ejemplo, tutoriales, proyectos de comunidad
+- PERO: Necesitás acceso a Palantir Foundry (pago) para usarlos de verdad
+
+CONCLUSIÓN:
+Es como si Tesla publicara cómo construir un auto eléctrico en GitHub,
+pero sin acceso a sus plantas de fabricación, no podés hacerlo.
+
+PARA TU PROYECTO (SAVT):
+NO necesitás Palantir. Lo que estás haciendo podés hacerlo con:
+✓ Canvas 3D (Three.js o Babylon.js)
+✓ APIs abiertas (Finnhub, GDELT, ACLED, etc.)
+✓ Claude/Gemini para eventos/decisiones
+✓ Firebase para persistencia
+
+APIS SIMILARES GRATIS (alternativas a Palantir):
+- Apache Superset (data viz)
+- Airbyte (data integration)
+- DuckDB (data warehouse local)
+- Hasura (GraphQL sobre data)
+- Claude API (para IA)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ INSTRUCCIONES PARA LLEVAR IDEAS A CHATS ESPECÍFICOS
+═══════════════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────────────
+ PARA EL CHAT DE ZAR CAPITAL SIMULATOR (WorldMonitor Enhancement):
+───────────────────────────────────────────────────────────────────────────────
+
+COPIAR ESTO:
+"""
+🎯 BRIEF: WorldMonitor 3D Enhancement
+
+Necesito mejorar la visualización del worldmonitor.html para que tenga estilo
+Bloomberg/Reuters con datos fluyendo en tiempo real.
+
+AGREGAR:
+1. Capa de flujos de capital (líneas animadas entre regiones)
+2. Eventos como puntos pulsantes (rojo=riesgo, verde=oportunidad)
+3. Data overlays en esquinas (ticker, métricas, eventos)
+4. Animaciones smooth en transiciones
+5. Luminiscencia en ciudades/rutas cuando hay actividad
+
+IMPORTANTE:
+- MODIFICAR worldmonitor.html existente, no reescribir
+- Mantener arquitectura actual (localStorage, botones, capas)
+- Agregar visualizaciones como capas nuevas
+
+[Adjuntar worldmonitor.html + 2 imágenes de referencia]
+"""
+
+───────────────────────────────────────────────────────────────────────────────
+ PARA EL CHAT DE SAVT (Proyecto Nuevo):
+───────────────────────────────────────────────────────────────────────────────
+
+COPIAR ESTO AL CREAR EL PROYECTO:
+"""
+🎯 PROYECTO: SAVT (Sistema Autónomo de Vigilancia Territorial)
+
+📂 CONTEXTO:
+Plataforma de intelligence geopolítica con análisis OSINT, triangulación de
+datos, visualización GIS y dashboards. Proyecto exploratorio a largo plazo
+con posibilidad de convertirse en empresa ultra-lean. Coordinación multi-IA
+(Claude + Gemini).
+
+📋 Leé el SAVT_CHANGELOG_v2.txt completo antes de responder.
+
+🚀 OBJETIVO DE HOY:
+Arrancar con el Paso 1: crear la estructura de carpetas PROYECTO_SAVT_DEFENSA
+y validar que esté bien armada según el CHANGELOG.
+
+⚠️ Aplicá las reglas de comportamiento del CHANGELOG (checkpoint flexible,
+detección de scope creep, validación técnica, tono directo).
+
+¿Leíste el CHANGELOG? ¿Arrancamos?
+
+[Adjuntar SAVT_CHANGELOG_v2.txt]
+"""
+
+───────────────────────────────────────────────────────────────────────────────
+ PARA CHATS CON GEMINI (Coordinación Multi-IA):
+───────────────────────────────────────────────────────────────────────────────
+
+COPIAR ESTO:
+"""
+🤖 PROYECTO: SAVT — Coordinación Multi-IA
+
+TU ROL: Analista Geopolítico + Investigador + Data Collector
+
+TAREAS:
+✓ Recopilación de reportes OSINT (ISW, ACLED, GDELT, etc.)
+✓ Síntesis de noticias y eventos geopolíticos
+✓ Análisis de tendencias macro
+✓ Generación de coordenadas GIS de eventos
+✓ Research profundo sobre temas específicos
+
+PROTOCOLO DE TRABAJO:
+1. Leé el SAVT_CHANGELOG_v2.txt para contexto completo
+2. Cuando termines una tarea, guardá resultados en formato .json
+3. Actualizá el CHANGELOG con "✓ Tarea completada, ver [archivo]"
+4. Claude tomará tus outputs para desarrollo técnico
+
+HOY NECESITO:
+[Definir la tarea específica]
+
+[Adjuntar SAVT_CHANGELOG_v2.txt si es la primera vez]
+"""
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ ARCHIVOS GENERADOS EN ESTE CHAT
+═══════════════════════════════════════════════════════════════════════════════
+
+1. SAVT_CHANGELOG_v2.txt
+   - Estructura completa del proyecto SAVT
+   - Fases, APIs, stack técnico, visión, multi-IA, instrucciones de comportamiento
+
+2. IDEAS_Y_CONTEXTO_CHAT_ENCUADRE.txt (este archivo)
+   - Resumen de todo lo discutido en este chat
+   - Para compartir en otros chats sin quemar tokens en imágenes
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ CONEXIÓN CON OTROS PROYECTOS DE PEDRO
+═══════════════════════════════════════════════════════════════════════════════
+
+TECH WORLD WATCH (Notion):
+- Source de eventos geopolíticos para SAVT
+- Triangulación cruzada de datos
+- Validación de reportes
+
+ZAR CAPITAL WORLDMONITOR:
+- Visualización geopolítica compartida
+- Integración de mapas 3D
+- Flujos de capital vs. conflictos
+
+FINANZAS PERSONALES:
+- Presupuesto para inversión en hardware SAVT
+- Tracking de gastos del proyecto
+- ROI analysis
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ NOTAS FINALES
+═══════════════════════════════════════════════════════════════════════════════
+
+EFICIENCIA DE TOKENS:
+- Este archivo TXT consume ~100x menos tokens que las 15 imágenes
+- Podés copiar/pegar secciones relevantes según el chat
+- Las imágenes solo son necesarias para WorldMonitor Enhancement
+
+PRÓXIMOS PASOS:
+1. Guardar SAVT_CHANGELOG_v2.txt
+2. Guardar este archivo (IDEAS_Y_CONTEXTO_CHAT_ENCUADRE.txt)
+3. Crear proyecto "Salón de Guerra — OSINT & SAVT"
+4. Subir CHANGELOG al proyecto
+5. Arrancar con Paso 1 (estructura de carpetas)
+
+RECORDATORIO:
+SAVT es un proyecto a largo plazo sin deadline. Avanzá a tu ritmo, sin culpa.
+El objetivo es aprender y construir capacidades, no lanzar una startup YA.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ FIN DEL ARCHIVO — Generado: 2026-05-23
+═══════════════════════════════════════════════════════════════════════════════
