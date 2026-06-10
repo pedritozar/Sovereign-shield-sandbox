@@ -1948,8 +1948,9 @@ async function fetchGDELT(){
 
 const OPENSKY_URL='https://opensky-network.org/api/states/all';
 const OPENSKY_REFRESH=90*1000; // 90 segundos
-// Prefijos OSINT militares confirmados
-const MIL_PREFIXES=/^(RCH|SPAR|RRR|NATO|FORTE|DUKE|JAKE|CNV|BART|CASA|FAB|AFA|AMX|VTOL|HAWK|EAGLE|BISON|ATLAS)/;
+// Prefijos OSINT militares confirmados — DSK-03 ampliado 09/06/2026
+// Agrega: MM, EVIL, VIPER, SKULL, REACH, HERCULES, PAT, NOMAD, GRIFFIN, FALCON, LIGHTNING, APOLLO, DEMON, HORNET, RAVEN
+const MIL_PREFIXES=/^(RCH|SPAR|RRR|NATO|FORTE|DUKE|JAKE|CNV|BART|CASA|FAB|AFA|AMX|VTOL|HAWK|EAGLE|BISON|ATLAS|MM|EVIL|VIPER|SKULL|REACH|HERCULES|PAT|NOMAD|GRIFFIN|FALCON|LIGHTNING|APOLLO|DEMON|HORNET|RAVEN)/;
 
 async function fetchOpenSky(){
   const statusEl=document.getElementById('opensky-status');
@@ -1973,12 +1974,19 @@ async function fetchOpenSky(){
     if(!data.states||!Array.isArray(data.states)) throw new Error('Sin estados OpenSky');
 
     _openskyPoints=data.states
-      .filter(s=>
-        s[1]&&                          // tiene callsign
-        MIL_PREFIXES.test(s[1].trim())&&// callsign militar
-        s[5]!=null&&s[6]!=null&&        // tiene coordenadas
-        !s[8]                            // no está en tierra
-      )
+      // DSK-03: 6 filtros cuantitativos — elimina taxi/ruido/outliers
+      .filter(s=>{
+        if(!s||s.length<11) return false;
+        const callsign=s[1], lng=s[5], lat=s[6];
+        const alt=s[7], onGround=s[8], vel=s[9];
+        if(!callsign||!MIL_PREFIXES.test(callsign.trim().toUpperCase())) return false; // 1. callsign militar
+        if(lng==null||lat==null) return false;                                          // 2. coordenadas válidas
+        if(onGround!==false) return false;                                              // 3. no en tierra (estricto)
+        if(vel==null||vel<=50) return false;                                            // 4. vel mínima >50 m/s (~180 km/h)
+        if(alt==null||alt<=500) return false;                                           // 5. alt mínima >500 m
+        if(vel>400||alt>20000) return false;                                            // 6. outlier detection
+        return true;
+      })
       .map(s=>{
         const cs=s[1].trim();
         const baroAlt=s[7]||5000;
@@ -2315,7 +2323,60 @@ function updatePESlider(){
 function confirmarInversion(){
   const u=_peCurrentUnicorn;if(!u)return;
   const pct=parseInt(document.getElementById('pe-slider').value);
-  addFeedItem(`PE: Inversión en ${u.name} — ${pct}% AUM · ${u.turnos} turnos hasta exit`,'#8860ff');
+
+  // ── Leer estado del simulador desde localStorage ──────────────
+  let simState=null;
+  try{ simState=JSON.parse(localStorage.getItem('zcp_state_v3')||'null'); }catch(e){}
+  if(!simState){ addFeedItem('PE: Conectá el simulador principal para invertir','#e84040'); closePEModal(); return; }
+
+  const simAum=simState.aum||50000;
+  const capitalInvertido=Math.round(simAum*(pct/100));
+
+  // ── Mapear riesgo string → número 1-5 ────────────────────────
+  const riesgoMap={'BAJO':2,'MEDIO':3,'ALTO':4};
+  const riesgoNum=riesgoMap[u.riesgo]||3;
+
+  // ── Extraer múltiplo de entrada del string (ej: "2x–5x" → 3.5) ─
+  const nums=(u.multiplo||'3x–5x').match(/[\d.]+/g)||['3','5'];
+  const multiplicoEntrada=(parseFloat(nums[0])+parseFloat(nums[nums.length-1]))/2;
+
+  // ── Llamar a simularRetornoPE() — motor DSK-02 ───────────────
+  // simularRetornoPE vive en zar_capital_simulator.html pero como
+  // worldmonitor es standalone, implementamos la lógica de guardado
+  // directo en localStorage para que el simulador la lea en su próximo render.
+  const nuevaInversion={
+    id:'pe_'+u.id+'_'+Date.now(),
+    unicornId:u.id,
+    nombre:u.name,
+    flag:u.flag,
+    riesgo:riesgoNum,
+    capitalInvertido:capitalInvertido,
+    revenueInicial:u.ticket*1000000,
+    multiplicoEntrada:multiplicoEntrada,
+    turnosExit:u.turnos,
+    turnoInversion:simState.turn||1,
+    pctAum:pct,
+    estado:'activo'
+  };
+
+  // Guardar en pePortfolio dentro de zcp_state_v3
+  if(!simState.pePortfolio) simState.pePortfolio=[];
+  simState.pePortfolio.push(nuevaInversion);
+
+  // Descontar capital del AUM en el estado del simulador
+  simState.aum=Math.max(0,(simState.aum||0)-capitalInvertido);
+
+  // Ajustar métricas: riesgo sube según nivel del unicornio
+  const riesgoDelta=riesgoNum>=4?15:riesgoNum===3?8:3;
+  simState.m=simState.m||{};
+  simState.m.risk=Math.min(100,(simState.m.risk||45)+riesgoDelta);
+
+  // Escribir estado actualizado
+  try{ localStorage.setItem('zcp_state_v3',JSON.stringify(simState)); }catch(e){}
+
+  // ── Feed + audio ──────────────────────────────────────────────
+  const fmtA=v=>v>=1000000?'$'+(v/1000000).toFixed(1)+'M':'$'+Math.round(v/1000)+'K';
+  addFeedItem(`PE CONFIRMADO: ${u.flag} ${u.name} — ${fmtA(capitalInvertido)} · Exit en ${u.turnos}T · Riesgo +${riesgoDelta}`,'#8860ff');
   playTonoUnlock();
   closePEModal();
 }

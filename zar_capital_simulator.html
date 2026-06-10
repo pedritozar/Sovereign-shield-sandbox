@@ -161,6 +161,7 @@ input:focus{border-color:#c89040}
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="evrem" style="font-size:9px;color:#3a4f65;letter-spacing:1px;text-transform:uppercase"></span>
+      <button id="closeyr" class="btn" onclick="cerrarAnoFiscal()" style="display:none;border-color:#c89040;color:#c89040;letter-spacing:1px">⬡ Cerrar Año Fiscal</button>
       <button id="nxt" class="btn-gold" onclick="advance()" disabled>Siguiente Bimestre</button>
     </div>
   </div>
@@ -200,14 +201,15 @@ const LEVELS=[
 ];
 
 const PER=['ENE-FEB','MAR-ABR','MAY-JUN','JUL-AGO','SEP-OCT','NOV-DIC'];
-function per(t){return PER[(t-1)%6]+' '+(t<=6?2025:2026);}
+function per(t){const baseYear=2024+(S?S.year:1);return PER[(t-1)%6]+' '+(t<=6?baseYear+1:baseYear+2);}
+// Nota: año 1 → 2025/2026 · año 2 → 2026/2027 · año N → baseYear+1/baseYear+2
 function phase(t){if(t>=10)return'INSTITUCIONAL';if(t>=7)return'EXPANSIÓN';if(t>=5)return'OPERACIONAL';if(t>=3)return'PRE-LAUNCH';return'INCUBACIÓN';}
 function getLevel(aum,rep){let lv=LEVELS[0];for(const l of LEVELS){if(aum>=l.aum&&rep>=l.rep)lv=l;}return lv;}
 function getNextLevel(aum,rep){const c=getLevel(aum,rep);return LEVELS.find(l=>l.id===c.id+1)||null;}
 function getLvProg(aum,rep){const c=getLevel(aum,rep);const n=getNextLevel(aum,rep);if(!n)return 100;return Math.min(100,Math.round((Math.min(aum/n.aum,.99)*0.6+Math.min(rep/n.rep,.99)*0.4)*100));}
 
 // ── STATE ───────────────────────────────────────────────────
-let S={turn:1,tot:12,aum:50000,lp:0,pend:100000,m:{rep:30,risk:45,mor:70,med:15,cmp:85},evts:[],done:0,log:[],edu:false,lvId:1,apiKey:'',demoMode:false,
+let S={turn:1,tot:12,year:1,aum:50000,lp:0,pend:100000,m:{rep:30,risk:45,mor:70,med:15,cmp:85},evts:[],done:0,log:[],edu:false,lvId:1,apiKey:'',demoMode:false,
   // GEM-14: LP Mechanics
   historialAUM:[50000,50000],
   lpCooldowns:{lp_001:0,lp_002:0,lp_003:0,lp_004:0,lp_005:0,lp_006:0,lp_007:0,lp_008:0},
@@ -353,6 +355,9 @@ function loadState(){
       if(!S.historialAUM) S.historialAUM=[S.aum,S.aum];
       if(!S.lpCooldowns)  S.lpCooldowns={lp_001:0,lp_002:0,lp_003:0,lp_004:0,lp_005:0,lp_006:0,lp_007:0,lp_008:0};
       if(!S.lpsActivos)   S.lpsActivos=['lp_001'];
+      // Prioridad 1: garantizar campos multi-año aunque sea partida vieja
+      if(!S.year)          S.year=1;
+      if(!S.historialAnual) S.historialAnual=[];
       if(key)S.apiKey=key;
       return true;
     }
@@ -409,8 +414,18 @@ function render(){
   renderEvts();
   const rem=S.evts.filter(e=>!e.resolved).length;
   const done=rem===0&&S.evts.length>0;
-  $i('nxt').disabled=!done||S.turn>=S.tot;
-  $i('evrem').textContent=rem>0?rem+' evento'+(rem>1?'s':'')+' pendiente'+(rem>1?'s':''):done&&S.turn<S.tot?'Listos para avanzar':S.turn>=S.tot?'Simulación completada':'';
+  const esUltimoTurno=S.turn>=S.tot;
+  const closeyrBtn=$i('closeyr');
+  // Turno 12 resuelto → mostrar "Cerrar Año Fiscal", ocultar "Siguiente Bimestre"
+  if(esUltimoTurno&&done){
+    $i('nxt').style.display='none';
+    if(closeyrBtn)closeyrBtn.style.display='block';
+  } else {
+    $i('nxt').style.display='';
+    $i('nxt').disabled=!done||esUltimoTurno;
+    if(closeyrBtn)closeyrBtn.style.display='none';
+  }
+  $i('evrem').textContent=rem>0?rem+' evento'+(rem>1?'s':'')+' pendiente'+(rem>1?'s':''):done&&!esUltimoTurno?'Listos para avanzar':esUltimoTurno&&done?'Año fiscal completado — cerrá el año':'';
   saveState();
 }
 
@@ -700,6 +715,53 @@ function evaluarPortfolioPE(inversiones, iter=200){
   };
 }
 
+// ── DSK-04: MOTOR EXIT PE — DeepSeek 09/06/2026 ─────────────
+// Evalúa inversiones PE que alcanzaron su turno de exit.
+// Usa simularRetornoPE() (mediana) como retorno base.
+// writeoff forzado si probWriteoff > 50%.
+// No muta pePortfolio[] directamente — retorna exits + deltaAum
+// para que advance() aplique los cambios al estado S.
+function evaluarExitsPE(pePortfolio, turnoActual){
+  const exits=[];
+  let deltaAum=0;
+  if(!Array.isArray(pePortfolio)||pePortfolio.length===0) return {exits,deltaAum};
+
+  for(const inv of pePortfolio){
+    if(!inv||inv.estado!=='activo') continue;
+    if(inv.turnoInversion==null||inv.turnosExit==null) continue;
+    const turnosTranscurridos=turnoActual-inv.turnoInversion;
+    if(turnosTranscurridos<inv.turnosExit) continue;
+
+    // Exit detectado — clonar para no mutar el original
+    const exitEntry={...inv};
+    try{
+      const sim=simularRetornoPE(inv,200);
+      if(sim.probWriteoff>50){
+        exitEntry.estado='writeoff';
+        exitEntry.retornoFinal=-1;
+        exitEntry.capitalFinal=0;
+        exitEntry.turnoExit=turnoActual;
+      } else {
+        const capitalFinal=inv.capitalInvertido*(1+sim.mediana);
+        exitEntry.estado='exitado';
+        exitEntry.retornoFinal=sim.mediana;
+        exitEntry.capitalFinal=Math.round(capitalFinal*100)/100;
+        exitEntry.turnoExit=turnoActual;
+      }
+    }catch(err){
+      console.warn('evaluarExitsPE: falló para',inv.nombre,err);
+      exitEntry.estado='writeoff';
+      exitEntry.retornoFinal=-1;
+      exitEntry.capitalFinal=0;
+      exitEntry.turnoExit=turnoActual;
+    }
+    deltaAum+=(exitEntry.capitalFinal-inv.capitalInvertido);
+    exits.push(exitEntry);
+  }
+  deltaAum=Math.round(deltaAum*100)/100;
+  return {exits,deltaAum};
+}
+
 // ── GEM-14: LP MECHANICS — Evaluación al fin de turno ───────
 // Implementación del pseudocódigo de Gemini GEM-14
 // LP_MECHANICS vive en worldmonitor.html — aquí se duplica el array
@@ -800,13 +862,105 @@ function evaluarLPsAlFinDeTurno(){
 }
 
 function advance(){
-  if(S.turn>=S.tot){endGame();return;}
+  if(S.turn>=S.tot){return;}
   // GEM-14: Evaluar LPs antes de avanzar de turno
   evaluarLPsAlFinDeTurno();
+
+  // DSK-04: Evaluar exits PE al inicio del nuevo turno
+  if(S.pePortfolio&&S.pePortfolio.length>0){
+    const {exits,deltaAum}=evaluarExitsPE(S.pePortfolio,S.turn);
+    if(exits.length>0){
+      // Actualizar pePortfolio con los exits procesados
+      exits.forEach(ex=>{
+        const idx=S.pePortfolio.findIndex(p=>p.id===ex.id);
+        if(idx!==-1) S.pePortfolio[idx]=ex;
+      });
+      // Aplicar deltaAum al estado
+      S.aum=Math.max(0,S.aum+deltaAum);
+      // Log de cada exit
+      const fmtA=v=>v>=1000000?'$'+(v/1000000).toFixed(1)+'M':'$'+Math.round(v/1000)+'K';
+      exits.forEach(ex=>{
+        const ico=ex.estado==='exitado'?'⬡':'✕';
+        const col=ex.estado==='exitado'?'#00c896':'#e84040';
+        const ret=ex.estado==='exitado'?'+'+(ex.retornoFinal*100).toFixed(1)+'%':'WRITEOFF';
+        addLog(`${ico} PE EXIT: ${ex.nombre} — ${ret} · Capital recuperado: ${fmtA(ex.capitalFinal)}`);
+      });
+      // Modal resumen si hay exits
+      const ganadores=exits.filter(e=>e.estado==='exitado');
+      const writeoffs=exits.filter(e=>e.estado==='writeoff');
+      const col=writeoffs.length>ganadores.length?'#e84040':deltaAum>=0?'#00c896':'#c89040';
+      showM({
+        t:deltaAum>=0?'pos':'neg',
+        ti:`PE Exit — ${exits.length} inversión${exits.length>1?'es':''} cerrada${exits.length>1?'s':''}`,
+        bo:`<b>Resultados de exit PE:</b><br><br>
+${ganadores.map(e=>`✓ <b style="color:#00c896">${e.nombre}</b> — +${(e.retornoFinal*100).toFixed(1)}% · ${fmtA(e.capitalFinal)}`).join('<br>')}
+${writeoffs.map(e=>`✕ <b style="color:#e84040">${e.nombre}</b> — WRITEOFF · $0`).join('<br>')}
+<br><b style="color:${col}">ΔAum neto: ${deltaAum>=0?'+':''}${fmtA(deltaAum)}</b>`
+      });
+    }
+  }
+
   S.turn++;
   const nd=EV[S.turn];
   S.evts=JSON.parse(JSON.stringify(nd||[genG()]));
   saveState();
+  render();
+  $i('ep').scrollTop=0;
+}
+
+// ── CIERRE DE AÑO FISCAL ─────────────────────────────────────
+// Prioridad 1 — 09/06/2026
+// Al llegar a turno 12 con todos los eventos resueltos, en vez de
+// endGame() el jugador puede cerrar el año y continuar al año siguiente.
+// Se preservan: AUM, LP, nivel, reputación, linaje dinástico.
+// Se resetean: turno a 1, eventos, pendientes (parcialmente).
+function cerrarAnoFiscal(){
+  const tot=S.aum+S.lp;
+  const lv=getLevel(tot,S.m.rep);
+  const anoActual=S.year||1;
+  const anoNuevo=anoActual+1;
+
+  // Evaluar LPs al cierre del año
+  evaluarLPsAlFinDeTurno();
+
+  // Registrar snapshot del año en el log
+  addLog(`⬡ AÑO ${anoActual} CERRADO — AUM: USD ${tot.toLocaleString('es-AR')} · Nivel: ${lv.name} · Rep: ${S.m.rep}`);
+
+  // Bonus de cierre de año: leve mejora en moral y compliance por sobrevivir el año
+  S.m.mor=clp(S.m.mor+5);
+  S.m.cmp=clp(S.m.cmp+3);
+
+  // Guardar historial de AUM para track record multi-año
+  if(!S.historialAnual) S.historialAnual=[];
+  S.historialAnual.push({year:anoActual,aum:tot,rep:S.m.rep,lv:lv.id});
+
+  // Resetear turno y año
+  S.year=anoNuevo;
+  S.turn=1;
+
+  // Cargar eventos del turno 1 (reutiliza los del año 1 con variación via genG si no hay definidos)
+  const evAno1=EV[1];
+  S.evts=JSON.parse(JSON.stringify(evAno1||[genG()]));
+
+  saveState();
+
+  // Mostrar modal resumen de año
+  const col='#c89040';
+  $i('macc').style.background=col;
+  $i('mtit').textContent=`Año Fiscal ${anoActual} Cerrado`;
+  $i('mtit').style.color=col;
+  $i('msub').textContent=`INICIO AÑO ${anoNuevo} — ZAR CAPITAL PARTNERS`;
+  $i('mbod').innerHTML=`
+    <b>Resumen Año ${anoActual}:</b><br><br>
+    AUM Final: <b style="color:${col}">USD ${tot.toLocaleString('es-AR')}</b><br>
+    Nivel: <b style="color:${lv.col}">${lv.name} (${lv.stage})</b><br>
+    Reputación: <b style="color:#4a9eff">${S.m.rep}/100</b><br>
+    Decisiones tomadas: <b>${S.done}</b><br><br>
+    <span style="color:#00c896">▸ El fondo entra al Año ${anoNuevo}. Los LPs observan. El mercado no espera.</span><br><br>
+    <div style="font-size:9px;color:#3a4f65;margin-top:6px">Período: ENE-FEB ${2024+anoNuevo} — continúa la simulación.</div>
+  `;
+  $i('zmod').style.display='flex';
+
   render();
   $i('ep').scrollTop=0;
 }

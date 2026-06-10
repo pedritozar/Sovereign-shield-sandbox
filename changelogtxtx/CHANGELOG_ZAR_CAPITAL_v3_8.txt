@@ -1,7 +1,7 @@
 # ============================================================
 # CHANGELOG — ZAR CAPITAL PARTNERS
 # Proyecto de Pedro Zacarias
-# Última actualización: 29/05/2026 — v3.6 FINAL
+# Última actualización: 09/06/2026 — v3.8 FINAL
 # ============================================================
 # INSTRUCCIÓN PARA CUALQUIER IA QUE LEA ESTO:
 # Leelo COMPLETO antes de responder. Sistema en GitHub:
@@ -23,9 +23,12 @@ usando la tecnología a favor y aprendiendo divirtiéndose."
 — Pedro Zacarias, 23/05/2026
 
 REPOSITORIO: github.com/pedritozar/zar-simulator
+LOCAL: ~/Desktop/simulator (Mac PEI)
+DEPLOY: git add -A && git commit -m "..." && git push -u origin main --force
+
 ARCHIVOS:
-  - zar_capital_simulator.html   → Simulador principal (1020 líneas)
-  - worldmonitor.html            → Monitor global 3D (v3.3 — 2440 líneas)
+  - zar_capital_simulator.html   → Simulador principal (1174 líneas)
+  - worldmonitor.html            → Monitor global 3D (v3.4 — 2501 líneas)
   - zar_command_center.html      → Centro de comando (2334 líneas)
 
 STACK:
@@ -44,8 +47,8 @@ STACK:
 ## 2. ESTADO ACTUAL DE ARCHIVOS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-── worldmonitor.html — v3.3 ✅ ÚLTIMO ESTABLE ──
-  2440 líneas
+── worldmonitor.html — v3.4 ✅ ÚLTIMO ESTABLE ──
+  2501 líneas
 
   CAPAS ACTIVAS:
   ✅ Portfolio ZAR · Sedes · Flujos de Capital
@@ -64,6 +67,12 @@ STACK:
   ✅ Modal Private Equity — 12 unicornios Defense Tech (NV4+)
   ✅ Unicornios PE como puntos clickeables en globo (NV4+)
   ✅ try/catch en initSoundManager() — 404s silenciosos
+  ✅ DSK-03: MIL_PREFIXES ampliado (MM, EVIL, VIPER, SKULL, REACH + 10 más)
+  ✅ DSK-03: filtro fetchOpenSky() con 6 checks cuantitativos
+             vel>50 m/s · alt>500m · outlier detection
+  ✅ confirmarInversion() conectada a zcp_state_v3
+             Lee AUM real · descuenta capital · guarda pePortfolio[]
+             Ajusta S.m.risk según nivel del unicornio
 
   CAPAS DESBLOQUEABLES:
   🔒 NV3  → Aviones Militares OpenSky
@@ -77,16 +86,24 @@ STACK:
   📡 GDELT     — CF Worker proxy ✅ zar-gdelt-proxyf.pzacarias18.workers.dev
   📡 ACLED     — requiere key acleddata.com
   📡 CelesTrak — TLEs reales cada 5s, cache 1h
-  📡 OpenSky   — militares OSINT cada 90s, NV3+
+  📡 OpenSky   — militares OSINT cada 90s, NV3+ (DSK-03 activo)
 
-── zar_capital_simulator.html ✅ 1020 líneas ──
+── zar_capital_simulator.html ✅ 1174 líneas ──
   ✅ GEM-14: evaluarLPsAlFinDeTurno() integrado
   ✅ DSK-01: 5 funciones quant (Sharpe/MaxDD/Calmar/CAGR/WinRate)
   ✅ DSK-02: simularRetornoPE() + evaluarPortfolioPE() — Monte Carlo PE
              normalAleatorio() · percentil() · correlacionMuestral()
   ✅ Panel Track Record en sidebar (actualización automática)
   ✅ historialAUM + lpCooldowns + lpsActivos en estado S
-  ⚠ Pendiente: nueva partida con API Key nueva
+  ✅ PRIORIDAD 1: Lógica Cierre de Año Fiscal
+             S.year:1 en estado · per() dinámica por año
+             Botón "⬡ Cerrar Año Fiscal" aparece en turno 12 resuelto
+             cerrarAnoFiscal(): snapshot, resetea turno, incrementa year
+             historialAnual[] guarda AUM/rep/nivel por año
+             loadState() hidrata year e historialAnual en partidas viejas
+  ✅ DSK-04: evaluarExitsPE() — integrada en advance() ✅
+             Detecta exits por turno · Monte Carlo mediana · writeoff si probWriteoff>50%
+             deltaAum aplicado a S.aum · log bitácora · modal resumen ganadores/writeoffs
 
 ── zar_command_center.html ✅ 2334 líneas ──
   ✅ GEM-06: Directorio 8 LPs institucionales con unlock por nivel
@@ -120,7 +137,8 @@ STAGE 2 — PRIVATE EQUITY ARM (NV 4-6) ← EN CONSTRUCCIÓN
   └─ 12 unicornios Defense Tech (modal + globo + pestaña CC)
   └─ LPs: lp_004 Vostok · lp_005 Takeda · lp_006 Nexus · lp_007 Temasek
   └─ DSK-02 motor retornos PE ✅ integrado en simulador
-  └─ Pendiente: lógica de inversión en simulador conectada a PE modal
+  └─ confirmarInversion() ✅ conectada a zcp_state_v3
+  └─ evaluarExitsPE() DSK-04 ✅ integrada en advance() — loop PE completo
 
 STAGE 3 — HOLDING CORPORATIVO (NV 7-9)
   └─ ZAR Defense / Orbital / Intelligence / Energy
@@ -137,7 +155,7 @@ STAGE 4 — CONGLOMERADO GLOBAL (NV 10-12)
 ✅ GDELT 2.0         → WorldMonitor + CF Worker proxy ✅
 ✅ ACLED             → WorldMonitor (requiere key)
 ✅ CelesTrak + TLE   → WorldMonitor (satellite.js)
-✅ OpenSky Network   → WorldMonitor (militares OSINT — NV3)
+✅ OpenSky Network   → WorldMonitor (militares OSINT — NV3 · DSK-03 activo)
 ✅ Cloudflare Worker → zar-gdelt-proxyf.pzacarias18.workers.dev
 ⏳ Howler.js audio   → skeleton listo · pendiente 4 archivos .ogg
 ⏳ NewsAPI           → pendiente
@@ -146,33 +164,26 @@ STAGE 4 — CONGLOMERADO GLOBAL (NV 10-12)
 ## 5. PRÓXIMOS OBJETIVOS — PARA EL PRÓXIMO CHAT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠ PRIORIDAD 1 — LÓGICA AÑO NUEVO (turno 12/12 bloqueado):
-  El simulador se traba al llegar a turno 12 — no tiene lógica de año 2.
-  → Agregar botón "Cerrar Año Fiscal" al llegar a turno 12
-  → Resetear turno a 1, incrementar año, mantener AUM/nivel/reputación/linaje
-  → Asignar a Claude próxima sesión
+⚠ PRIORIDAD 1 — .gitignore en el repo:
+  El push subió .DS_Store y archivos .app innecesarios.
+  → Crear .gitignore con: .DS_Store · *.app · changelogtxtx/
+  → Un solo commit limpio
 
-⚠ PRIORIDAD 2 — OPENSKY NV3 — fetchMilitaryFlights():
-  Gemini entregó GEM-04 research. DeepSeek debe entregar la función JS.
-  → Filtro callsigns OSINT: RCH, CNV, MM, FORTE, DUKE, JAKE, REACH, EVIL, VIPER, SKULL
-  → Refresh 90 segundos · fallback silencioso · JS puro sin dependencias
-  → Cuando DeepSeek entregue, Claude integra en worldmonitor.html NV3
-
-⚠ PRIORIDAD 3 — CONEXIÓN PE MODAL ↔ SIMULADOR:
-  → Motor DSK-02 integrado pero no conectado al modal PE
-  → Al invertir en unicornio debe llamar a simularRetornoPE()
-  → Guardar resultado en zcp_state_v3.pePortfolio[]
-
-⚠ PRIORIDAD 4 — AUDIO PENDIENTE:
+⚠ PRIORIDAD 2 — AUDIO PENDIENTE:
   → Pedro debe descargar los 4 .ogg y subir a /assets/audio/:
     market_open.ogg · market_closed.ogg
     modo_ficcion.ogg · cisne_negro.ogg
   → IDs Freesound: 651372 · 582315 · 448086 · 369124
     ⚠ 2 de 4 IDs pueden ser incorrectos — verificar manualmente
 
+⚠ PRIORIDAD 3 — TEST COMPLETO TURN 1→12→AÑO 2:
+  → Verificar flujo completo: turno 1 → turno 12 → cerrarAnoFiscal() → año 2
+  → Verificar PE: invertir en unicornio → avanzar turnos → exit automático
+  → Verificar OpenSky NV3 con filtros DSK-03 activos
+
 EN COLA (sin urgencia):
   → GEM-19: eventos RPG Stage 2 → Stage 3 (para Gemini)
-  → DSK-03: ajuste fino volatilidad con datos históricos defense tech
+  → DSK-05: ajuste fino volatilidad con datos históricos defense tech
   → Sincronización WorldMonitor ↔ Simulador en tiempo real
   → Stage 3 planning (NV 7-9)
   → PROYECTO FUTURO: Simulador medieval estilo Crusader Kings
@@ -211,6 +222,15 @@ DSK-02 ✓ Motor PE Monte Carlo — simulador integrado
          (simularRetornoPE · evaluarPortfolioPE · utilidades)
 DSK-02b ✓ calcularTensionSucesoria() — Command Center
           Score 0-100 · niveles estable/alerta/crisis
+DSK-02c ✓ fetchMilitaryFlights() — entregada por DeepSeek
+          Función con filtro OSINT callsigns · try/catch · fallback 90s
+          Superada/absorbida por DSK-03 (fetchOpenSky mejorada)
+DSK-03 ✓ OpenSky NV3 mejorado — worldmonitor.html
+         MIL_PREFIXES ampliado (MM, EVIL, VIPER, SKULL, REACH + 10)
+         6 filtros cuantitativos: vel/alt/outlier/tierra/callsign/coords
+DSK-04 ✓ evaluarExitsPE() — integrada en advance() — simulador
+         Detecta exits · Monte Carlo mediana · writeoff si probWriteoff>50%
+         deltaAum → S.aum · log · modal resumen · loop PE completo ✅
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 7. REGLAS DE TRABAJO
@@ -221,17 +241,21 @@ PROTOCOLO ANTES DE TOCAR CÓDIGO:
   2. Pedir confirmación a Pedro
   3. Tarea pesada → Sonnet 4
 
+DEPLOY (terminal Mac):
+  cd ~/Desktop/simulator
+  git add -A && git commit -m "vX.X — descripción" && git push -u origin main --force
+
 MODELO: Sonnet 4.6 · CHANGELOG: adjuntar siempre · tiene prioridad
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 8. EQUIPO IA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[PRINCIPAL]    Claude Sonnet 4.6  — arquitectura, código, APIs
+[PRINCIPAL]    Claude Sonnet 4.6  — arquitectura, código, integración
 [COLABORADOR]  Gemini Pro         — research, datos, OSINT (GEM-xx)
 [CUANTITATIVO] DeepSeek R1        — matemática financiera (DSK-xx)
                Incorporado: 28/05/2026
-               Rol: fórmulas JS puras, Sharpe, CAGR, Monte Carlo
+               Rol: fórmulas JS puras, Sharpe, CAGR, Monte Carlo, exits PE
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 9. VERSIONES
@@ -243,18 +267,22 @@ worldmonitor.html:
   v3.1 — Modal PE + 12 unicornios
   v3.2 — Coordenadas exactas + puntos NV4 clickeables
   v3.3 — try/catch initSoundManager() — 404 audio silenciosos
-         ← ÚLTIMO ESTABLE — 2440 líneas — 29/05/2026
+  v3.4 — DSK-03 OpenSky mejorado · confirmarInversion() conectada
+         ← ÚLTIMO ESTABLE — 2501 líneas — 09/06/2026
 
 zar_capital_simulator.html:
   28/05/2026 — GEM-14 LP Mechanics + DSK-01 Track Record
   29/05/2026 — DSK-02 Motor PE Monte Carlo integrado
-               ← ÚLTIMO ESTABLE — 1020 líneas
+  09/06/2026 — Año Fiscal multi-año · S.year · cerrarAnoFiscal()
+               per() dinámica · botón cierre · historialAnual[]
+               DSK-04 evaluarExitsPE() integrada en advance()
+               ← ÚLTIMO ESTABLE — 1174 líneas
 
 zar_command_center.html:
   28/05/2026 — GEM-17 Pestaña Private Equity integrada
   29/05/2026 — GEM-18 Sistema Dinástico RPG completo
                GEM-18b 3 eventos Stage 2 + DSK-02b score dinástico
-               ← ÚLTIMO ESTABLE — 2334 líneas
+               ← ÚLTIMO ESTABLE — 2334 líneas (sin cambios esta sesión)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 10. PRINCIPIO — REFLEXIÓN TECNOLÓGICA
@@ -289,3 +317,5 @@ ORIGEN DE TECNOLOGÍAS EN ZAR:
   Monte Carlo (método) → Nicholas Metropolis & Stanislaw Ulam,
                       Los Álamos (1947) — creado para el Proyecto
                       Manhattan, hoy base de la simulación financiera
+  Git               → Linus Torvalds, Finlandia (2005) — creado en
+                      2 semanas para gestionar el kernel de Linux
