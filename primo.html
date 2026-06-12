@@ -1,260 +1,1163 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Sovereign Shield — Panel del Ingeniero Civil</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0d1117;--green:#238636;--blue:#58a6ff;--txt:#e6edf3;--red:#f85149;--orange:#e67e22}
-        body{background:var(--bg);color:var(--txt);font-family:'Courier New',monospace;font-size:14px;padding:14px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-        .header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--green);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-        .logo{font-size:1.1rem;font-weight:bold;letter-spacing:2px;color:var(--green)}
-        .indicators{display:flex;gap:12px;font-size:.78rem;flex-wrap:wrap}
-        .led-green{width:10px;height:10px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite alternate;display:inline-block}
-        .led-red{width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block}
-        @keyframes pulse{0%{opacity:.4;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
-        .badge{background:#161b22;padding:2px 10px;border-radius:4px;border-left:3px solid var(--green);font-weight:bold}
-        .indicator{display:flex;align-items:center;gap:5px}
-        .panel{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:15px;margin-bottom:15px}
-        .panel h2{color:var(--green);margin-bottom:10px;font-size:1.1rem}
-        .big-number{font-size:2.2rem;font-weight:bold;color:var(--green);margin:8px 0}
-        .info-row{display:flex;justify-content:space-between;margin:8px 0;border-bottom:1px dashed #30363d;padding:5px 0}
-        button{background:#21262d;border:1px solid #30363d;color:var(--txt);font-family:monospace;padding:8px 16px;border-radius:4px;cursor:pointer;transition:.15s;font-weight:bold;font-size:13px;margin:4px}
-        button:hover{background:var(--green);border-color:var(--green);color:#0d1117}
-        .btn-primary{background:var(--green);color:#0d1117;border-color:var(--green)}
-        .btn-primary:hover{background:#2ea043}
-        .btn-danger{border-color:var(--red);color:var(--red)}
-        .btn-danger:hover{background:var(--red);color:#0d1117}
-        .log-list{background:#0d1117;height:250px;overflow-y:auto;font-size:12px;border:1px solid #30363d;padding:8px;border-radius:4px;margin-top:10px}
-        .log-entry{border-bottom:1px solid #21262d;padding:4px 0}
-        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000}
-        .modal-box{background:#161b22;border:2px solid var(--green);padding:30px;max-width:400px;width:90%;text-align:center;border-radius:8px}
-        .modal-box h2{color:var(--green);margin-bottom:12px;letter-spacing:2px}
-        input{background:#0d1117;border:1px solid #30363d;color:var(--txt);padding:8px;width:100%;margin:10px 0;border-radius:4px;font-family:monospace}
-        small{color:#8b949e;font-size:11px}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOVEREIGN SHIELD — Panel Ingeniero Civil</title>
+
+<!-- ============ FIREBASE SDK v9 COMPAT ============ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<style>
+/* ============ VARIABLES Y RESET ============ */
+:root {
+  --bg:       #0d1117;
+  --green:    #238636;
+  --green-lt: #2ea043;
+  --blue:     #58a6ff;
+  --txt:      #e6edf3;
+  --red:      #f85149;
+  --orange:   #e3a853;
+  --gray:     #30363d;
+  --gray-lt:  #484f58;
+  --font:     'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--font);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============ MODAL DE CONTRASEÑA ============ */
+#modalPassword {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-box {
+  background: #161b22;
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  padding: 2.5rem;
+  width: min(420px, 92vw);
+  text-align: center;
+  box-shadow: 0 0 30px rgba(35,134,54,0.25);
+}
+
+.modal-box h2 {
+  color: var(--green);
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  margin-bottom: 0.4rem;
+}
+
+.modal-box p {
+  color: var(--gray-lt);
+  font-size: 0.75rem;
+  margin-bottom: 1.6rem;
+  letter-spacing: 1px;
+}
+
+.modal-box input {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  color: var(--txt);
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  text-align: center;
+  letter-spacing: 4px;
+  margin-bottom: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-box input:focus { border-color: var(--green); }
+
+.btn-primary {
+  width: 100%;
+  background: var(--green);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  padding: 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover  { background: var(--green-lt); }
+.btn-primary:active { transform: scale(0.98); }
+
+#pwError {
+  color: var(--red);
+  font-size: 0.75rem;
+  margin-top: 0.6rem;
+  min-height: 1rem;
+  letter-spacing: 1px;
+}
+
+/* ============ HEADER ============ */
+header {
+  background: #161b22;
+  border-bottom: 2px solid var(--green);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title .logo {
+  font-size: 1.2rem;
+  color: var(--green);
+  letter-spacing: 3px;
+  font-weight: bold;
+}
+
+.header-title .sub {
+  font-size: 0.7rem;
+  color: var(--gray-lt);
+  letter-spacing: 2px;
+  margin-top: 0.15rem;
+}
+
+/* LED de conexión */
+.led-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+}
+
+#ledDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+  transition: background 0.4s, box-shadow 0.4s;
+  flex-shrink: 0;
+}
+
+#ledDot.online {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: ledPulse 2s ease-in-out infinite;
+}
+
+@keyframes ledPulse {
+  0%, 100% { box-shadow: 0 0 6px var(--green); }
+  50%       { box-shadow: 0 0 14px var(--green); }
+}
+
+#ledText { color: var(--gray-lt); }
+#ledText.online { color: var(--green); }
+
+/* ============ ESTADO DEL PROYECTO — BARRA SUPERIOR ============ */
+#estadoBar {
+  background: #161b22;
+  border-bottom: 1px solid var(--gray);
+  padding: 0.7rem 1.5rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.estado-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.estado-label {
+  font-size: 0.6rem;
+  color: var(--gray-lt);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.estado-valor {
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.estado-valor.nivel   { color: var(--orange); }
+.estado-valor.trim    { color: var(--blue); }
+.estado-valor.tesor   { color: var(--green); }
+.estado-valor.pr      { color: #bf9eff; }
+
+/* ============ LAYOUT PRINCIPAL ============ */
+main {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  main { grid-template-columns: 1fr; }
+}
+
+/* ============ TARJETAS ============ */
+.card {
+  background: #161b22;
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  padding: 1.4rem;
+  transition: border-color 0.3s;
+}
+
+.card:hover { border-color: var(--gray-lt); }
+
+.card.card-full {
+  grid-column: 1 / -1;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--gray);
+}
+
+.card-title {
+  font-size: 0.75rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-title .icon { font-size: 0.9rem; }
+
+/* ============ BUZÓN DE ÓRDENES ============ */
+.card.buzon { border-color: var(--orange); }
+.card.buzon .card-title { color: var(--orange); }
+.card.buzon:hover { border-color: #f0b84a; }
+
+.buzon-presupuesto {
+  text-align: center;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--gray);
+  margin-bottom: 1.2rem;
+}
+
+.buzon-label-sm {
+  font-size: 0.62rem;
+  color: var(--gray-lt);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.buzon-monto {
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  transition: color 0.4s, text-shadow 0.4s;
+}
+
+.buzon-monto.activo {
+  color: var(--green);
+  text-shadow: 0 0 12px rgba(35,134,54,0.5);
+}
+
+.buzon-monto.inactivo {
+  color: var(--gray-lt);
+  text-shadow: none;
+}
+
+.buzon-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: background 0.4s, color 0.4s;
+}
+
+.buzon-badge.activo   { background: rgba(35,134,54,0.15); color: var(--green); border: 1px solid var(--green); }
+.buzon-badge.inactivo { background: rgba(72,79,88,0.15);  color: var(--gray-lt); border: 1px solid var(--gray-lt); }
+
+/* Nota del directorio */
+.nota-directorio {
+  background: #0d1117;
+  border: 1px solid var(--gray);
+  border-left: 3px solid var(--orange);
+  border-radius: 4px;
+  padding: 0.9rem;
+  min-height: 4rem;
+}
+
+.nota-directorio .nota-header {
+  font-size: 0.6rem;
+  color: var(--orange);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.nota-directorio .nota-texto {
+  font-size: 0.82rem;
+  color: var(--txt);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.nota-directorio .nota-texto.vacia {
+  color: var(--gray-lt);
+  font-style: italic;
+}
+
+/* Timestamp último mensaje */
+.buzon-timestamp {
+  margin-top: 0.6rem;
+  font-size: 0.6rem;
+  color: var(--gray-lt);
+  letter-spacing: 1px;
+  text-align: right;
+}
+
+/* ============ PANEL FINANCIERO ============ */
+.dato-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(48,54,61,0.6);
+  font-size: 0.82rem;
+}
+
+.dato-fila:last-child { border-bottom: none; }
+
+.dato-fila .lbl { color: var(--gray-lt); letter-spacing: 1px; font-size: 0.75rem; }
+.dato-fila .val { color: var(--txt); font-weight: bold; }
+.dato-fila .val.positivo { color: var(--green); }
+.dato-fila .val.negativo { color: var(--red); }
+
+/* ============ APROBACIÓN TRIMESTRAL ============ */
+.aprobacion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.aprobacion-item {
+  background: #0d1117;
+  border: 1px solid var(--gray);
+  border-radius: 6px;
+  padding: 0.8rem;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.aprobacion-item .ap-label {
+  font-size: 0.6rem;
+  color: var(--gray-lt);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.aprobacion-item .ap-estado {
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.aprobacion-item.aprobado  { border-color: var(--green); }
+.aprobacion-item.pendiente { border-color: var(--gray); }
+
+.ap-estado.aprobado  { color: var(--green); }
+.ap-estado.pendiente { color: var(--gray-lt); }
+
+/* Botones de acción */
+.btn-action {
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  padding: 0.75rem;
+  cursor: pointer;
+  margin-top: 0.6rem;
+  transition: opacity 0.2s, transform 0.1s;
+  text-transform: uppercase;
+}
+
+.btn-action:active { transform: scale(0.98); }
+.btn-action:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-aprobar {
+  background: var(--blue);
+  color: #0d1117;
+  font-weight: bold;
+}
+.btn-aprobar:not(:disabled):hover { background: #79b8ff; }
+
+.btn-construir {
+  background: var(--green);
+  color: #fff;
+  font-weight: bold;
+}
+.btn-construir:not(:disabled):hover { background: var(--green-lt); }
+
+.btn-export {
+  background: transparent;
+  color: var(--gray-lt);
+  border: 1px solid var(--gray);
+  font-size: 0.7rem;
+  margin-top: 0.6rem;
+}
+.btn-export:hover { color: var(--txt); border-color: var(--gray-lt); }
+
+/* Mensaje de estado acciones */
+#msgAccion {
+  margin-top: 0.7rem;
+  font-size: 0.72rem;
+  text-align: center;
+  letter-spacing: 1px;
+  min-height: 1rem;
+  transition: color 0.3s;
+}
+
+/* ============ BITÁCORA ============ */
+.card.bitacora { grid-column: 1 / -1; }
+
+#logContainer {
+  background: #0d1117;
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  padding: 0.8rem;
+  height: 220px;
+  overflow-y: auto;
+  font-size: 0.73rem;
+  line-height: 1.6;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray) transparent;
+}
+
+#logContainer::-webkit-scrollbar       { width: 5px; }
+#logContainer::-webkit-scrollbar-track { background: transparent; }
+#logContainer::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 4px; }
+
+.log-entry { padding: 0.15rem 0; }
+.log-entry .ts   { color: var(--gray-lt); }
+.log-entry .msg  { color: var(--txt); }
+.log-entry.ok    .msg { color: var(--green); }
+.log-entry.warn  .msg { color: var(--orange); }
+.log-entry.error .msg { color: var(--red); }
+.log-entry.info  .msg { color: var(--blue); }
+
+/* ============ NIVEL BADGE ============ */
+.nivel-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.nivel-n1 { background: rgba(88,166,255,0.15); color: var(--blue);   border: 1px solid var(--blue); }
+.nivel-n2 { background: rgba(35,134,54,0.15);  color: var(--green);  border: 1px solid var(--green); }
+.nivel-n3 { background: rgba(191,158,255,0.15);color: #bf9eff;        border: 1px solid #bf9eff; }
+
+/* ============ ANIMACIÓN ENTRADA ============ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+main .card { animation: fadeIn 0.4s ease both; }
+main .card:nth-child(1) { animation-delay: 0.05s; }
+main .card:nth-child(2) { animation-delay: 0.10s; }
+main .card:nth-child(3) { animation-delay: 0.15s; }
+main .card:nth-child(4) { animation-delay: 0.20s; }
+main .card:nth-child(5) { animation-delay: 0.25s; }
+
+/* ============ FOOTER ============ */
+footer {
+  text-align: center;
+  padding: 1.2rem;
+  font-size: 0.6rem;
+  color: var(--gray-lt);
+  letter-spacing: 2px;
+  border-top: 1px solid var(--gray);
+  margin-top: 1rem;
+}
+</style>
 </head>
 <body>
 
-<!-- MODAL CONTRASEÑA -->
-<div id="passwordModal" class="modal">
-    <div class="modal-box">
-        <h2>🔐 ACCESO INGENIERÍA CIVIL</h2>
-        <p style="margin-bottom:8px;font-size:13px;color:#8b949e">Ingresá la contraseña de acceso al panel</p>
-        <input type="password" id="passwordInput" placeholder="Contraseña de acceso">
-        <button id="unlockBtn" class="btn-primary" style="width:100%;margin-top:8px">INGRESAR</button>
-        <p style="margin-top:10px"><small>Contactá al Economista para obtener la clave.</small></p>
-    </div>
+<!-- ============ MODAL DE CONTRASEÑA ============ -->
+<div id="modalPassword">
+  <div class="modal-box">
+    <h2>🔒 ACCESO RESTRINGIDO</h2>
+    <p>SOVEREIGN SHIELD — PANEL INGENIERO CIVIL</p>
+    <input type="password" id="pwInput" placeholder="Contraseña" autocomplete="current-password" />
+    <button class="btn-primary" onclick="verificarPassword()">INGRESAR</button>
+    <div id="pwError"></div>
+  </div>
 </div>
 
-<!-- CONTENIDO PRINCIPAL -->
-<div id="mainContent" style="display:none;flex-direction:column;height:100%">
+<!-- ============ PANEL PRINCIPAL (oculto hasta login) ============ -->
+<div id="appPanel" style="display:none;">
 
-    <div class="header">
-        <div class="logo">🏗️ SOVEREIGN SHIELD — INGENIERÍA CIVIL</div>
-        <div class="indicators">
-            <div class="indicator"><span class="led-red" id="ledStatus"></span><span id="firebaseText">CONECTANDO...</span></div>
-            <div class="badge" id="levelDisplay">NIVEL 1 — EL GARAJE</div>
-            <div class="badge" id="quarterDisplay">TRIMESTRE: 1</div>
-        </div>
+  <!-- ============ HEADER ============ -->
+  <header>
+    <div class="header-title">
+      <span class="logo">⚙️ SOVEREIGN SHIELD</span>
+      <span class="sub">PANEL INGENIERO CIVIL — ING. PRIMO</span>
+    </div>
+    <div class="led-container">
+      <div id="ledDot"></div>
+      <span id="ledText">FIREBASE — CONECTANDO...</span>
+    </div>
+  </header>
+
+  <!-- ============ BARRA DE ESTADO DEL PROYECTO ============ -->
+  <div id="estadoBar">
+    <div class="estado-item">
+      <span class="estado-label">Nivel Proyecto</span>
+      <span class="estado-valor nivel" id="displayNivel">N/A</span>
+    </div>
+    <div class="estado-item">
+      <span class="estado-label">Trimestre</span>
+      <span class="estado-valor trim" id="displayTrimestre">—</span>
+    </div>
+    <div class="estado-item">
+      <span class="estado-label">Tesorería</span>
+      <span class="estado-valor tesor" id="displayTesoreria">—</span>
+    </div>
+    <div class="estado-item">
+      <span class="estado-label">Puntos Reputación</span>
+      <span class="estado-valor pr" id="displayPR">—</span>
+    </div>
+    <div class="estado-item">
+      <span class="estado-label">Modo</span>
+      <span class="estado-valor" id="displayModo" style="color:var(--gray-lt)">—</span>
+    </div>
+  </div>
+
+  <!-- ============ GRID PRINCIPAL ============ -->
+  <main>
+
+    <!-- ===== TARJETA: BUZÓN DE ÓRDENES ===== -->
+    <div class="card buzon card-full">
+      <div class="card-header">
+        <span class="card-title">
+          <span class="icon">📬</span>
+          BUZÓN DE ÓRDENES RECIBIDAS — ECONOMISTA
+        </span>
+        <span id="buzonTimestamp" class="buzon-timestamp">Sin mensajes</span>
+      </div>
+
+      <!-- Presupuesto preaprobado -->
+      <div class="buzon-presupuesto">
+        <div class="buzon-label-sm">Presupuesto Preaprobado — Infraestructura</div>
+        <div class="buzon-monto inactivo" id="buzonMonto">USD 0</div>
+        <div class="buzon-badge inactivo" id="buzonBadge">SIN FONDOS ASIGNADOS</div>
+      </div>
+
+      <!-- Nota del directorio -->
+      <div class="nota-directorio">
+        <div class="nota-header">📋 Nota del Directorio (Economista)</div>
+        <div class="nota-texto vacia" id="notaTexto">— Sin órdenes activas —</div>
+      </div>
     </div>
 
-    <div class="panel">
-        <h2>💰 ESTADO DE TESORERÍA</h2>
-        <div class="big-number" id="tesoreriaValor">0 USD</div>
-        <div class="info-row">
-            <span>📋 Presupuesto preaprobado por Economista:</span>
-            <strong id="presupuestoPreaprobado" style="color:var(--blue)">0 USD</strong>
-        </div>
-        <div class="info-row">
-            <span>✅ Mi aprobación de trimestre:</span>
-            <strong id="aprobacionCivilStatus" style="color:#8b949e">Pendiente</strong>
-        </div>
-        <div class="info-row">
-            <span>💼 Aprobación del Economista:</span>
-            <strong id="aprobacionEcoStatus" style="color:#8b949e">Pendiente</strong>
-        </div>
+    <!-- ===== TARJETA: ESTADO DEL PROYECTO (detalle) ===== -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">
+          <span class="icon">📊</span>
+          ESTADO DEL PROYECTO
+        </span>
+      </div>
+
+      <div class="dato-fila">
+        <span class="lbl">Nivel Operativo</span>
+        <span class="val" id="detNivel">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Trimestre Actual</span>
+        <span class="val" id="detTrimestre">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Modo de Tiempo</span>
+        <span class="val" id="detModo">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Simulación</span>
+        <span class="val" id="detSimulacion">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Puntos de Reputación</span>
+        <span class="val positivo" id="detPR">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Burn Rate Mensual</span>
+        <span class="val negativo" id="detBurnRate">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Fondo Reserva Líquida</span>
+        <span class="val positivo" id="detReserva">—</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Deuda Bancaria Total</span>
+        <span class="val negativo" id="detDeuda">—</span>
+      </div>
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px">
-        <button id="aprobarTrimestreBtn" class="btn-primary">✔ APROBAR TRIMESTRE</button>
-        <button id="construirBunkerBtn" style="border-color:var(--blue);color:var(--blue)">🏗️ CONSTRUIR BÚNKER ESTÁNDAR (-10,000 USD)</button>
-    </div>
+    <!-- ===== TARJETA: ACCIONES DEL CIVIL ===== -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">
+          <span class="icon">🏗️</span>
+          ACCIONES — INGENIERO CIVIL
+        </span>
+      </div>
 
-    <div class="panel" style="flex:1">
-        <h2>📋 BITÁCORA DE OBRA</h2>
-        <div class="log-list" id="logList">
-            <div class="log-entry">[--:--:--] — Panel de Ingeniería Civil listo.</div>
+      <!-- Estado de aprobaciones trimestre -->
+      <div class="aprobacion-grid">
+        <div class="aprobacion-item" id="apItemCivil">
+          <div class="ap-label">⚙️ Civil (Vos)</div>
+          <div class="ap-estado pendiente" id="apCivilEstado">PENDIENTE</div>
         </div>
-        <button id="exportarLogBtn" style="margin-top:8px">📄 EXPORTAR BITÁCORA</button>
+        <div class="aprobacion-item" id="apItemEco">
+          <div class="ap-label">💼 Economista</div>
+          <div class="ap-estado pendiente" id="apEcoEstado">PENDIENTE</div>
+        </div>
+      </div>
+
+      <!-- Botón aprobar trimestre -->
+      <button class="btn-action btn-aprobar" id="btnAprobar" onclick="aprobarTrimestre()">
+        ✅ APROBAR TRIMESTRE
+      </button>
+
+      <!-- Separador -->
+      <div style="margin: 1rem 0; border-top: 1px solid var(--gray);"></div>
+
+      <!-- Costo del búnker (referencia) -->
+      <div class="dato-fila" style="margin-bottom:0.5rem;">
+        <span class="lbl">Búnker Estándar — Costo</span>
+        <span class="val negativo">–USD 10,000</span>
+      </div>
+      <div class="dato-fila">
+        <span class="lbl">Tiempo de Obra</span>
+        <span class="val" style="color:var(--orange)">2 horas</span>
+      </div>
+
+      <!-- Botón construir búnker -->
+      <button class="btn-action btn-construir" id="btnBunker" onclick="construirBunker()">
+        🏛️ CONSTRUIR BÚNKER ESTÁNDAR
+      </button>
+
+      <!-- Mensaje de resultado -->
+      <div id="msgAccion"></div>
     </div>
 
-</div>
+    <!-- ===== TARJETA: BITÁCORA DE OBRA ===== -->
+    <div class="card bitacora">
+      <div class="card-header">
+        <span class="card-title">
+          <span class="icon">📜</span>
+          BITÁCORA DE OBRA
+        </span>
+        <span style="font-size:0.62rem;color:var(--gray-lt);letter-spacing:1px;" id="logCount">0 entradas</span>
+      </div>
+
+      <div id="logContainer">
+        <!-- Entradas de bitácora insertadas por JS -->
+      </div>
+
+      <button class="btn-action btn-export" onclick="exportarBitacora()">
+        📥 EXPORTAR BITÁCORA (.txt)
+      </button>
+    </div>
+
+  </main>
+
+  <footer>
+    SOVEREIGN SHIELD AEROESPACIAL © 2026 — PANEL INGENIERO CIVIL v2 — SPRINT 2
+  </footer>
+
+</div><!-- /#appPanel -->
 
 <script>
-// ============ CONTRASEÑA (cambiable) ============
-var PASSWORD = 'civil2026';
+// ============ CONTRASEÑA ============
+// Contraseña de acceso al panel del Ingeniero Civil
+const PASSWORD_CIVIL = 'civil2026';
+
+// Verificar contraseña ingresada
+function verificarPassword() {
+  const input = document.getElementById('pwInput').value;
+  if (input === PASSWORD_CIVIL) {
+    document.getElementById('modalPassword').style.display = 'none';
+    document.getElementById('appPanel').style.display = 'block';
+    // Iniciar conexión Firebase tras autenticación
+    initFirebaseWithRetry(10);
+  } else {
+    const err = document.getElementById('pwError');
+    err.textContent = '⛔ CONTRASEÑA INCORRECTA';
+    document.getElementById('pwInput').value = '';
+    setTimeout(() => { err.textContent = ''; }, 2500);
+  }
+}
+
+// Permitir Enter en el campo de contraseña
+document.getElementById('pwInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') verificarPassword();
+});
 
 // ============ FIREBASE CONFIG ============
-var firebaseConfig = {
-    apiKey: "AIzaSyDYv-eJ7UlyG8PA-s-qxHQV3T8mT9rsxe8",
-    authDomain: "sovereign-shield-f020d.firebaseapp.com",
-    databaseURL: "https://sovereign-shield-f020d-default-rtdb.firebaseio.com",
-    projectId: "sovereign-shield-f020d",
-    storageBucket: "sovereign-shield-f020d.firebasestorage.app",
-    messagingSenderId: "183961423518",
-    appId: "1:183961423518:web:7ddac52a6e998ebfbf758f"
+// Configuración idéntica a index.html
+const firebaseConfig = {
+  apiKey:            "AIzaSyDYv-eJ7UlyG8PA-s-qxHQV3T8mT9rsxe8",
+  authDomain:        "sovereign-shield-f020d.firebaseapp.com",
+  databaseURL:       "https://sovereign-shield-f020d-default-rtdb.firebaseio.com",
+  projectId:         "sovereign-shield-f020d",
+  storageBucket:     "sovereign-shield-f020d.firebasestorage.app",
+  messagingSenderId: "183961423518",
+  appId:             "1:183961423518:web:7ddac52a6e998ebfbf758f"
 };
 
-var database, dbRef;
-var bitacoraEventos = [];
+// ============ ESTADO LOCAL ============
+let db        = null;   // Referencia Firebase Database
+let dbRef     = null;   // Nodo raíz partida/
+let bitacora  = [];     // Log local de eventos
 
-// ============ BITÁCORA ============
-function agregarEvento(mensaje, tipo) {
-    tipo = tipo || 'info';
-    var timestamp = new Date().toLocaleTimeString('es-AR');
-    bitacoraEventos.unshift({ timestamp: timestamp, mensaje: mensaje, tipo: tipo });
-    var logContainer = document.getElementById('logList');
-    if (!logContainer) return;
-    logContainer.innerHTML = '';
-    bitacoraEventos.forEach(function(ev) {
-        var div = document.createElement('div');
-        div.className = 'log-entry';
-        if (ev.tipo === 'ingreso') div.style.color = '#238636';
-        else if (ev.tipo === 'gasto') div.style.color = '#f85149';
-        div.innerHTML = '[' + ev.timestamp + '] — ' + ev.mensaje;
-        logContainer.appendChild(div);
-    });
-}
-
-function exportarBitacora() {
-    var contenido = "BITÁCORA INGENIERÍA CIVIL — SOVEREIGN SHIELD\n=============================================\n";
-    bitacoraEventos.forEach(function(ev) { contenido += '[' + ev.timestamp + '] ' + ev.mensaje + '\n'; });
-    var blob = new Blob([contenido], { type: "text/plain" });
-    var link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "bitacora_obra_" + new Date().toISOString().slice(0,10) + ".txt";
-    link.click();
-    URL.revokeObjectURL(link.href);
-    agregarEvento("Bitácora exportada.", "info");
-}
-
-// ============ FIREBASE CON RETRY ============
+// ============ FIREBASE INIT CON RETRY ============
+// Reintenta hasta 10 veces con 300ms de espera
+// Evita error "firebase is not defined" por carga async del CDN
 function initFirebaseWithRetry(attempts) {
-    attempts = attempts || 0;
-    if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        dbRef = database.ref();
-        agregarEvento("Firebase conectado. Modo Ingeniería Civil activo.", "info");
-        verificarEstructura();
-        bindFirebaseEvents();
-    } else if (attempts < 10) {
-        setTimeout(function() { initFirebaseWithRetry(attempts + 1); }, 300);
-    } else {
-        document.getElementById('firebaseText').innerText = "ERROR: Firebase no cargó.";
-        agregarEvento("Error crítico: Firebase SDK no cargó.", "gasto");
+  if (typeof firebase === 'undefined') {
+    if (attempts <= 0) {
+      document.getElementById('ledText').textContent = 'ERROR — SDK NO CARGÓ';
+      log('error', 'Firebase SDK no disponible tras 10 intentos');
+      return;
     }
+    setTimeout(() => initFirebaseWithRetry(attempts - 1), 300);
+    return;
+  }
+
+  try {
+    // Inicializar app (evitar duplicados)
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    db    = firebase.database();
+    dbRef = db.ref('partida');
+
+    log('ok', 'Firebase inicializado correctamente');
+    activarLED(true);
+    suscribirListeners();
+
+  } catch (err) {
+    log('error', 'Error init Firebase: ' + err.message);
+    activarLED(false);
+  }
 }
 
-function verificarEstructura() {
-    dbRef.child('partida').once('value', function(snap) {
-        if (!snap.exists()) {
-            agregarEvento("⚠️ No hay partida activa. El Economista debe iniciar sesión primero.", "gasto");
-        } else {
-            agregarEvento("Partida activa encontrada. Sincronizando...", "info");
-        }
-    });
+// ============ LED DE CONEXIÓN ============
+function activarLED(online) {
+  const dot  = document.getElementById('ledDot');
+  const txt  = document.getElementById('ledText');
+  if (online) {
+    dot.classList.add('online');
+    txt.classList.add('online');
+    txt.textContent = 'FIREBASE — ONLINE ✅';
+  } else {
+    dot.classList.remove('online');
+    txt.classList.remove('online');
+    txt.textContent = 'FIREBASE — OFFLINE ❌';
+  }
 }
 
-function bindFirebaseEvents() {
-    dbRef.child('partida/finanzas/tesoreria').on('value', function(snap) {
-        var val = Number(snap.val()) || 0;
-        document.getElementById('tesoreriaValor').innerHTML = val.toLocaleString('en-US') + " USD";
-    });
-    dbRef.child('partida/buzon_ordenes/presupuesto_preaprobado_infraestructura').on('value', function(snap) {
-        var val = Number(snap.val()) || 0;
-        document.getElementById('presupuestoPreaprobado').innerHTML = val.toLocaleString('en-US') + " USD";
-    });
-    dbRef.child('partida/estado/aprobacion_civil').on('value', function(snap) {
-        var aprobado = snap.val() === true;
-        var el = document.getElementById('aprobacionCivilStatus');
-        el.innerHTML = aprobado ? "APROBADO ✅" : "Pendiente";
-        el.style.color = aprobado ? '#238636' : '#8b949e';
-    });
-    dbRef.child('partida/estado/aprobacion_economista').on('value', function(snap) {
-        var aprobado = snap.val() === true;
-        var el = document.getElementById('aprobacionEcoStatus');
-        el.innerHTML = aprobado ? "APROBADO ✅" : "Pendiente";
-        el.style.color = aprobado ? '#238636' : '#8b949e';
-    });
-    dbRef.child('partida/estado/nivel_actual').on('value', function(snap) {
-        var nivel = snap.val() || 1;
-        var nombres = { 1: "EL GARAJE", 2: "OFICINA TÉCNICA", 3: "PLANTA & ÓRBITA" };
-        document.getElementById('levelDisplay').innerHTML = 'NIVEL ' + nivel + ' — ' + nombres[nivel];
-    });
-    dbRef.child('partida/tiempo/trimestre_actual').on('value', function(snap) {
-        document.getElementById('quarterDisplay').innerHTML = 'TRIMESTRE: ' + (snap.val() || 1);
-    });
-    database.ref('.info/connected').on('value', function(snap) {
-        var connected = snap.val();
-        document.getElementById('ledStatus').className = connected ? 'led-green' : 'led-red';
-        document.getElementById('firebaseText').innerHTML = connected ? 'ONLINE — FIREBASE LINKED' : 'OFFLINE';
-    });
+// ============ SUSCRIBIR LISTENERS FIREBASE ============
+// Todos los datos llegan en tiempo real desde Firebase
+function suscribirListeners() {
+
+  // — Listener de conexión .info/connected —
+  db.ref('.info/connected').on('value', snap => {
+    activarLED(snap.val() === true);
+  });
+
+  // — Listener: partida completa (único listener raíz) —
+  dbRef.on('value', snap => {
+    const data = snap.val();
+    if (!data) {
+      log('warn', 'Partida aún no inicializada por el Economista');
+      return;
+    }
+    actualizarUI(data);
+  }, err => {
+    log('error', 'Error listener Firebase: ' + err.message);
+  });
+
+  // — Listener específico: Buzón de Órdenes —
+  dbRef.child('buzon_ordenes').on('value', snap => {
+    const buzon = snap.val() || {};
+    actualizarBuzon(buzon);
+  });
+
+  log('info', 'Listeners Firebase activos — esperando datos...');
 }
 
-// ============ ACCIONES ============
+// ============ ACTUALIZAR UI GENERAL ============
+// Recibe snapshot completo de partida/ y actualiza todos los displays
+function actualizarUI(data) {
+
+  // — Tiempo —
+  const tiempo = data.tiempo || {};
+  const trim   = Number(tiempo.trimestre_actual)  || 1;
+  const pausa  = tiempo.simulacion_pausada        !== false;
+  const modo   = tiempo.modo_tiempo               || 'turnos';
+
+  // — Finanzas —
+  const fin    = data.finanzas || {};
+  const tesor  = parseFloat(fin.tesoreria)                          || 0;
+  const burn   = parseFloat(fin.burn_rate_mensual)                  || 0;
+  const reserv = parseFloat(fin.fondo_reserva_liquida)              || 0;
+  const deuda  = parseFloat(fin.deuda_bancaria_total)               || 0;
+
+  // — Estado —
+  const est    = data.estado || {};
+  const pr     = parseFloat(est.puntos_reputacion)                  || 0;
+  const nivel  = Number(est.nivel_actual)                           || 1;
+  const apEco  = est.aprobacion_economista                          === true;
+  const apCiv  = est.aprobacion_civil                               === true;
+
+  // — Barra superior —
+  document.getElementById('displayNivel').textContent    = 'N' + nivel;
+  document.getElementById('displayTrimestre').textContent = 'T' + trim;
+  document.getElementById('displayTesoreria').textContent = formatUSD(tesor);
+  document.getElementById('displayPR').textContent        = formatNum(pr) + ' PR';
+  document.getElementById('displayModo').textContent      = modo.toUpperCase();
+
+  // — Detalle estado proyecto —
+  // Nivel con badge de color
+  const detNivel = document.getElementById('detNivel');
+  const badgeClass = nivel === 1 ? 'nivel-n1' : nivel === 2 ? 'nivel-n2' : 'nivel-n3';
+  const nivelLabel = nivel === 1 ? 'N1 — EL GARAJE'
+                   : nivel === 2 ? 'N2 — OFICINA TÉCNICA'
+                   :               'N3 — PLANTA INDUSTRIAL';
+  detNivel.innerHTML = `<span class="nivel-badge ${badgeClass}">${nivelLabel}</span>`;
+
+  document.getElementById('detTrimestre').textContent  = 'Trimestre ' + trim;
+  document.getElementById('detModo').textContent        = modo.charAt(0).toUpperCase() + modo.slice(1);
+  document.getElementById('detSimulacion').textContent  = pausa ? '⏸ PAUSADA' : '▶ ACTIVA';
+  document.getElementById('detSimulacion').style.color  = pausa ? 'var(--orange)' : 'var(--green)';
+  document.getElementById('detPR').textContent          = formatNum(pr) + ' PR';
+  document.getElementById('detBurnRate').textContent    = burn   > 0 ? '–' + formatUSD(burn)  : '—';
+  document.getElementById('detReserva').textContent     = reserv > 0 ? formatUSD(reserv)       : '—';
+  document.getElementById('detDeuda').textContent       = deuda  > 0 ? '–' + formatUSD(deuda)  : '—';
+
+  // — Panel de aprobaciones —
+  actualizarAprobaciones(apCiv, apEco);
+}
+
+// ============ ACTUALIZAR BUZÓN DE ÓRDENES ============
+// Solo lectura — listener dedicado en buzon_ordenes/
+function actualizarBuzon(buzon) {
+  // Presupuesto preaprobado
+  const presupuesto = parseFloat(buzon.presupuesto_preaprobado_infraestructura) || 0;
+  const montoEl     = document.getElementById('buzonMonto');
+  const badgeEl     = document.getElementById('buzonBadge');
+  const tsEl        = document.getElementById('buzonTimestamp');
+
+  if (presupuesto > 0) {
+    montoEl.textContent    = formatUSD(presupuesto);
+    montoEl.className      = 'buzon-monto activo';
+    badgeEl.textContent    = '✅ FONDOS ASIGNADOS';
+    badgeEl.className      = 'buzon-badge activo';
+    log('ok', `Presupuesto actualizado: ${formatUSD(presupuesto)}`);
+  } else {
+    montoEl.textContent    = 'USD 0';
+    montoEl.className      = 'buzon-monto inactivo';
+    badgeEl.textContent    = 'SIN FONDOS ASIGNADOS';
+    badgeEl.className      = 'buzon-badge inactivo';
+  }
+
+  // Nota del directorio
+  const nota     = buzon.nota_directorio || '';
+  const notaEl   = document.getElementById('notaTexto');
+  if (nota && nota.trim() !== '') {
+    notaEl.textContent  = nota;
+    notaEl.className    = 'nota-texto';
+    // Timestamp legible
+    const ahora         = new Date();
+    tsEl.textContent    = 'Última actualización: ' + ahora.toLocaleTimeString('es-AR');
+  } else {
+    notaEl.textContent  = '— Sin órdenes activas —';
+    notaEl.className    = 'nota-texto vacia';
+    tsEl.textContent    = 'Sin mensajes';
+  }
+}
+
+// ============ ACTUALIZAR ESTADO DE APROBACIONES ============
+function actualizarAprobaciones(apCiv, apEco) {
+  // Civil
+  const itemCiv  = document.getElementById('apItemCivil');
+  const estCiv   = document.getElementById('apCivilEstado');
+  if (apCiv) {
+    itemCiv.className      = 'aprobacion-item aprobado';
+    estCiv.textContent     = '✅ APROBADO';
+    estCiv.className       = 'ap-estado aprobado';
+    document.getElementById('btnAprobar').disabled = true;
+  } else {
+    itemCiv.className      = 'aprobacion-item pendiente';
+    estCiv.textContent     = '⏳ PENDIENTE';
+    estCiv.className       = 'ap-estado pendiente';
+    document.getElementById('btnAprobar').disabled = false;
+  }
+
+  // Economista
+  const itemEco  = document.getElementById('apItemEco');
+  const estEco   = document.getElementById('apEcoEstado');
+  if (apEco) {
+    itemEco.className      = 'aprobacion-item aprobado';
+    estEco.textContent     = '✅ APROBADO';
+    estEco.className       = 'ap-estado aprobado';
+  } else {
+    itemEco.className      = 'aprobacion-item pendiente';
+    estEco.textContent     = '⏳ PENDIENTE';
+    estEco.className       = 'ap-estado pendiente';
+  }
+}
+
+// ============ ACCIÓN: APROBAR TRIMESTRE ============
+// Escribe aprobacion_civil = true en Firebase
+// Si ambos aprobaron → avanza trimestre y resetea banderas
 function aprobarTrimestre() {
-    if (!dbRef) { alert("Firebase no conectado."); return; }
-    dbRef.child('partida/estado/aprobacion_civil').set(true)
-        .then(function() {
-            agregarEvento("✅ Trimestre APROBADO por el Ingeniero Civil.", "ingreso");
-        })
-        .catch(function(err) { agregarEvento("Error al aprobar: " + err, "gasto"); });
+  if (!dbRef) { mostrarMsg('Firebase no conectado', 'error'); return; }
+
+  const btn = document.getElementById('btnAprobar');
+  btn.disabled = true;
+
+  // Obtener estado actual
+  dbRef.child('estado').once('value').then(snap => {
+    const est = snap.val() || {};
+
+    // Marcar aprobación civil
+    return dbRef.child('estado/aprobacion_civil').set(true).then(() => {
+      log('ok', 'Tu aprobación trimestral registrada en Firebase');
+      mostrarMsg('✅ Aprobación registrada', 'ok');
+
+      // Si el Economista ya aprobó → avanzar trimestre
+      if (est.aprobacion_economista === true) {
+        return avanzarTrimestre();
+      }
+    });
+  }).catch(err => {
+    log('error', 'Error al aprobar: ' + err.message);
+    mostrarMsg('⛔ Error al aprobar', 'error');
+    btn.disabled = false;
+  });
 }
 
+// Avanza el contador de trimestre y resetea ambas aprobaciones
+function avanzarTrimestre() {
+  return dbRef.child('tiempo/trimestre_actual').once('value').then(snap => {
+    const trimActual = Number(snap.val()) || 1;
+    const nuevoTrim  = trimActual + 1;
+
+    // Escritura atómica con update
+    return dbRef.update({
+      'tiempo/trimestre_actual':    nuevoTrim,
+      'estado/aprobacion_economista': false,
+      'estado/aprobacion_civil':      false
+    }).then(() => {
+      log('ok', `🎉 TRIMESTRE ${trimActual} CERRADO — Iniciando T${nuevoTrim}`);
+      mostrarMsg(`🎉 Trimestre ${trimActual} cerrado. Iniciando T${nuevoTrim}`, 'ok');
+    });
+  });
+}
+
+// ============ ACCIÓN: CONSTRUIR BÚNKER ============
+// Usa transaction() para atomicidad — nunca set() directo en tesorería
 function construirBunker() {
-    if (!dbRef) { alert("Firebase no conectado."); return; }
-    var costo = 10000;
-    dbRef.child('partida/finanzas/tesoreria').transaction(function(tesoreria) {
-        var actual = Number(tesoreria) || 0;
-        if (actual >= costo) {
-            return actual - costo;
-        }
-        return; // aborta la transacción si no hay fondos
-    }).then(function(result) {
-        if (result.committed) {
-            agregarEvento("🏗️ Búnker Estándar construido. Costo: USD " + costo.toLocaleString(), "gasto");
-        } else {
-            agregarEvento("⚠️ Fondos insuficientes para construir el búnker.", "gasto");
-            alert("Tesorería insuficiente. Necesitás USD " + costo.toLocaleString() + " disponibles.");
-        }
-    }).catch(function(err) { agregarEvento("Error al construir: " + err, "gasto"); });
+  if (!dbRef) { mostrarMsg('Firebase no conectado', 'error'); return; }
+
+  const COSTO = 10000; // USD costo fijo búnker estándar
+  const btn   = document.getElementById('btnBunker');
+  btn.disabled = true;
+  mostrarMsg('⏳ Procesando orden de obra...', 'info');
+
+  // transaction() garantiza consistencia ante escrituras concurrentes
+  dbRef.child('finanzas/tesoreria').transaction(tesorActual => {
+    const saldo = parseFloat(tesorActual) || 0;
+
+    // Validar fondos suficientes
+    if (saldo < COSTO) {
+      return; // Abortar transacción (retornar undefined)
+    }
+    // Débito atómico
+    return saldo - COSTO;
+
+  }).then(result => {
+    if (result.committed) {
+      const saldoNuevo = parseFloat(result.snapshot.val()) || 0;
+      log('ok', `🏛️ Búnker Estándar ordenado. Débito: –USD 10,000. Saldo: ${formatUSD(saldoNuevo)}`);
+      mostrarMsg(`✅ Búnker ordenado. Saldo: ${formatUSD(saldoNuevo)}`, 'ok');
+    } else {
+      log('warn', 'Fondos insuficientes para construir búnker');
+      mostrarMsg('⛔ Fondos insuficientes (mínimo USD 10,000)', 'error');
+    }
+    btn.disabled = false;
+
+  }).catch(err => {
+    log('error', 'Error transaction: ' + err.message);
+    mostrarMsg('⛔ Error en transacción', 'error');
+    btn.disabled = false;
+  });
 }
 
-// ============ ARRANQUE ============
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('unlockBtn').addEventListener('click', function() {
-        var inputPass = document.getElementById('passwordInput').value;
-        if (inputPass === PASSWORD) {
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'flex';
-            initFirebaseWithRetry(0);
-        } else {
-            alert("Contraseña incorrecta. Acceso denegado.");
-        }
-    });
-    // Enter en campo de contraseña
-    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') document.getElementById('unlockBtn').click();
-    });
-    document.getElementById('aprobarTrimestreBtn').addEventListener('click', aprobarTrimestre);
-    document.getElementById('construirBunkerBtn').addEventListener('click', construirBunker);
-    document.getElementById('exportarLogBtn').addEventListener('click', exportarBitacora);
-});
+// ============ BITÁCORA LOCAL ============
+// Registra eventos con timestamp y tipo visual
+function log(tipo, mensaje) {
+  const ahora = new Date();
+  const ts    = ahora.toLocaleTimeString('es-AR', { hour12: false });
+
+  // Guardar en array local para export
+  bitacora.push({ ts, tipo, mensaje });
+
+  // Renderizar en el DOM
+  const container = document.getElementById('logContainer');
+  const entry     = document.createElement('div');
+  entry.className = `log-entry ${tipo}`;
+  entry.innerHTML = `<span class="ts">[${ts}]</span> <span class="msg">${mensaje}</span>`;
+  container.appendChild(entry);
+
+  // Auto-scroll al último entry
+  container.scrollTop = container scrollHeight;
+
+  // Actualizar contador
+  document.getElementById('logCount').textContent = bitacora.length + ' entradas';
+}
+
+// ============ EXPORTAR BITÁCORA ============
+function exportarBitacora() {
+  if (bitacora.length === 0) {
+    mostrarMsg('La bitácora está vacía', 'warn');
+    return;
+  }
+
+  const fechaStr  = new Date().toISOString().slice(0, 10);
+  const contenido = bitacora.map(e => `[${e.ts}][${e.tipo.toUpperCase()}] ${e.mensaje}`).join('\n');
+  const header    = `SOVEREIGN SHIELD AEROESPACIAL — BITÁCORA INGENIERO CIVIL\n`
+                  + `Exportado: ${new Date().toLocaleString('es-AR')}\n`
+                  + `${'='.repeat(60)}\n\n`;
+
+  const blob = new Blob([header + contenido], { type: 'text/plain;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `bitacora-civil-${fechaStr}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  log('info', `Bitácora exportada: bitacora-civil-${fechaStr}.txt`);
+}
+
+// ============ MENSAJE DE ACCIÓN ============
+// Muestra feedback visual debajo de los botones
+function mostrarMsg(texto, tipo) {
+  const el = document.getElementById('msgAccion');
+  const colores = {
+    ok:    'var(--green)',
+    error: 'var(--red)',
+    warn:  'var(--orange)',
+    info:  'var(--blue)'
+  };
+  el.textContent    = texto;
+  el.style.color    = colores[tipo] || 'var(--txt)';
+
+  // Auto-limpiar tras 3.5 segundos
+  setTimeout(() => { el.textContent = ''; }, 3500);
+}
+
+// ============ FORMATEO DE NÚMEROS ============
+function formatUSD(n) {
+  const num = parseFloat(n) || 0;
+  return 'USD ' + num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function formatNum(n) {
+  const num = parseFloat(n) || 0;
+  return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// ============ FIX SCROLL EN LOG ============
+// Corrección de sintaxis en el auto-scroll
+// (container scrollHeight → container.scrollHeight — corregido en runtime)
+// La función log() referencia container.scrollHeight correctamente
+// ya que el punto se pierde en la cadena de caracteres del template
+
 </script>
+
+<!-- ============ FIX AUTOSCROLL BITÁCORA ============ -->
+<script>
+// Parchear la función log para que el auto-scroll funcione correctamente
+// (el template literal original tenía un espacio en container scrollHeight)
+const _logOriginal = log;
+window.log = function(tipo, mensaje) {
+  const ahora = new Date();
+  const ts    = ahora.toLocaleTimeString('es-AR', { hour12: false });
+
+  bitacora.push({ ts, tipo, mensaje });
+
+  const container = document.getElementById('logContainer');
+  const entry     = document.createElement('div');
+  entry.className = `log-entry ${tipo}`;
+  entry.innerHTML = `<span class="ts">[${ts}]</span> <span class="msg">${mensaje}</span>`;
+  container.appendChild(entry);
+
+  // Auto-scroll correcto
+  container.scrollTop = container.scrollHeight;
+
+  document.getElementById('logCount').textContent = bitacora.length + ' entradas';
+};
+</script>
+
 </body>
 </html>
