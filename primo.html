@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sovereign Shield — Panel del Ingeniero Civil</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0d1117;--green:#238636;--blue:#58a6ff;--txt:#e6edf3;--red:#f85149;--orange:#e67e22}
+        body{background:var(--bg);color:var(--txt);font-family:'Courier New',monospace;font-size:14px;padding:14px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+        .header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--green);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+        .logo{font-size:1.1rem;font-weight:bold;letter-spacing:2px;color:var(--green)}
+        .indicators{display:flex;gap:12px;font-size:.78rem;flex-wrap:wrap}
+        .led-green{width:10px;height:10px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite alternate;display:inline-block}
+        .led-red{width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block}
+        @keyframes pulse{0%{opacity:.4;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
+        .badge{background:#161b22;padding:2px 10px;border-radius:4px;border-left:3px solid var(--green);font-weight:bold}
+        .indicator{display:flex;align-items:center;gap:5px}
+        .panel{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:15px;margin-bottom:15px}
+        .panel h2{color:var(--green);margin-bottom:10px;font-size:1.1rem}
+        .big-number{font-size:2.2rem;font-weight:bold;color:var(--green);margin:8px 0}
+        .info-row{display:flex;justify-content:space-between;margin:8px 0;border-bottom:1px dashed #30363d;padding:5px 0}
+        button{background:#21262d;border:1px solid #30363d;color:var(--txt);font-family:monospace;padding:8px 16px;border-radius:4px;cursor:pointer;transition:.15s;font-weight:bold;font-size:13px;margin:4px}
+        button:hover{background:var(--green);border-color:var(--green);color:#0d1117}
+        .btn-primary{background:var(--green);color:#0d1117;border-color:var(--green)}
+        .btn-primary:hover{background:#2ea043}
+        .btn-danger{border-color:var(--red);color:var(--red)}
+        .btn-danger:hover{background:var(--red);color:#0d1117}
+        .log-list{background:#0d1117;height:250px;overflow-y:auto;font-size:12px;border:1px solid #30363d;padding:8px;border-radius:4px;margin-top:10px}
+        .log-entry{border-bottom:1px solid #21262d;padding:4px 0}
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000}
+        .modal-box{background:#161b22;border:2px solid var(--green);padding:30px;max-width:400px;width:90%;text-align:center;border-radius:8px}
+        .modal-box h2{color:var(--green);margin-bottom:12px;letter-spacing:2px}
+        input{background:#0d1117;border:1px solid #30363d;color:var(--txt);padding:8px;width:100%;margin:10px 0;border-radius:4px;font-family:monospace}
+        small{color:#8b949e;font-size:11px}
+    </style>
+</head>
+<body>
+
+<!-- MODAL CONTRASEÑA -->
+<div id="passwordModal" class="modal">
+    <div class="modal-box">
+        <h2>🔐 ACCESO INGENIERÍA CIVIL</h2>
+        <p style="margin-bottom:8px;font-size:13px;color:#8b949e">Ingresá la contraseña de acceso al panel</p>
+        <input type="password" id="passwordInput" placeholder="Contraseña de acceso">
+        <button id="unlockBtn" class="btn-primary" style="width:100%;margin-top:8px">INGRESAR</button>
+        <p style="margin-top:10px"><small>Contactá al Economista para obtener la clave.</small></p>
+    </div>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div id="mainContent" style="display:none;flex-direction:column;height:100%">
+
+    <div class="header">
+        <div class="logo">🏗️ SOVEREIGN SHIELD — INGENIERÍA CIVIL</div>
+        <div class="indicators">
+            <div class="indicator"><span class="led-red" id="ledStatus"></span><span id="firebaseText">CONECTANDO...</span></div>
+            <div class="badge" id="levelDisplay">NIVEL 1 — EL GARAJE</div>
+            <div class="badge" id="quarterDisplay">TRIMESTRE: 1</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>💰 ESTADO DE TESORERÍA</h2>
+        <div class="big-number" id="tesoreriaValor">0 USD</div>
+        <div class="info-row">
+            <span>📋 Presupuesto preaprobado por Economista:</span>
+            <strong id="presupuestoPreaprobado" style="color:var(--blue)">0 USD</strong>
+        </div>
+        <div class="info-row">
+            <span>✅ Mi aprobación de trimestre:</span>
+            <strong id="aprobacionCivilStatus" style="color:#8b949e">Pendiente</strong>
+        </div>
+        <div class="info-row">
+            <span>💼 Aprobación del Economista:</span>
+            <strong id="aprobacionEcoStatus" style="color:#8b949e">Pendiente</strong>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px">
+        <button id="aprobarTrimestreBtn" class="btn-primary">✔ APROBAR TRIMESTRE</button>
+        <button id="construirBunkerBtn" style="border-color:var(--blue);color:var(--blue)">🏗️ CONSTRUIR BÚNKER ESTÁNDAR (-10,000 USD)</button>
+    </div>
+
+    <div class="panel" style="flex:1">
+        <h2>📋 BITÁCORA DE OBRA</h2>
+        <div class="log-list" id="logList">
+            <div class="log-entry">[--:--:--] — Panel de Ingeniería Civil listo.</div>
+        </div>
+        <button id="exportarLogBtn" style="margin-top:8px">📄 EXPORTAR BITÁCORA</button>
+    </div>
+
+</div>
+
+<script>
+// ============ CONTRASEÑA (cambiable) ============
+var PASSWORD = 'civil2026';
+
+// ============ FIREBASE CONFIG ============
+var firebaseConfig = {
+    apiKey: "AIzaSyDYv-eJ7UlyG8PA-s-qxHQV3T8mT9rsxe8",
+    authDomain: "sovereign-shield-f020d.firebaseapp.com",
+    databaseURL: "https://sovereign-shield-f020d-default-rtdb.firebaseio.com",
+    projectId: "sovereign-shield-f020d",
+    storageBucket: "sovereign-shield-f020d.firebasestorage.app",
+    messagingSenderId: "183961423518",
+    appId: "1:183961423518:web:7ddac52a6e998ebfbf758f"
+};
+
+var database, dbRef;
+var bitacoraEventos = [];
+
+// ============ BITÁCORA ============
+function agregarEvento(mensaje, tipo) {
+    tipo = tipo || 'info';
+    var timestamp = new Date().toLocaleTimeString('es-AR');
+    bitacoraEventos.unshift({ timestamp: timestamp, mensaje: mensaje, tipo: tipo });
+    var logContainer = document.getElementById('logList');
+    if (!logContainer) return;
+    logContainer.innerHTML = '';
+    bitacoraEventos.forEach(function(ev) {
+        var div = document.createElement('div');
+        div.className = 'log-entry';
+        if (ev.tipo === 'ingreso') div.style.color = '#238636';
+        else if (ev.tipo === 'gasto') div.style.color = '#f85149';
+        div.innerHTML = '[' + ev.timestamp + '] — ' + ev.mensaje;
+        logContainer.appendChild(div);
+    });
+}
+
+function exportarBitacora() {
+    var contenido = "BITÁCORA INGENIERÍA CIVIL — SOVEREIGN SHIELD\n=============================================\n";
+    bitacoraEventos.forEach(function(ev) { contenido += '[' + ev.timestamp + '] ' + ev.mensaje + '\n'; });
+    var blob = new Blob([contenido], { type: "text/plain" });
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "bitacora_obra_" + new Date().toISOString().slice(0,10) + ".txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+    agregarEvento("Bitácora exportada.", "info");
+}
+
+// ============ FIREBASE CON RETRY ============
+function initFirebaseWithRetry(attempts) {
+    attempts = attempts || 0;
+    if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        dbRef = database.ref();
+        agregarEvento("Firebase conectado. Modo Ingeniería Civil activo.", "info");
+        verificarEstructura();
+        bindFirebaseEvents();
+    } else if (attempts < 10) {
+        setTimeout(function() { initFirebaseWithRetry(attempts + 1); }, 300);
+    } else {
+        document.getElementById('firebaseText').innerText = "ERROR: Firebase no cargó.";
+        agregarEvento("Error crítico: Firebase SDK no cargó.", "gasto");
+    }
+}
+
+function verificarEstructura() {
+    dbRef.child('partida').once('value', function(snap) {
+        if (!snap.exists()) {
+            agregarEvento("⚠️ No hay partida activa. El Economista debe iniciar sesión primero.", "gasto");
+        } else {
+            agregarEvento("Partida activa encontrada. Sincronizando...", "info");
+        }
+    });
+}
+
+function bindFirebaseEvents() {
+    dbRef.child('partida/finanzas/tesoreria').on('value', function(snap) {
+        var val = Number(snap.val()) || 0;
+        document.getElementById('tesoreriaValor').innerHTML = val.toLocaleString('en-US') + " USD";
+    });
+    dbRef.child('partida/buzon_ordenes/presupuesto_preaprobado_infraestructura').on('value', function(snap) {
+        var val = Number(snap.val()) || 0;
+        document.getElementById('presupuestoPreaprobado').innerHTML = val.toLocaleString('en-US') + " USD";
+    });
+    dbRef.child('partida/estado/aprobacion_civil').on('value', function(snap) {
+        var aprobado = snap.val() === true;
+        var el = document.getElementById('aprobacionCivilStatus');
+        el.innerHTML = aprobado ? "APROBADO ✅" : "Pendiente";
+        el.style.color = aprobado ? '#238636' : '#8b949e';
+    });
+    dbRef.child('partida/estado/aprobacion_economista').on('value', function(snap) {
+        var aprobado = snap.val() === true;
+        var el = document.getElementById('aprobacionEcoStatus');
+        el.innerHTML = aprobado ? "APROBADO ✅" : "Pendiente";
+        el.style.color = aprobado ? '#238636' : '#8b949e';
+    });
+    dbRef.child('partida/estado/nivel_actual').on('value', function(snap) {
+        var nivel = snap.val() || 1;
+        var nombres = { 1: "EL GARAJE", 2: "OFICINA TÉCNICA", 3: "PLANTA & ÓRBITA" };
+        document.getElementById('levelDisplay').innerHTML = 'NIVEL ' + nivel + ' — ' + nombres[nivel];
+    });
+    dbRef.child('partida/tiempo/trimestre_actual').on('value', function(snap) {
+        document.getElementById('quarterDisplay').innerHTML = 'TRIMESTRE: ' + (snap.val() || 1);
+    });
+    database.ref('.info/connected').on('value', function(snap) {
+        var connected = snap.val();
+        document.getElementById('ledStatus').className = connected ? 'led-green' : 'led-red';
+        document.getElementById('firebaseText').innerHTML = connected ? 'ONLINE — FIREBASE LINKED' : 'OFFLINE';
+    });
+}
+
+// ============ ACCIONES ============
+function aprobarTrimestre() {
+    if (!dbRef) { alert("Firebase no conectado."); return; }
+    dbRef.child('partida/estado/aprobacion_civil').set(true)
+        .then(function() {
+            agregarEvento("✅ Trimestre APROBADO por el Ingeniero Civil.", "ingreso");
+        })
+        .catch(function(err) { agregarEvento("Error al aprobar: " + err, "gasto"); });
+}
+
+function construirBunker() {
+    if (!dbRef) { alert("Firebase no conectado."); return; }
+    var costo = 10000;
+    dbRef.child('partida/finanzas/tesoreria').transaction(function(tesoreria) {
+        var actual = Number(tesoreria) || 0;
+        if (actual >= costo) {
+            return actual - costo;
+        }
+        return; // aborta la transacción si no hay fondos
+    }).then(function(result) {
+        if (result.committed) {
+            agregarEvento("🏗️ Búnker Estándar construido. Costo: USD " + costo.toLocaleString(), "gasto");
+        } else {
+            agregarEvento("⚠️ Fondos insuficientes para construir el búnker.", "gasto");
+            alert("Tesorería insuficiente. Necesitás USD " + costo.toLocaleString() + " disponibles.");
+        }
+    }).catch(function(err) { agregarEvento("Error al construir: " + err, "gasto"); });
+}
+
+// ============ ARRANQUE ============
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('unlockBtn').addEventListener('click', function() {
+        var inputPass = document.getElementById('passwordInput').value;
+        if (inputPass === PASSWORD) {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            initFirebaseWithRetry(0);
+        } else {
+            alert("Contraseña incorrecta. Acceso denegado.");
+        }
+    });
+    // Enter en campo de contraseña
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') document.getElementById('unlockBtn').click();
+    });
+    document.getElementById('aprobarTrimestreBtn').addEventListener('click', aprobarTrimestre);
+    document.getElementById('construirBunkerBtn').addEventListener('click', construirBunker);
+    document.getElementById('exportarLogBtn').addEventListener('click', exportarBitacora);
+});
+</script>
+</body>
+</html>
