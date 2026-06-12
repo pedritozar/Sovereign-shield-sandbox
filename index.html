@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sovereign Shield Aeroespacial</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0d1117;--green:#238636;--blue:#58a6ff;--txt:#e6edf3;--red:#f85149;--orange:#e67e22}
+        body{background:var(--bg);color:var(--txt);font-family:'Courier New',monospace;font-size:14px;padding:14px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+        .header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--green);padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+        .logo{font-size:1.1rem;font-weight:bold;letter-spacing:2px;color:var(--green)}
+        .indicators{display:flex;gap:12px;font-size:.78rem;flex-wrap:wrap;align-items:center}
+        .led-green{width:10px;height:10px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite alternate;display:inline-block}
+        .led-red{width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block}
+        @keyframes pulse{0%{opacity:.4;transform:scale(.8)}100%{opacity:1;transform:scale(1.2)}}
+        .badge{background:#161b22;padding:2px 10px;border-radius:4px;border-left:3px solid var(--green);font-weight:bold}
+        .indicator{display:flex;align-items:center;gap:5px}
+        .tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid #30363d}
+        .tab-btn{background:#161b22;border:none;color:var(--txt);font-family:monospace;padding:7px 16px;cursor:pointer;transition:.2s;font-weight:bold;font-size:12px}
+        .tab-btn.active{background:var(--green);color:#0d1117}
+        .tab-content{flex:1;overflow-y:auto;display:none;padding:4px 0}
+        .tab-content.active{display:block}
+        .panel{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;margin-bottom:12px}
+        .panel h3{color:var(--green);margin-bottom:8px;font-size:12px;letter-spacing:1px}
+        .flex-row{display:flex;gap:14px;flex-wrap:wrap}
+        .card{flex:1;background:#0d1117;border:1px solid var(--blue);border-radius:6px;padding:12px;min-width:240px}
+        .card h3{color:var(--blue);margin-bottom:8px;font-size:12px}
+        button{background:#21262d;border:1px solid #30363d;color:var(--txt);font-family:monospace;padding:5px 11px;border-radius:4px;cursor:pointer;transition:.15s;font-weight:bold;font-size:12px;margin:2px 0}
+        button:hover{background:var(--green);border-color:var(--green);color:#0d1117}
+        .btn-red{border-color:var(--red);color:var(--red)}
+        .btn-red:hover{background:var(--red);color:#0d1117}
+        .btn-blue{border-color:var(--blue);color:var(--blue)}
+        .btn-blue:hover{background:var(--blue);color:#0d1117}
+        .btn-orange{border-color:var(--orange);color:var(--orange)}
+        textarea,input[type=text],input[type=password]{background:#0d1117;border:1px solid #30363d;color:var(--txt);font-family:monospace;padding:7px;width:100%;margin-top:5px;border-radius:4px}
+        .big-num{font-size:2rem;font-weight:bold;color:var(--green)}
+        .progress-bar{background:#30363d;height:7px;border-radius:4px;overflow:hidden;margin:7px 0}
+        .progress-fill{background:var(--green);width:0%;height:100%;transition:width .5s}
+        #map{height:340px;width:100%;border-radius:6px;margin-bottom:8px;border:1px solid #30363d}
+        .map-controls{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+        .chat-area{background:#0d1117;border:1px solid #30363d;height:200px;overflow-y:auto;padding:8px;margin:8px 0;font-size:12px;border-radius:4px}
+        .msg{margin-bottom:7px;border-left:3px solid var(--blue);padding-left:7px;line-height:1.5}
+        .log-list{background:#0d1117;height:300px;overflow-y:auto;font-size:12px;border:1px solid #30363d;padding:7px;border-radius:4px}
+        .log-entry{border-bottom:1px solid #21262d;padding:3px 0}
+        .footer{margin-top:8px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #30363d;padding-top:8px;flex-wrap:wrap}
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:1000}
+        .modal-box{background:#161b22;border:2px solid var(--green);padding:30px;max-width:460px;width:90%;text-align:center;border-radius:8px}
+        .modal-box h2{color:var(--green);margin-bottom:14px;font-size:.95rem;letter-spacing:2px}
+        small{color:#8b949e;font-size:11px}
+        .radio-group label{display:block;margin:5px 0;cursor:pointer}
+        .radio-group input{margin-right:7px}
+    </style>
+</head>
+<body>
+
+<!-- MODAL API KEY -->
+<div id="apiModal" class="modal">
+    <div class="modal-box">
+        <h2>⚡ SOVEREIGN SHIELD — INTELIGENCIA TÁCTICA</h2>
+        <p style="margin-bottom:12px;font-size:13px;color:#8b949e">Ingresá tu API Key de Anthropic</p>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+        <button id="saveApiKeyBtn" style="margin-top:12px;width:100%">INICIAR SESIÓN</button>
+        <p style="margin-top:10px"><small>La clave se guarda localmente. Nunca se sube al repositorio.</small></p>
+    </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="logo">⚡ SOVEREIGN SHIELD AEROESPACIAL</div>
+    <div class="indicators">
+        <div class="indicator"><span class="led-red" id="ledStatus"></span><span id="firebaseText">CONECTANDO...</span></div>
+        <div class="badge" id="levelDisplay">NIVEL 1 — EL GARAJE</div>
+        <div class="badge" id="quarterDisplay">TRIMESTRE: 1</div>
+        <div class="badge" id="treasuryHeader">TESORERÍA: USD 500,000</div>
+    </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+    <button class="tab-btn active" data-tab="tab1">💰 TESORERÍA</button>
+    <button class="tab-btn" data-tab="tab2">🗺 MAPA TÁCTICO</button>
+    <button class="tab-btn" data-tab="tab3">🎓 SOVEREIGN ACADEMY</button>
+    <button class="tab-btn" data-tab="tab4">📋 BITÁCORA</button>
+</div>
+
+<!-- TAB 1: TESORERÍA -->
+<div id="tab1" class="tab-content active">
+    <div class="flex-row">
+        <div class="card">
+            <h3>ESTADO FINANCIERO</h3>
+            <div class="big-num" id="tesoreriaValor">500,000</div>
+            <small>USD en tesorería</small>
+            <div style="margin-top:8px">Burn Rate: <strong id="burnRateValor">0</strong> USD/mes</div>
+            <div>Reputación: <strong id="reputacionValor">0</strong> PR</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <small id="progressLabel">Progreso hacia Nivel 2 (0 / 10,000 PR)</small>
+        </div>
+        <div class="card">
+            <h3>ACCIONES DEL ECONOMISTA</h3>
+            <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+            <button id="cargarCSVBtn">📂 CARGAR CSV DE TRADING</button>
+            <button id="cerrarTrimestreBtn" style="margin-top:6px">📆 CERRAR TRIMESTRE</button>
+            <div style="margin-top:12px">
+                <div style="color:var(--green);font-size:12px;margin-bottom:5px">⏱ MODO DE TIEMPO:</div>
+                <div class="radio-group">
+                    <label><input type="radio" name="modoTiempo" value="turnos" checked> Turnos (consenso trimestral)</label>
+                    <label><input type="radio" name="modoTiempo" value="acelerado"> Acelerado (1 día = 1 mes virtual)</label>
+                    <label><input type="radio" name="modoTiempo" value="libre"> Libre (Play/Pause manual)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel">
+        <h3>APROBACIONES DE TRIMESTRE</h3>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+            <div>💼 Economista: <strong id="aprobEconomista" style="color:#8b949e">Pendiente</strong></div>
+            <div>🏗️ Ing. Civil: <strong id="aprobCivil" style="color:#8b949e">Pendiente</strong></div>
+        </div>
+        <small>Ambos deben confirmar para avanzar al siguiente trimestre.</small>
+    </div>
+</div>
+
+<!-- TAB 2: MAPA TÁCTICO -->
+<div id="tab2" class="tab-content">
+    <div class="map-controls">
+        <button class="teatro-btn" data-lat="-38.4161" data-lng="-63.6167" data-zoom="4">🇦🇷 ARGENTINA</button>
+        <button class="teatro-btn" data-lat="-51.681" data-lng="-59.177" data-zoom="9" data-req="2">🌊 MALVINAS [N2]</button>
+        <button class="teatro-btn" data-lat="37.5665" data-lng="126.978" data-zoom="10" data-req="2">🇰🇷 COREA [N2]</button>
+        <button class="teatro-btn" data-lat="31.9686" data-lng="-99.9018" data-zoom="6" data-req="3">🤠 TEXAS [N3]</button>
+    </div>
+    <div id="map"></div>
+    <div class="panel">
+        <h3>TEATROS DE OPERACIONES</h3>
+        <p>📍 <strong>HQ Buenos Aires</strong> — Operativo &nbsp;|&nbsp; 🚧 <strong>Base Patagónica</strong> — Bloqueada (Nivel 2)</p>
+        <small>Los teatros internacionales se desbloquean con reputación suficiente.</small>
+    </div>
+</div>
+
+<!-- TAB 3: SOVEREIGN ACADEMY -->
+<div id="tab3" class="tab-content">
+    <div class="flex-row">
+        <div class="card">
+            <h3>PIZARRÓN ACADÉMICO</h3>
+            <textarea id="apuntesTextarea" rows="5" placeholder="Pegá acá tus apuntes de la UBA (Economía, Contabilidad, Ingeniería, Física)...&#10;&#10;No se envía a la IA hasta que hacés una consulta."></textarea>
+            <div style="margin-top:7px;display:flex;gap:7px">
+                <button id="fijarContextoBtn">📌 FIJAR CONTEXTO</button>
+                <button id="limpiarPizarronBtn" class="btn-red">🧹 LIMPIAR</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>MODO TUTOR IA</h3>
+            <button id="modoHaikuBtn" style="background:var(--green);color:#0d1117;width:100%">⚡ EXPLICACIÓN RÁPIDA (Haiku)</button>
+            <button id="modoSonnetBtn" class="btn-blue" style="width:100%;margin-top:5px">🧠 RAZONAMIENTO AVANZADO (Sonnet)</button>
+            <small style="display:block;margin-top:5px">Haiku: consultas rápidas (milésimas de USD). Sonnet: temas complejos de la UBA.</small>
+            <div style="margin-top:10px;display:flex;gap:6px">
+                <input type="text" id="preguntaInput" placeholder="Escribí tu consulta académica..." style="flex:1">
+                <button id="consultarBtn">CONSULTAR</button>
+            </div>
+        </div>
+    </div>
+    <div class="chat-area" id="chatArea">
+        <div class="msg">📘 Tutor listo. Fijá contexto con tus apuntes o hacé una pregunta directa.</div>
+    </div>
+</div>
+
+<!-- TAB 4: BITÁCORA -->
+<div id="tab4" class="tab-content">
+    <button id="exportarBitacoraBtn" style="margin-bottom:8px">📄 EXPORTAR BITÁCORA (.txt)</button>
+    <div class="log-list" id="logList">
+        <div class="log-entry">[--:--:--] — Sistema iniciado.</div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    <button id="playPauseBtn">▶ PLAY</button>
+    <button id="boostBtn" class="btn-orange" style="display:none">⚡ BOOST +25,000 PR</button>
+    <button id="resetBtn" class="btn-red">🔴 RESET PARTIDA</button>
+</div>
+
+<script>
+// ============ FIREBASE CONFIG ============
+const firebaseConfig = {
+    apiKey: "AIzaSyDYv-eJ7UlyG8PA-s-qxHQV3T8mT9rsxe8",
+    authDomain: "sovereign-shield-f020d.firebaseapp.com",
+    databaseURL: "https://sovereign-shield-f020d-default-rtdb.firebaseio.com",
+    projectId: "sovereign-shield-f020d",
+    storageBucket: "sovereign-shield-f020d.firebasestorage.app",
+    messagingSenderId: "183961423518",
+    appId: "1:183961423518:web:7ddac52a6e998ebfbf758f"
+};
+
+// ============ VARIABLES GLOBALES ============
+let database, dbRef;
+let modeloActivo = 'claude-3-haiku-20240307';
+let contextoFijado = '';
+let mapaInicializado = false;
+let mapaObj = null;
+let bitacoraEventos = [];
+
+// ============ FIREBASE: INIT CON RETRY (10 intentos) ============
+function initFirebaseWithRetry(attempts) {
+    attempts = attempts || 0;
+    if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        dbRef = database.ref();
+        inicializarFirebaseData();
+        bindFirebaseListeners();
+        agregarEvento("⚡ Sistema Sovereign Shield operativo.", "info");
+    } else if (attempts < 10) {
+        setTimeout(function() { initFirebaseWithRetry(attempts + 1); }, 300);
+    } else {
+        console.error("Firebase no cargó después de 10 intentos.");
+        var txt = document.getElementById('firebaseText');
+        if (txt) txt.innerText = "ERROR: Firebase SDK no cargó. Revisá conexión.";
+    }
+}
+
+// ============ BITÁCORA ============
+function agregarEvento(mensaje, tipo) {
+    tipo = tipo || 'info';
+    var timestamp = new Date().toLocaleTimeString('es-AR');
+    bitacoraEventos.unshift({ timestamp: timestamp, mensaje: mensaje, tipo: tipo });
+    var logContainer = document.getElementById('logList');
+    if (!logContainer) return;
+    logContainer.innerHTML = '';
+    bitacoraEventos.forEach(function(ev) {
+        var div = document.createElement('div');
+        div.className = 'log-entry';
+        if (ev.tipo === 'ingreso') div.style.color = '#238636';
+        else if (ev.tipo === 'gasto') div.style.color = '#f85149';
+        div.innerHTML = '[' + ev.timestamp + '] — ' + ev.mensaje;
+        logContainer.appendChild(div);
+    });
+}
+
+function exportarBitacora() {
+    var contenido = "BITÁCORA SOVEREIGN SHIELD AEROESPACIAL\n========================================\n";
+    bitacoraEventos.forEach(function(ev) {
+        contenido += '[' + ev.timestamp + '] ' + ev.mensaje + '\n';
+    });
+    var blob = new Blob([contenido], { type: "text/plain" });
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "bitacora_" + new Date().toISOString().slice(0,10) + ".txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+    agregarEvento("Bitácora exportada.", "info");
+}
+
+// ============ FIREBASE: ESTRUCTURA INICIAL ============
+function inicializarFirebaseData() {
+    dbRef.child('partida').once('value', function(snap) {
+        if (!snap.exists()) {
+            dbRef.child('partida').set({
+                tiempo: { trimestre_actual: 1, simulacion_pausada: true, modo_tiempo: "turnos" },
+                finanzas: { tesoreria: 500000, burn_rate_mensual: 0, ingresos_saas_mensual: 0, deuda_bancaria_total: 0, fondo_reserva_liquida: 0 },
+                estado: { puntos_reputacion: 0, nivel_actual: 1, aprobacion_economista: false, aprobacion_civil: false },
+                buzon_ordenes: { presupuesto_preaprobado_infraestructura: 0, nota_directorio: "" }
+            }).then(function() { agregarEvento("Base de datos Firebase inicializada.", "info"); });
+        } else {
+            agregarEvento("Partida existente cargada.", "info");
+        }
+    });
+}
+
+// ============ FIREBASE: LISTENERS ============
+function bindFirebaseListeners() {
+    dbRef.child('partida/finanzas/tesoreria').on('value', function(snap) {
+        var val = Number(snap.val()) || 0;
+        document.getElementById('tesoreriaValor').innerText = val.toLocaleString('en-US');
+        document.getElementById('treasuryHeader').innerHTML = 'TESORERÍA: USD ' + val.toLocaleString('en-US');
+    });
+    dbRef.child('partida/finanzas/burn_rate_mensual').on('value', function(snap) {
+        document.getElementById('burnRateValor').innerText = Number(snap.val()) || 0;
+    });
+    dbRef.child('partida/estado/puntos_reputacion').on('value', function(snap) {
+        var pr = Number(snap.val()) || 0;
+        document.getElementById('reputacionValor').innerText = pr.toLocaleString('en-US');
+        actualizarNivel(pr);
+    });
+    dbRef.child('partida/tiempo/trimestre_actual').on('value', function(snap) {
+        document.getElementById('quarterDisplay').innerHTML = 'TRIMESTRE: ' + (snap.val() || 1);
+    });
+    dbRef.child('partida/estado/aprobacion_economista').on('value', function(snap) {
+        var el = document.getElementById('aprobEconomista');
+        el.innerText = snap.val() ? "APROBADO ✅" : "Pendiente";
+        el.style.color = snap.val() ? '#238636' : '#8b949e';
+    });
+    dbRef.child('partida/estado/aprobacion_civil').on('value', function(snap) {
+        var el = document.getElementById('aprobCivil');
+        el.innerText = snap.val() ? "APROBADO ✅" : "Pendiente";
+        el.style.color = snap.val() ? '#238636' : '#8b949e';
+    });
+    dbRef.child('partida/tiempo/simulacion_pausada').on('value', function(snap) {
+        document.getElementById('playPauseBtn').innerHTML = snap.val() ? "▶ PLAY" : "⏸ PAUSE";
+    });
+    dbRef.child('partida/tiempo/modo_tiempo').on('value', function(snap) {
+        var modo = snap.val() || 'turnos';
+        document.querySelectorAll('input[name="modoTiempo"]').forEach(function(r) { r.checked = r.value === modo; });
+    });
+    database.ref('.info/connected').on('value', function(snap) {
+        var led = document.getElementById('ledStatus');
+        var txt = document.getElementById('firebaseText');
+        if (snap.val()) {
+            led.className = 'led-green';
+            txt.innerText = 'ONLINE — FIREBASE LINKED';
+        } else {
+            led.className = 'led-red';
+            txt.innerText = 'OFFLINE';
+        }
+    });
+}
+
+// ============ SISTEMA DE NIVELES ============
+function actualizarNivel(pr) {
+    var nivel = 1;
+    if (pr >= 50001) nivel = 3;
+    else if (pr >= 10001) nivel = 2;
+    var nombres = { 1: "EL GARAJE", 2: "LA OFICINA TÉCNICA", 3: "PLANTA INDUSTRIAL & ÓRBITA" };
+    document.getElementById('levelDisplay').innerHTML = 'NIVEL ' + nivel + ' — ' + nombres[nivel];
+    var limites = { 1: 10000, 2: 50000, 3: 50000 };
+    var progreso = nivel === 3 ? 100 : Math.min(100, (pr / limites[nivel]) * 100);
+    document.getElementById('progressFill').style.width = progreso + '%';
+    var label = document.getElementById('progressLabel');
+    if (label) {
+        if (nivel === 1) label.innerText = 'Progreso hacia Nivel 2 (' + pr.toLocaleString() + ' / 10,000 PR)';
+        else if (nivel === 2) label.innerText = 'Progreso hacia Nivel 3 (' + pr.toLocaleString() + ' / 50,000 PR)';
+        else label.innerText = 'Nivel máximo alcanzado ✅';
+    }
+    dbRef.child('partida/estado/nivel_actual').once('value', function(snap) {
+        if ((snap.val() || 1) !== nivel) {
+            dbRef.child('partida/estado/nivel_actual').set(nivel);
+            agregarEvento('🏆 ASCENSO: Nivel ' + nivel + ' — ' + nombres[nivel], "ingreso");
+            setTimeout(function() { alert('¡NUEVO NIVEL!\nNivel ' + nivel + ' — ' + nombres[nivel]); }, 100);
+        }
+    });
+}
+
+// ============ CSV TRADING ============
+function cargarCSV() {
+    document.getElementById('csvFileInput').click();
+}
+
+// ============ CIERRE DE TRIMESTRE ============
+function cerrarTrimestre() {
+    dbRef.child('partida/tiempo/simulacion_pausada').once('value', function(snap) {
+        if (snap.val() === true) {
+            alert("La simulación está en PAUSE. Activá PLAY primero.");
+            return;
+        }
+        dbRef.child('partida/estado/aprobacion_economista').set(true).then(function() {
+            agregarEvento("Economista aprobó el cierre del trimestre.", "info");
+            dbRef.child('partida/estado').once('value', function(s) {
+                if (s.child('aprobacion_economista').val() && s.child('aprobacion_civil').val()) {
+                    dbRef.child('partida/tiempo/trimestre_actual').transaction(function(t) { return (Number(t) || 1) + 1; });
+                    dbRef.child('partida/estado/aprobacion_economista').set(false);
+                    dbRef.child('partida/estado/aprobacion_civil').set(false);
+                    agregarEvento("✅ TRIMESTRE CERRADO. Ambos directores aprobaron.", "info");
+                }
+            });
+        });
+    });
+}
+
+// ============ PLAY/PAUSE ============
+function togglePlayPause() {
+    dbRef.child('partida/tiempo/simulacion_pausada').transaction(function(cur) { return !cur; });
+    agregarEvento("Estado de simulación cambiado.", "info");
+}
+
+// ============ RESET ============
+function resetPartida() {
+    if (confirm("⚠️ ¿RESETEAR PARTIDA A ESTADO INICIAL?\nSe perderán todos los avances.")) {
+        dbRef.child('partida').update({
+            'finanzas/tesoreria': 500000,
+            'finanzas/burn_rate_mensual': 0,
+            'estado/puntos_reputacion': 0,
+            'estado/nivel_actual': 1,
+            'estado/aprobacion_economista': false,
+            'estado/aprobacion_civil': false,
+            'tiempo/trimestre_actual': 1,
+            'tiempo/simulacion_pausada': true
+        }).then(function() { agregarEvento("🔴 RESET — USD 500,000 | Nivel 1 | Trimestre 1", "gasto"); });
+    }
+}
+
+// ============ BOOST DEBUG ============
+function boostReputacion() {
+    dbRef.child('partida/estado/puntos_reputacion').transaction(function(pr) { return (Number(pr) || 0) + 25000; });
+    agregarEvento("⚡ DEBUG: +25,000 PR", "ingreso");
+}
+
+// ============ MAPA LEAFLET ============
+function inicializarMapa() {
+    if (typeof L === 'undefined') { setTimeout(inicializarMapa, 500); return; }
+    if (mapaInicializado) { if (mapaObj) mapaObj.invalidateSize(); return; }
+    mapaObj = L.map('map').setView([-38.4161, -63.6167], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(mapaObj);
+    L.marker([-34.6037, -58.3816]).addTo(mapaObj).bindPopup('<b>📍 HQ SOVEREIGN SHIELD</b><br>Buenos Aires — Operativo');
+    L.marker([-45.8, -67.5]).addTo(mapaObj).bindPopup('<b>🚧 BASE PATAGÓNICA</b><br>Bloqueada — Requiere Nivel 2');
+    mapaInicializado = true;
+    agregarEvento("Mapa táctico inicializado.", "info");
+}
+
+function zoomTeatro(lat, lng, zoom, nivelReq) {
+    if (!mapaObj) { agregarEvento("Mapa no inicializado.", "gasto"); return; }
+    if (nivelReq) {
+        dbRef.child('partida/estado/nivel_actual').once('value', function(snap) {
+            if ((snap.val() || 1) < nivelReq) { alert('Teatro bloqueado. Requiere Nivel ' + nivelReq + '.'); return; }
+            mapaObj.setView([lat, lng], zoom);
+        });
+    } else {
+        mapaObj.setView([lat, lng], zoom);
+    }
+}
+
+// ============ TUTOR IA ============
+async function consultarTutor() {
+    var pregunta = document.getElementById('preguntaInput').value.trim();
+    if (!pregunta) { alert("Escribí una consulta."); return; }
+    var apiKey = localStorage.getItem('ss_anthropic_key');
+    if (!apiKey) { alert("No hay API Key. Recargá la página."); return; }
+    var chatArea = document.getElementById('chatArea');
+    var userDiv = document.createElement('div');
+    userDiv.className = 'msg';
+    userDiv.innerHTML = '<strong>👤 Usted:</strong> ' + pregunta;
+    chatArea.appendChild(userDiv);
+    var thinkDiv = document.createElement('div');
+    thinkDiv.className = 'msg';
+    thinkDiv.innerHTML = '<em>🤖 Procesando con ' + (modeloActivo.includes('sonnet') ? 'Sonnet' : 'Haiku') + '...</em>';
+    chatArea.appendChild(thinkDiv);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    try {
+        var res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+                model: modeloActivo,
+                max_tokens: 1000,
+                system: contextoFijado || "Sos un tutor académico experto en Economía, Ingeniería Civil y Física. Respondé de forma clara y concisa en español.",
+                messages: [{ role: 'user', content: pregunta }]
+            })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
+        var data = await res.json();
+        var respuesta = data.content[0].text;
+        thinkDiv.remove();
+        var tutorDiv = document.createElement('div');
+        tutorDiv.className = 'msg';
+        tutorDiv.style.borderLeftColor = '#238636';
+        tutorDiv.innerHTML = '<strong>🎓 Tutor (' + (modeloActivo.includes('sonnet') ? 'Sonnet' : 'Haiku') + '):</strong><br>' + respuesta.replace(/\n/g, '<br>');
+        chatArea.appendChild(tutorDiv);
+        agregarEvento("Academy: consulta respondida.", "info");
+    } catch(err) {
+        thinkDiv.remove();
+        var errDiv = document.createElement('div');
+        errDiv.className = 'msg';
+        errDiv.style.borderLeftColor = '#f85149';
+        errDiv.innerHTML = '<strong>❌ Error:</strong> ' + err.message;
+        chatArea.appendChild(errDiv);
+        agregarEvento("Error Academy: " + err.message, "gasto");
+    }
+    document.getElementById('preguntaInput').value = '';
+    chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+// ============ DOM READY ============
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal API Key
+    var modal = document.getElementById('apiModal');
+    if (localStorage.getItem('ss_anthropic_key')) {
+        modal.style.display = 'none';
+    }
+    document.getElementById('saveApiKeyBtn').addEventListener('click', function() {
+        var key = document.getElementById('apiKeyInput').value.trim();
+        if (key && key.startsWith('sk-ant-')) {
+            localStorage.setItem('ss_anthropic_key', key);
+            modal.style.display = 'none';
+            agregarEvento("API Key registrada correctamente.", "info");
+        } else {
+            alert("API Key inválida. Debe comenzar con sk-ant-");
+        }
+    });
+
+    // Firebase init con retry
+    initFirebaseWithRetry(0);
+
+    // Botones
+    document.getElementById('cargarCSVBtn').addEventListener('click', cargarCSV);
+    document.getElementById('cerrarTrimestreBtn').addEventListener('click', cerrarTrimestre);
+    document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
+    document.getElementById('resetBtn').addEventListener('click', resetPartida);
+    document.getElementById('exportarBitacoraBtn').addEventListener('click', exportarBitacora);
+
+    // CSV listener
+    document.getElementById('csvFileInput').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        Papa.parse(file, {
+            header: true,
+            dynamicTyping: false,
+            complete: function(results) {
+                var cols = results.meta.fields || [];
+                var posibles = ['profit','resultado','ganancia','p&l','pnl','neto','net'];
+                var colProfit = cols.find(function(c) { return posibles.some(function(p) { return c.toLowerCase().includes(p); }); });
+                if (!colProfit) {
+                    agregarEvento("⚠️ CSV: No se encontró columna de profit.", "gasto");
+                    alert("El CSV debe tener columna: profit, ganancia, resultado o P&L.");
+                    return;
+                }
+                var total = 0;
+                results.data.forEach(function(row) {
+                    var raw = row[colProfit];
+                    if (raw !== undefined && raw !== null && raw !== '') {
+                        var num = parseFloat(String(raw).replace(/,/g,'.').replace(/[^0-9.\-]/g,''));
+                        if (!isNaN(num)) total += num;
+                    }
+                });
+                dbRef.child('partida/finanzas/tesoreria').transaction(function(cur) { return (Number(cur) || 0) + total; })
+                    .then(function() { agregarEvento("📊 CSV cargado. Ganancia: USD " + total.toFixed(2), total >= 0 ? "ingreso" : "gasto"); })
+                    .catch(function(err) { agregarEvento("❌ Error Firebase: " + err, "gasto"); });
+            },
+            error: function(err) { agregarEvento("❌ Error CSV: " + err, "gasto"); }
+        });
+        e.target.value = '';
+    });
+
+    // Debug boost
+    if (window.location.search.includes('debug=true')) {
+        var btn = document.getElementById('boostBtn');
+        btn.style.display = 'inline-block';
+        btn.addEventListener('click', boostReputacion);
+    }
+
+    // Modo tiempo
+    document.querySelectorAll('input[name="modoTiempo"]').forEach(function(radio) {
+        radio.addEventListener('change', function(e) {
+            if (e.target.checked && dbRef) {
+                dbRef.child('partida/tiempo/modo_tiempo').set(e.target.value);
+                agregarEvento("Modo de tiempo: " + e.target.value, "info");
+            }
+        });
+    });
+
+    // Academy
+    document.getElementById('fijarContextoBtn').addEventListener('click', function() {
+        contextoFijado = document.getElementById('apuntesTextarea').value;
+        agregarEvento("Academy: contexto fijado.", "info");
+        alert("✅ Contexto fijado. El tutor usará tus apuntes.");
+    });
+    document.getElementById('limpiarPizarronBtn').addEventListener('click', function() {
+        contextoFijado = '';
+        document.getElementById('apuntesTextarea').value = '';
+        document.getElementById('chatArea').innerHTML = '<div class="msg">📘 Pizarrón limpio.</div>';
+        agregarEvento("Academy: pizarrón limpiado.", "info");
+    });
+    document.getElementById('modoHaikuBtn').addEventListener('click', function() {
+        modeloActivo = 'claude-3-haiku-20240307';
+        document.getElementById('modoHaikuBtn').style.background = 'var(--green)';
+        document.getElementById('modoHaikuBtn').style.color = '#0d1117';
+        document.getElementById('modoSonnetBtn').style.background = '#21262d';
+        document.getElementById('modoSonnetBtn').style.color = 'var(--blue)';
+        agregarEvento("Tutor: modo RÁPIDO (Haiku).", "info");
+    });
+    document.getElementById('modoSonnetBtn').addEventListener('click', function() {
+        modeloActivo = 'claude-sonnet-4-6';
+        document.getElementById('modoSonnetBtn').style.background = 'var(--blue)';
+        document.getElementById('modoSonnetBtn').style.color = '#0d1117';
+        document.getElementById('modoHaikuBtn').style.background = '#21262d';
+        document.getElementById('modoHaikuBtn').style.color = 'var(--green)';
+        agregarEvento("Tutor: modo AVANZADO (Sonnet).", "info");
+    });
+    document.getElementById('consultarBtn').addEventListener('click', consultarTutor);
+    document.getElementById('preguntaInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') consultarTutor();
+    });
+
+    // Mapa
+    document.querySelector('[data-tab="tab2"]').addEventListener('click', function() {
+        setTimeout(inicializarMapa, 150);
+    });
+    document.querySelectorAll('.teatro-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            zoomTeatro(
+                parseFloat(btn.dataset.lat),
+                parseFloat(btn.dataset.lng),
+                parseInt(btn.dataset.zoom),
+                btn.dataset.req ? parseInt(btn.dataset.req) : null
+            );
+        });
+    });
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+});
+</script>
+</body>
+</html>
