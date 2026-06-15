@@ -763,6 +763,111 @@ async function consultarTutor() {
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
+// ========== SPRINT 3 - PRENSA: GENERAR TITULARES CON HAIKU ==========
+let cooldownPrensa = false;
+
+async function generarTitulares() {
+    if (cooldownPrensa) {
+        agregarEvento("⏳ Prensa: esperá el cooldown de 15s.", "info");
+        return;
+    }
+    var btn = document.getElementById('generarPrensaBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '⏳ Generando...';
+    cooldownPrensa = true;
+    var msgSpan = document.getElementById('cooldownPrensaMsg');
+    var segundos = 15;
+    if (msgSpan) msgSpan.textContent = 'Disponible en ' + segundos + 's...';
+    var interval = setInterval(function() {
+        segundos--;
+        if (segundos <= 0) {
+            clearInterval(interval);
+            if (msgSpan) msgSpan.textContent = '';
+        } else {
+            if (msgSpan) msgSpan.textContent = 'Disponible en ' + segundos + 's...';
+        }
+    }, 1000);
+    setTimeout(function() {
+        btn.disabled = false;
+        btn.textContent = '⚡ GENERAR TITULARES';
+        cooldownPrensa = false;
+    }, 15000);
+    try {
+        var snapshotTeso = await dbRef.child('partida/finanzas/tesoreria').once('value');
+        var tesoreria = snapshotTeso.val() || 0;
+        var snapshotPR = await dbRef.child('partida/estado/puntos_reputacion').once('value');
+        var pr = snapshotPR.val() || 0;
+        var snapshotTrim = await dbRef.child('partida/tiempo/trimestre_actual').once('value');
+        var trimestre = snapshotTrim.val() || 1;
+        var snapshotNivel = await dbRef.child('partida/estado/nivel_actual').once('value');
+        var nivel = snapshotNivel.val() || 1;
+        var niveles = { 1: 'Garaje', 2: 'Oficina Técnica', 3: 'Planta Industrial' };
+        var prompt = 'Sos un periodista experto en finanzas, geopolítica y cibercultura. Generá 4 titulares de prensa en JSON para "Sovereign Shield Aeroespacial", empresa de defensa argentina.\n\nIndicadores actuales:\n- Tesorería: USD ' + tesoreria.toLocaleString() + '\n- Reputación: ' + pr + ' PR\n- Nivel: ' + nivel + ' (' + (niveles[nivel] || 'Garaje') + ')\n- Trimestre: ' + trimestre + '\n\nGenerá un objeto JSON con estas cuatro claves EXACTAS:\n- "terminal": titular financiero/mercado, tono Bloomberg (serio, números, impacto económico)\n- "aegis": titular defensa/geopolítico, tono militar serio (estilo Jane\'s Defence)\n- "axios": titular ejecutivo síntesis en UNA oración corta, estilo Axios\n- "glitch": titular satírico ciberpunk con ironía ácida\n\nRespondé ÚNICAMENTE con el JSON. Sin explicaciones ni markdown.';
+        var apiKey = localStorage.getItem('ss_anthropic_key');
+        if (!apiKey) throw new Error('No hay API Key de Anthropic configurada.');
+        var response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 600,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        if (!response.ok) throw new Error('Haiku error HTTP ' + response.status);
+        var data = await response.json();
+        var raw = data.content[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+        var titulares = JSON.parse(raw);
+        document.getElementById('titularTerminal').innerText = titulares.terminal || '— Sin datos —';
+        document.getElementById('titularAegis').innerText = titulares.aegis || '— Sin datos —';
+        document.getElementById('titularAxios').innerText = titulares.axios || '— Sin datos —';
+        document.getElementById('titularGlitch').innerText = titulares.glitch || '— Sin datos —';
+        agregarEvento('📰 Prensa: titulares generados por Haiku (T' + trimestre + ' N' + nivel + ').', 'info');
+        var giphyKey = localStorage.getItem('ss_giphy_key');
+        var giphyContainer = document.getElementById('giphyContainer');
+        if (giphyKey && giphyContainer) {
+            var searchTerm = (titulares.glitch || 'cyberpunk drone').split(' ').slice(0, 3).join(' ');
+            var giphyRes = await fetch('https://api.giphy.com/v1/gifs/search?api_key=' + giphyKey + '&q=' + encodeURIComponent(searchTerm) + '&limit=1&rating=g');
+            if (giphyRes.ok) {
+                var giphyData = await giphyRes.json();
+                if (giphyData.data && giphyData.data.length > 0) {
+                    giphyContainer.innerHTML = '<img src="' + giphyData.data[0].images.original.url + '" alt="GIF" style="max-width:100%;border-radius:6px;border:1px solid #30363d">';
+                } else {
+                    giphyContainer.innerHTML = '<p style="color:#8b949e;font-size:12px">🎬 Sin GIF para "' + searchTerm + '".</p>';
+                }
+            }
+        } else if (giphyContainer) {
+            giphyContainer.innerHTML = '<p style="color:#8b949e;font-size:12px">🎬 Configurá tu API key de GIPHY abajo para ver GIFs.</p>';
+        }
+    } catch(err) {
+        agregarEvento('❌ Error prensa: ' + err.message, 'gasto');
+        setTimeout(function() {
+            var b = document.getElementById('generarPrensaBtn');
+            if (b) { b.disabled = false; b.textContent = '⚡ GENERAR TITULARES'; }
+            cooldownPrensa = false;
+            if (msgSpan) msgSpan.textContent = '';
+        }, 1000);
+    }
+}
+
+function guardarGiphyKey() {
+    var input = document.getElementById('giphyKeyInput');
+    if (!input) return;
+    var key = input.value.trim();
+    if (key.length > 5) {
+        localStorage.setItem('ss_giphy_key', key);
+        agregarEvento('🎬 Clave GIPHY guardada correctamente.', 'ingreso');
+    } else {
+        alert('Ingresá una API key válida de GIPHY (más de 5 caracteres).');
+    }
+}
+
 // ============ DOM READY ============
 document.addEventListener('DOMContentLoaded', function() {
     // Modal API Key
@@ -792,6 +897,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
     document.getElementById('resetBtn').addEventListener('click', resetPartida);
     document.getElementById('exportarBitacoraBtn').addEventListener('click', exportarBitacora);
+    // ========== SPRINT 3 - PRENSA ==========
+    var generarPrensaBtn = document.getElementById('generarPrensaBtn');
+    if (generarPrensaBtn) generarPrensaBtn.addEventListener('click', generarTitulares);
+    var guardarGiphyBtn = document.getElementById('guardarGiphyKeyBtn');
+    if (guardarGiphyBtn) guardarGiphyBtn.addEventListener('click', guardarGiphyKey);
+    var savedGiphyKey = localStorage.getItem('ss_giphy_key');
+    var giphyInput = document.getElementById('giphyKeyInput');
+    if (savedGiphyKey && giphyInput) giphyInput.value = '●●●●●●●●';
 
     // CSV listener
     document.getElementById('csvFileInput').addEventListener('change', function(e) {
