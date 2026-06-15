@@ -1,7 +1,7 @@
 # ============================================================
 # CHANGELOG — ZAR CAPITAL PARTNERS
 # Proyecto de Pedro Zacarias
-# Última actualización: 09/06/2026 — v3.8 FINAL
+# Última actualización: 10/06/2026 — v3.8 FINAL
 # ============================================================
 # INSTRUCCIÓN PARA CUALQUIER IA QUE LEA ESTO:
 # Leelo COMPLETO antes de responder. Sistema en GitHub:
@@ -177,7 +177,8 @@ STAGE 4 — CONGLOMERADO GLOBAL (NV 10-12)
     ⚠ 2 de 4 IDs pueden ser incorrectos — verificar manualmente
 
 ⚠ PRIORIDAD 3 — TEST COMPLETO TURN 1→12→AÑO 2:
-  → Verificar flujo completo: turno 1 → turno 12 → cerrarAnoFiscal() → año 2
+  ✅ Botón "⬡ Cerrar Año Fiscal" confirmado funcionando en browser
+  → Pendiente: test completo desde turno 1 nueva partida
   → Verificar PE: invertir en unicornio → avanzar turnos → exit automático
   → Verificar OpenSky NV3 con filtros DSK-03 activos
 
@@ -241,9 +242,20 @@ PROTOCOLO ANTES DE TOCAR CÓDIGO:
   2. Pedir confirmación a Pedro
   3. Tarea pesada → Sonnet 4
 
-DEPLOY (terminal Mac):
-  cd ~/Desktop/simulator
-  git add -A && git commit -m "vX.X — descripción" && git push -u origin main --force
+DEPLOY (terminal Mac) — WORKFLOW DEFINITIVO VALIDADO 10/06/2026:
+  ⚠ REGLA: los archivos se editan en Claude, NO directamente en la carpeta local.
+  ⚠ REGLA: abrir siempre el .html directo desde Finder — NUNCA los .app (versiones viejas)
+
+  PASO 1 — Descargar archivos modificados desde Claude (botón download)
+  PASO 2 — Reemplazar en ~/Desktop/simulator/ (mismo nombre de archivo)
+  PASO 3 — Terminal:
+    cd ~/Desktop/simulator
+    git add -A && git commit -m "vX.X — descripción" && git push -u origin main --force
+  PASO 4 — Verificar: abrir .html desde Finder · cmd+R en browser
+
+  VERIFICAR QUE EL ARCHIVO LOCAL ES EL CORRECTO:
+    grep -n "cerrarAnoFiscal\|evaluarExitsPE" ~/Desktop/simulator/zar_capital_simulator.html
+    (debe devolver líneas — si no devuelve nada, el archivo es viejo)
 
 MODELO: Sonnet 4.6 · CHANGELOG: adjuntar siempre · tiene prioridad
 

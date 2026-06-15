@@ -1,0 +1,1070 @@
+=======================================================================
+ SOVEREIGN SHIELD AEROESPACIAL — CHANGELOG MAESTRO v2.8
+ Proyecto: Simulador Estratégico Cooperativo + Startup de Defensa Real
+ Usuario: PEI — Pedro Zacarias (Economista, analista geopolítico)
+ Colaborador: Primo (Ingeniero Civil, graduado)
+ Canal operativo: Discord — SOVEREIGN SHIELD
+ Fecha de última actualización: 13/06/2026
+ Stack IA: Claude Sonnet 4.6 (arquitectura) + DeepSeek (código)
+ Reactor Nuclear IA: API Key Anthropic propia — saldo activo (13/06/2026)
+=======================================================================
+
+
+=======================================================================
+ NATURALEZA DEL PROYECTO
+=======================================================================
+
+CAPA A — SIMULADOR ESTRATÉGICO COOPERATIVO:
+  Videojuego de estrategia tipo Tycoon/Milsim ejecutado vía Discord.
+  Simula la construcción de una empresa de defensa/aeroespacial
+  argentina desde el garaje hasta estatus de superpotencia global.
+  Función pedagógica dual:
+    - PEI: Economía, finanzas, macroeconomía, econometría (UBA).
+    - Primo: Ingeniería civil, estructuras, geotecnia, hidráulica.
+
+CAPA B — PLATAFORMA REAL SUBYACENTE:
+  El simulador mapea directamente sobre un plan de negocios real.
+  Cada nivel del juego corresponde a una fase de financiamiento real.
+  Decisiones simuladas tienen consecuencias diferidas en la realidad.
+
+MÓDULO INTEGRADO — SOVEREIGN ACADEMY:
+  Herramienta de estudio universitario DENTRO del mismo index.html.
+  No es un proyecto separado. Es una solapa del panel principal.
+  Función: tutor académico 24/7 usando la API de Anthropic para
+  estudiar Economía, Contabilidad, Derecho e Ingeniería.
+
+PROYECTO FUTURO (ARCHIVADO — NO ACTIVO):
+  Ikariam Sandbox Greco-Romano: Simulador macroeconómico estilo
+  Ikariam con Dracmas de Plata, Mar Egeo en Leaflet, consejeros IA.
+  Se desarrolla DESPUÉS de completar Sovereign Shield.
+
+
+=======================================================================
+ EQUIPO Y ROLES
+=======================================================================
+
+PEI (Pedro Zacarias):
+  - Economista / Estratega Financiero
+  - Gestión de tesorería, trading/scalping, análisis geopolítico
+  - Hardware: MacBook Air M3 (Ultrawide + segunda pantalla)
+
+Primo (Ingeniero Civil, graduado):
+  - Infraestructura crítica, búnkeres, logística de obra
+  - Hardware: PC Windows
+  - Distancia: 250 km — coordinación exclusivamente vía Discord
+
+
+=======================================================================
+ REPOSITORIO Y DEPLOY
+=======================================================================
+
+GitHub:           https://github.com/pedritozar/Sovereign-shield-sandbox
+Deploy principal: https://pedritozar.github.io/Sovereign-shield-sandbox
+Panel Economista: /index.html
+Panel Primo:      /primo.html  (contraseña: civil2026)
+Generador IA:     generador.html (LOCAL en Mac — NO subir a GitHub)
+
+Firebase Proyecto:  sovereign-shield-f020d
+Firebase RTDB URL:  https://sovereign-shield-f020d-default-rtdb.firebaseio.com
+Firebase Plan:      Spark (gratuito)
+Ubicación DB:       Estados Unidos (us-central1)
+Firebase App ID:    1:183961423518:web:7ddac52a6e998ebfbf758f
+Firebase API Key:   AIzaSyDYv-eJ7UlyG8PA-s-qxHQV3T8mT9rsxe8
+authDomain:         sovereign-shield-f020d.firebaseapp.com
+projectId:          sovereign-shield-f020d
+storageBucket:      sovereign-shield-f020d.firebasestorage.app
+messagingSenderId:  183961423518
+
+Anthropic Console: USD 4.47 saldo activo (12/06/2026)
+  Recarga planificada: USD 5 cada 2 semanas según liquidez de PEI
+  Modelo generación código:    claude-sonnet-4-6 (recomendado)
+  Modelo tutor rápido Academy: claude-3-haiku-20240307
+  Modelo tutor avanzado UBA:   claude-sonnet-4-6 (switch manual)
+  Hard Limit: configurar USD 5/mes en Anthropic Console
+
+
+=======================================================================
+ STACK TÉCNICO — DECISIONES ARQUITECTÓNICAS CERRADAS
+=======================================================================
+
+CORE:
+  - 100% Front-End Web (HTML5 / CSS3 / Vanilla JavaScript). Sin Python.
+  - Sin frameworks pesados (sin React, sin Vue, sin Node local).
+  - Archivo principal: index.html (archivo secundario: primo.html)
+  - Procesamiento nativo del cliente (Mac M3 y PC Windows).
+
+LIBRERÍAS VÍA CDN:
+  - Leaflet.js 1.9.4: Mapas tácticos 2D.
+  - Chart.js 4.4.0: Gráficos financieros y econométricos.
+  - PapaParse 5.4.1: Lectura local de CSV de trading.
+  - Firebase SDK 9.22.0 compat: Realtime Database.
+
+BACKEND:
+  - Firebase Realtime Database: Persistencia 24/7 entre ambas PCs.
+  - Reloj maestro: firebase.database.ServerValue.TIMESTAMP
+    (NO relojes locales — evita desincronización entre timezones).
+
+DESPLIEGUE:
+  - GitHub Pages: Hosting gratuito, deploy automático en cada push.
+  - Flujo terminal Mac:
+      git add . → git commit -m "descripción" → git push origin main
+
+PALETA CSS (Matrix/Milsim):
+  --bg:     #0d1117  (negro mate terminal)
+  --green:  #238636  (verde táctico)
+  --blue:   #58a6ff  (azul táctico)
+  --txt:    #e6edf3  (texto principal)
+  --red:    #f85149  (alertas)
+  Fuente: 'Courier New', monospace
+
+
+=======================================================================
+ APIs EXTERNAS PLANIFICADAS
+=======================================================================
+
+1. FRED API (Federal Reserve Economic Data) — gratuita:
+   Uso: Tasa de interés real de la Fed + índice de inflación.
+   Mecánica: Si la tasa sube en el mundo real, los créditos del
+   simulador se encarecen automáticamente. Sprint 5.
+
+2. Open-Meteo API (reemplaza OpenWeatherMap):
+   Uso: Clima real en teatros de operaciones (Malvinas, Seúl, Texas).
+   Sin API Key. Gratuita e instantánea.
+   Mecánica: Lluvia en Malvinas → velocidad de construcción del primo
+   baja 20% por "condiciones climáticas adversas".
+   ⚠️ MIGRACIÓN PENDIENTE: inicio Sprint 3 (ya hay fix OWM activo).
+
+3. Open Notify API (ISS Tracker):
+   Uso: Posición de la ISS en tiempo real.
+   Mecánica: ISS sobre la base → bonus de radar temporal. Sprint 5.
+
+4. GIPHY API — gratuita:
+   Uso: GIFs animados para el Feed de Prensa dinámico.
+   Keywords: explosion pixel art, retro cyber rocket, sci-fi satellite.
+   Sprint 3.
+
+5. Claude API (Anthropic) — Motor de Inteligencia:
+   Haiku (default): Alertas, diarios satíricos, tutor rápido.
+     ~USD 0.0003/consulta. USD 5 = 5,700+ eventos.
+   Sonnet (switch): Temas UBA complejos, MCO, derecho comercial.
+   Anti-spam: Cooldown 15s en botón de crisis geopolítica.
+   Caché: Textos fijos del Tutor van hardcodeados (no consumen API).
+   API Key: NUNCA en código. Siempre desde localStorage.
+
+
+=======================================================================
+ SISTEMA DE TIEMPO ASINCRÓNICO (IKARIAM ENGINE)
+=======================================================================
+
+PRINCIPIO: El tiempo corre aunque nadie esté conectado.
+
+MECÁNICA Firebase Timestamps:
+  Al ordenar una obra → Firebase guarda:
+    { timestamp_inicio: [hora_real], duracion_segundos: 7200 }
+  Al conectarse → JS compara hora del servidor vs timestamp guardado.
+  Si pasaron las 2 horas → obra completada sola, recursos actualizados.
+
+MODO SELECCIONADO: Turnos por Trimestre (Opción 1).
+  El juego avanza solo cuando AMBOS confirman sus acciones.
+  PEI carga CSV → primo construye → ambos aprueban → avanza trimestre.
+  VENTAJA: Compatible con horarios de facultad y trabajo de ambos.
+
+MODO DE TIEMPO (selector en UI):
+  - Turnos: consenso trimestral (DEFAULT)
+  - Acelerado: 1 día real = 1 mes virtual (Firebase timestamp)
+  - Libre: Play/Pause manual centralizado en Firebase
+
+MOTOR DE TIEMPO HISTÓRICO (Sprint 7 — nuevo):
+  Contador JS separado: 1 Hora Real = 1 Año Virtual del Sandbox.
+  Activa triggers automáticos locales sin consumir API.
+  Ver sección MECÁNICAS DE JUEGO PROFUNDO — Motor de Eventos.
+
+
+=======================================================================
+ SISTEMA DE NIVELES Y PROGRESIÓN (GAMEPLAY LOOP)
+=======================================================================
+
+MONEDA: Puntos de Reputación (PR). CAPITAL INICIAL: USD 500,000.
+
+-------------------------------------------------------------------
+NIVEL 1: EL GARAJE (0 — 10,000 PR)
+Fase Bootstrapping / Startup Pyme. Contexto: 2026/2027.
+-------------------------------------------------------------------
+PEI: Carga CSV trading, tesorería básica, tasa de interés fija.
+Primo: Solo "Acopio de Caños" y "Soldadura de Chapas". Mapa bloqueado.
+Conflictos: Cárteles, contrabandistas, drones civiles.
+Diario activo: "The Daily Glitch" (sátira/ciberpunk).
+Academy N1: Interés simple, presión hidrostática en cañerías.
+PPC N1: Subcontratación de PMCs internacionales (Rusos/US/Chinos)
+  para custodiar rutas. Penaliza Margen Neto pero salva producción.
+Desbloqueo N2: 10,001 PR + mapa táctico de Argentina validado.
+
+-------------------------------------------------------------------
+NIVEL 2: LA OFICINA TÉCNICA (10,001 — 50,000 PR)
+Fase Mediana Empresa / Crecimiento / Serie Seed.
+-------------------------------------------------------------------
+PEI: Burn Rate activo, créditos con tasa variable (WACC simplificado),
+     gestión de nómina (3 ingenieros simulados).
+Primo: Blueprints desbloqueados (plantillas pre-armadas).
+       Bonificación por materiales de alta calidad.
+Conflictos: Fuerzas navales regionales, facciones de Texas.
+            Teatro de Operaciones Malvinas activo.
+Diario activo: "Axios Intel" (síntesis ejecutiva).
+Academy N2: Tasa variable, ratio Deuda/Capital, parábola de drones
+            R = (v² · sin2θ) / g
+PPC N2: Lobby Estatal. Palancas políticas para instar despliegue del
+  Ejército Nacional a cambio de contratos o riesgo fiscal.
+Desbloqueo N3: 50,001 PR + Serie A (USD 12M simulados).
+
+-------------------------------------------------------------------
+NIVEL 3: PLANTA INDUSTRIAL & ÓRBITA (+50,001 PR)
+Fase Gran Corporación / Sci-Fi. Serie A/B.
+-------------------------------------------------------------------
+PEI: MCO econométrico, bonos corporativos, apalancamiento estructurado.
+     Riesgo de Margin Call Corporativo activo.
+Primo: Silos H40, refrigeración criogénica, búnkeres subterráneos.
+Conflictos: Guerra total, ataques ASAT norcoreanos, Manchuria, Texas.
+            Mercado Negro: ofertas de facciones hostiles.
+Diarios: "Sovereign Terminal" (Bloomberg) + "Global Aegis" (Jane's).
+Academy N3: MCO para demanda mundial de defensa. Velocidad de escape.
+            Fricción térmica en reingreso atmosférico.
+PPC N3: Fundación de PMC Subsidiaria Propia — "Sovereign Tactical".
+  El Primo la equipa con armas SCI-FI. PEI financia despliegue en
+  África, Balcanes o la Luna para asegurar monopolios de materias primas.
+
+
+=======================================================================
+ SISTEMA FINANCIERO
+=======================================================================
+
+INCLUIDO (implementado o planificado):
+  - Working Capital: colchón mínimo 3 meses de Burn Rate.
+  - WACC simplificado: tasa baja si tesorería alta o búnker blindado.
+  - Fondo de Reserva Líquida: separado del Burn Rate automático.
+  - Crédito N1: préstamo emergencia hasta USD 100k.
+  - Crédito N3: bonos corporativos + leverage estructurado.
+  - Default Técnico: si tesorería = 0 con deuda → ambos dashboards
+    bloqueados remotamente.
+  - Trading real: PapaParse lee CSV de scalping de PEI. Profit total
+    suma a tesorería. parseFloat() estricto en toda operación.
+
+CURRENCY RUN ENGINE (Planificado — Sprint 7):
+  Algoritmo que calcula devaluación virtual e inflación interna.
+  Se activa si el CFO abusa de la emisión de deuda.
+  Impacto: triplica el costo de obra + modifica tesorería en tiempo real.
+  Firebase nodos nuevos:
+    finanzas/indice_inflacion_virtual: Float (base 1.0)
+    finanzas/tipo_cambio_virtual:      Float (base 1.0)
+
+CHART.JS FINANCE TERMINAL — Bloomberg Mode (Sprint 3):
+  Gráficos de líneas dinámicas en vivo integrados en Tab Tesorería:
+    - Free Cash Flow
+    - EBITDA
+    - Apalancamiento (ratio Deuda / Capital)
+    - Burn Rate mensual
+  Datos: historial de Firebase + CSV de trading real de PEI.
+  Look & feel: Bloomberg / Wall Street Terminal (letras ámbar/negro).
+
+DESCARTADO para v1.0:
+  - Fluctuación de divisas (solo USD virtuales).
+  - Auditorías fiscales detalladas (Tax Rate fijo 30%).
+  - IPO / salida a bolsa (empresa S.A. privada).
+
+
+=======================================================================
+ MILITARY SCALING FILTER
+=======================================================================
+
+Las variables militares están activas desde N1, escalando en intensidad.
+
+N1 (Garaje): Cárteles, drones civiles.
+  Compras: caños para torretas caseras, chapas para blindar camionetas.
+  Diario: "The Daily Glitch" se burla del taller.
+
+N2 (Pyme): Fuerzas navales regionales, facciones de Texas.
+  Compras: tuberías hidráulicas para misiles costeros, drones de radar.
+  Diario: "Axios Intel" reporta combates en el Atlántico Sur.
+
+N3 (Corporación): Superpotencias, ataques ASAT norcoreanos.
+  Compras: astilleros navales, portaaviones nuclear, domo espacial.
+  Diario: "Sovereign Terminal" cubre caída de Wall Street.
+
+
+=======================================================================
+ FEED DE PRENSA — CIBERESPACIO MEDIÁTICO (Sprint 3)
+=======================================================================
+
+4 cabeceras con CSS distinto. Claude Haiku genera titulares según
+el estado real de Firebase (tesorería, nivel, trimestre).
+
+1. "Sovereign Terminal" (Bloomberg):
+   CSS: Pantalla negra, letras ámbar/verde, Chart.js líneas.
+
+2. "Global Aegis Report" (Jane's Defence Weekly):
+   CSS: Verde oliva, tipografía militar robusta.
+
+3. "Axios Intel" (síntesis ejecutiva):
+   CSS: Minimalista blanco/negro, viñetas cortas.
+
+4. "The Daily Glitch" (sátira / ciberpunk):
+   CSS: Texto distorsionado, tonos púrpura, efecto glitch CSS puro.
+   Cubre conflictos de PMC: bajas, eficiencia táctica, impacto en ONs.
+
+Imágenes: GIPHY API con búsqueda automática por keywords.
+Efecto Glitch: CSS vibración + distorsión para eventos apocalípticos.
+Integración Sprint 7: Haiku redacta titulares adaptados al año virtual
+  en curso (Motor de Eventos Históricos) por micro-centavos.
+
+
+=======================================================================
+ SOVEREIGN ACADEMY — MÓDULO DE ESTUDIO INTEGRADO
+=======================================================================
+
+Solapa dentro del index.html. Tutor académico 24/7 con API Anthropic.
+
+Componentes implementados (Sprint 0):
+  - Pizarrón (textarea): texto LOCAL, costo cero en reposo.
+  - Botón "Fijar Contexto": envía apuntes como system prompt una sola vez.
+  - Switch Haiku / Sonnet.
+  - Chat del tutor con historial visual.
+  - Botón "Limpiar Pizarrón": resetea contexto y chat.
+  - Bitácora de eventos.
+
+Pendientes originales (Sprint 4):
+  - Export bitácora de estudio a Markdown (.md).
+  - Historial de consultas separado del chat general.
+  - Detección "Zona de Alerta" (temas a reforzar).
+
+SOVEREIGN ACADEMY — UPGRADES PROFUNDOS (Diseño DeepSeek v2.7):
+  Nota arquitectónica: van en index.html (tab Academy), no en el reactor.
+  Orden de implementación: U3 → U1 → U2 → U4 (dependencias primero).
+
+  UPGRADE ACADEMY 3 — LOCAL STORAGE CACHE (implementar primero):
+    Indexa respuestas premium de Sonnet en localStorage + IndexedDB.
+    Si el usuario repite una pregunta → respuesta desde disco local.
+    Clave: hash SHA-256 de (pregunta + contexto del pizarrón).
+    SHA-256 con crypto.subtle.digest() — nativo en Chrome, sin dependencias.
+    Ahorro estimado: 30-50% en sesiones de repaso pre-parcial.
+    SINERGIA: comparte patrón IndexedDB con Reactor Upgrade 10.
+
+  UPGRADE ACADEMY 1 — ANKI FLASHCARD GENERATOR:
+    Extrae conceptos clave del pizarrón usando Claude Haiku.
+    Genera tarjetas interactivas: frente (concepto) / dorso (definición).
+    CSS 3D card flip + sistema de repetición espaciada.
+    Estado correcto/incorrecto almacenado en localStorage.
+    Costo: ~USD 0.0005 por set de 10-15 tarjetas.
+
+  UPGRADE ACADEMY 2 — MOCK EXAM ENGINE (Sonnet):
+    Botón que inyecta apuntes del pizarrón en Claude Sonnet.
+    Genera casos de estudio prácticos estilo UBA por materia:
+      - Balances contables (Contabilidad)
+      - Fallos de derecho comercial (Derecho)
+      - Derivadas financieras, elasticidades (Macro/Micro)
+      - Análisis FODA de empresa dada (Administración)
+    Calificación en vivo: Sonnet evalúa y asigna nota 0-10 con corrección.
+    Resultados guardados en localStorage para seguimiento de evolución.
+    Costo: ~USD 0.01 por examen completo.
+
+  UPGRADE ACADEMY 4 — WEB SPEECH VOICE MODE (cero tokens):
+    Síntesis de voz nativa (window.speechSynthesis — gratuita, sin límites).
+    El Tutor puede leer apuntes, preguntas y respuestas en voz alta.
+    Controles: Play, Pause, Stop + selector de velocidad (0.8x a 1.5x).
+    Selección de voz (masculino/femenino según sistema operativo Mac).
+    Procesamiento 100% local — cero consumo de API.
+
+COSTOS ACTUALIZADOS (con Academy upgrades):
+  Haiku tutor rápido:   ~$0.0003/consulta → USD 1 = 3,000+ preguntas.
+  Haiku Anki set:       ~$0.0005 por 10-15 tarjetas.
+  Sonnet análisis UBA:  ~$0.00125 por 4,000 palabras.
+  Sonnet Mock Exam:     ~$0.01 por examen completo con corrección.
+  Cache Academy 3:      ahorra 30-50% en sesiones de repaso.
+  USD 5 mensuales = estudio universitario prácticamente ilimitado.
+
+Integración pedagógica con mecánicas de juego (Sprint 5+):
+  - Eventos del "Congreso de Accionistas" se resuelven aplicando
+    teoría contable y societaria enseñada por el Tutor IA.
+  - El jugador necesita responder correctamente para desbloquear
+    el artilugio legal y evitar el aumento del Burn Rate.
+
+Costos reales:
+  Haiku: ~$0.0003/consulta → USD 1 = 3,000+ preguntas conceptuales.
+  Sonnet análisis 4,000 palabras: ~$0.00125.
+  USD 5 mensuales = estudio universitario prácticamente ilimitado.
+
+
+=======================================================================
+ GENERADOR.HTML v3.0 — UPGRADES PLANIFICADOS (Reactor Road Map)
+=======================================================================
+
+ESTADO ACTUAL: generador.html con 16K tokens activo ✅
+DIAGNÓSTICO: Corte inicial por tope Output 8K → solucionado en v2.2.
+
+NOTA DE PRIORIZACIÓN:
+  Alta: Upgrade 1 + Upgrade 2 + Upgrade 7 (impacto inmediato en flujo).
+  Media: Upgrade 3 + Upgrade 6 + Upgrade 9 (calidad y resiliencia).
+  Baja: Upgrade 4 + Upgrade 5 + Upgrade 8 (optimización estética).
+  Implementación incremental — no bloquean los sprints del juego.
+
+--- UPGRADE 1 — INYECCIÓN MODULAR LEGO-STYLE (prioridad alta) ---
+  Solapa "Librería de Componentes" en el reactor.
+  Almacena bloques fijos reutilizables:
+    CSS base, Firebase init, Leaflet CDN, Chart.js boilerplate, etc.
+  Al actualizar: la API solo escribe el módulo nuevo.
+  El reactor ensambla el HTML final → ahorra tokens, evita reescrituras.
+
+--- UPGRADE 2 — FILTRO SANITARIO ANTI-BUGS (prioridad alta) ---
+  Validador interno que escanea el output de la API antes de descargar.
+  Detecta: llaves sin cerrar, tags HTML truncados, cortes por token limit.
+  Si detecta error → autoregenera el bloque antes de entregarlo al usuario.
+
+--- UPGRADE 3 — AUTO-DOCUMENTER / MAPA DE FUNCIONES (prioridad media) ---
+  Genera en paralelo un archivo `mapa_codigo.txt`.
+  Detalla qué líneas y variables mutaron en la sesión:
+    Ejemplo: "líneas 300-340: calcularEbitda() — modificado"
+  Permite control quirúrgico exacto al volver a Claude App.
+
+--- UPGRADE 4 — CDN DYNAMIC SWITCHBOARD (prioridad baja) ---
+  Panel visual con interruptores para activar/desactivar librerías CDN
+  (Chart.js, Leaflet, Tailwind) antes de compilar el HTML.
+  Mantiene el archivo liviano y enfocado según el sprint en curso.
+
+--- UPGRADE 5 — TREE SHAKING ENGINE (prioridad baja) ---
+  Detecta y elimina funciones repetidas o variables obsoletas.
+  Reduce tokens innecesarios y optimiza uso de RAM en Mac M3.
+
+--- UPGRADE 6 — OFFLINE EMERGENCY MODE (prioridad media) ---
+  Inyección de datos mock de respaldo.
+  Si las APIs gratuitas (FRED, Open-Meteo) fallan en sesión:
+    → el HTML activa variables internas con últimos valores guardados.
+    → el sandbox y Sovereign Academy siguen operativos sin conexión.
+
+--- UPGRADE 7 — PATCH INVERSE ENGINEERING (prioridad alta) ---
+  Caja de inyección de parches en el reactor.
+  Flujo: pegás la solución generada por DeepSeek/Claude App.
+  El reactor ubica la coordenada exacta en el HTML y aplica el fix
+  sin romper el resto de funciones ni la base Firebase.
+
+--- UPGRADE 8 — CSS COMPILER / PURGADO ESTÉTICO (prioridad baja) ---
+  Compresor que unifica estilos de todas las solapas.
+  Reduce el peso del HTML aproximadamente 30%.
+  Garantiza carga inmediata en pantallas Ultrawide y look consistente.
+
+--- UPGRADE 9 — SOVEREIGN TELEMETRY (LOGS EN VIVO) (prioridad media) ---
+  Ventana flotante inyectada en el juego (no requiere abrir DevTools).
+  Monitorea en tiempo real sin consumir API:
+    - Latencia de Firebase (ms)
+    - Llamadas a la API de Anthropic (Haiku / Sonnet)
+    - Peticiones de clima (Open-Meteo)
+    - Eventos del Motor Histórico (año virtual en curso)
+
+
+=======================================================================
+ ANIMACIONES VECTORIALES TÁCTICAS — CSS3/SVG (Diseño v2.6)
+=======================================================================
+
+PRINCIPIO: 100% nativo — cero tokens de API, carga nula para la RAM.
+Procesamiento local en Mac M3 / PC Windows.
+Firebase recibe SOLO el resultado final (éxito / fallo / costo).
+
+1. TRACCIÓN DE DESPLIEGUE:
+   Líneas de puntos de luz (CSS stroke-dashoffset animado) que viajan
+   desde la base patagónica hasta el conflicto en vivo sobre Leaflet.
+
+2. VUELO ORBITAL DE DRON:
+   El ícono del dron (Sukhoi/Reaper) gira de forma circular y
+   automatizada sobre las coordenadas calientes del objetivo.
+   Extiende y reemplaza los markers L.circleMarker del Sprint 2b.
+
+3. IMPACTOS — BOMBAS GUIADAS:
+   Destellos vectoriales amarillos (SVG path) + ondas de calor
+   expansivas (CSS Pulse Scale) simulando explosiones en el frente.
+
+4. EFECTO GLITCH / DERRIBO:
+   Parpadeo rojo + distorsión visual CSS + desaparición del marker.
+   Se activa cuando el prototipo experimental falla en campo
+   (ver Módulo de Trueque Tecnológico en MECÁNICAS PROFUNDAS).
+
+Sprint asignado: Sprint 6 (sincronizado con Módulo de Trueque).
+Compatibilidad: extiende el sistema de patrullaje del Sprint 2b.
+
+
+=======================================================================
+ MECÁNICAS DE JUEGO PROFUNDO — DISEÑO v2.6
+ Fuente: Sesión DeepSeek 13/06/2026
+=======================================================================
+
+--- SISTEMA DE LEYES DINÁMICAS Y LOBBY CORPORATIVO (Sprint 5) ---
+
+  "Congreso de Accionistas y Reguladores":
+    Eventos aleatorios de regulaciones fiscales, conflictos sindicales,
+    demandas ambientales o laborales que interrumpen la operación.
+
+  EJEMPLO DE EVENTO:
+    "El gremio de soldadores exige +20% de aumento por insalubridad
+     radiológica en el taller."
+    Opción A → ACEPTAR: Burn Rate sube, moral del equipo al 100%.
+    Opción B → RECHAZAR con artilugio legal (enseñado por Academy):
+      → Se ahorra cash flow.
+      → "The Daily Glitch" publica una parodia el turno siguiente.
+      → Requiere respuesta académica correcta del Tutor para activarse.
+
+  INTEGRACIÓN PEDAGÓGICA:
+    Los eventos se resuelven aplicando teoría contable y societaria
+    del módulo Sovereign Academy. El tutor IA valida la respuesta.
+
+--- MÓDULO DE TRUEQUE TECNOLÓGICO Y PRUEBAS DE CAMPO (Sprint 6) ---
+
+  MECÁNICA RECTORA — Descuento Logístico:
+    Permite mitigar el costo de contratación de PMCs entregando
+    prototipos experimentales (Sukhoi/Reaper) a cambio de servicios.
+    Reduce gasto de Tesorería hasta un 80% protegiendo el Free Cash Flow.
+    Riesgo: se pierde hardware de la firma si el prototipo falla.
+
+  SISTEMA DE RETORNO CIENTÍFICO (I+D — rol del Primo):
+    El despliegue de drones experimentales en el mapa Leaflet activa
+    el "Reporte de Telemetría" en la consola Sovereign Telemetry.
+    Bonificación: Puntos de Investigación I+D al finalizar combate.
+    Árbol Tecnológico que se desbloquea:
+      → Autonomía → Intercepción → Blindaje
+    Factor de Riesgo:
+      Si el prototipo falla:
+        - Contrato con la PMC se anula.
+        - Rutas de suministro bloqueadas (mapa Leaflet bloqueado).
+        - Penalización en Obligaciones Negociables en Firebase.
+
+--- MOTOR DE EVENTOS HISTÓRICOS (Sprint 7) ---
+
+  LOGÍSTICA DE TIEMPO:
+    Contador JS interno: 1 Hora Real = 1 Año Virtual del Sandbox.
+    Triggers automáticos locales — CERO consumo de API.
+    Corre en paralelo al motor de turnos por trimestre.
+
+  MATRIZ DE INFORTUNIOS HISTÓRICOS (carga inicial sugerida):
+    Año 2-3: Balcanes entran en Tercera Guerra Mundial.
+             Invasión Anglo-Francesa en África Central es repelida.
+             → Desbloquea contratos logísticos indirectos.
+    Año 5:   Caos urbano en Los Ángeles. Rebelión armada en Finlandia.
+    Año 8:   Moscú unifica el Báltico. Torres ciberpunk de 2 km.
+             Estética visual del mapa Leaflet cambia a modo Ciberpunk.
+    Año 10:  DLC Lunar de Emergencia → Alunizaje Ruso.
+             Desbloquea módulo de operaciones espaciales.
+
+  INTEGRACIÓN CON HAIKU:
+    Si el año virtual activa una anomalía financiera o geopolítica →
+    Haiku redacta la primera plana de "Sovereign Terminal" o
+    "The Daily Glitch" adaptada al año virtual en curso.
+    Costo estimado: micro-centavos por evento.
+
+--- SISTEMA PPC — OPERACIONES CON CONTRATISTAS PRIVADOS (Sprint 7) ---
+
+  PÉRDIDA DE SUMINISTRO PROTEGIDO:
+    Si rutas de acero o chips caen en zona de tensión (Efecto Mariposa) →
+    el flujo de insumos se congela. Primo no puede construir.
+
+  ESCALA DE ACCIÓN OPERATIVA (mapea sobre los Niveles N1/N2/N3):
+    N1 (Garaje): Subcontratación de PMCs internacionales.
+                 (Rusos / US / Chinos) para custodiar rutas.
+                 Penaliza Margen Neto pero preserva producción.
+    N2 (Pyme):   Lobby Estatal. Palancas políticas para instar despliegue
+                 del Ejército Nacional a cambio de contratos o riesgo fiscal.
+    N3 (Corp):   Fundación PMC Subsidiaria Propia — "Sovereign Tactical".
+                 El Primo la equipa con hardware SCI-FI (Sprint 6).
+                 PEI financia despliegue en África, Balcanes o la Luna
+                 para asegurar monopolios de materias primas.
+
+  COBERTURA DE PRENSA INDUSTRIAL:
+    "Jane's Defence Report" o "The Daily Glitch" cubren combates de la PMC:
+      - Bajas y eficiencia táctica.
+      - Impacto en el valor de las Obligaciones Negociables (ONs).
+
+
+=======================================================================
+ SPRINT 0 — COMPLETADO ✅
+ Esqueleto base (index.html) — Panel del Economista
+=======================================================================
+
+FECHA: 11/06/2026 | ARCHIVO: index.html (621 líneas)
+URL: https://pedritozar.github.io/Sovereign-shield-sandbox
+
+FEATURES IMPLEMENTADAS:
+  - Modal de API Key Anthropic (sk-ant-) → localStorage
+  - Firebase con initFirebaseWithRetry() — 10 intentos / 300ms
+  - LED verde/rojo "ONLINE — FIREBASE LINKED" en tiempo real
+  - 4 Tabs: Tesorería, Mapa Táctico, Sovereign Academy, Bitácora
+  - Niveles por PR: N1 (0-10k), N2 (10k-50k), N3 (+50k)
+  - Barra de progreso dinámica hacia siguiente nivel
+  - CSV trading con PapaParse + parseFloat() estricto
+  - Tesorería actualizada via transaction() en Firebase
+  - Mapa Leaflet centrado en Argentina (inicialización segura)
+  - Marcadores: HQ Buenos Aires + Base Patagónica (bloqueada N2)
+  - Teatros con zoom animado + bloqueo por nivel
+  - Tutor IA: Haiku (default) / Sonnet (switch manual)
+  - Pizarrón académico con "Fijar Contexto"
+  - Bitácora local con export .txt
+  - Play/Pause → simulacion_pausada en Firebase
+  - Reset → USD 500k + N1 + Trimestre 1
+  - Boost Debug → +25,000 PR (solo con ?debug=true en URL)
+  - Modo de Tiempo: Turnos / Acelerado / Libre
+  - Aprobación trimestral con consenso de ambos jugadores
+
+SOLUCIÓN TÉCNICA CLAVE — Error "firebase is not defined":
+  SDKs del CDN cargan async. initFirebaseWithRetry() reintenta
+  cada 300ms hasta 10 veces antes de mostrar error en pantalla.
+
+
+=======================================================================
+ SPRINT 1 — COMPLETADO ✅
+ Panel del Ingeniero Civil (primo.html)
+=======================================================================
+
+FECHA: 11/06/2026 | ARCHIVO: primo.html (260 líneas)
+URL: https://pedritozar.github.io/Sovereign-shield-sandbox/primo.html
+CONTRASEÑA: civil2026 (cambiable en línea ~82)
+
+FEATURES IMPLEMENTADAS:
+  - Modal de contraseña simple (sin API Key — primo no la necesita)
+  - Firebase mismo retry robusto + misma config que index.html
+  - LED de conexión en tiempo real
+  - Visualización en tiempo real: tesorería, presupuesto preaprobado,
+    aprobación propia, aprobación del Economista, nivel, trimestre
+  - Botón "APROBAR TRIMESTRE":
+      aprobacion_civil = true en Firebase.
+      Cuando eco + civil aprueban → trimestre avanza + reset banderas.
+  - Botón "CONSTRUIR BÚNKER ESTÁNDAR (-10,000 USD)":
+      transaction() para atomicidad. Aborta si fondos insuficientes.
+  - Bitácora de obra con export .txt
+
+NOTA: El nodo buzon_ordenes/presupuesto_preaprobado_infraestructura
+ya existe en Firebase — listo para que el Economista lo setee en S2.
+
+
+=======================================================================
+ HERRAMIENTA ADICIONAL — COMPLETADA ✅
+ Reactor Nuclear IA (generador.html — LOCAL en Mac)
+=======================================================================
+
+FECHA: 12/06/2026 | ARCHIVO: generador.html (504 líneas)
+USO: Abrí en Chrome localmente. NUNCA subir a GitHub.
+
+PROPÓSITO: Generar archivos HTML completos usando la API de Anthropic
+propia de PEI, sin límites de tokens de la app web de Claude.
+
+CARACTERÍSTICAS:
+  - Selector: Sonnet 4.6 (recomendado) / Haiku 3 / Opus 4.6
+  - Cálculo de costo en USD por generación (tiempo real)
+  - 7 plantillas rápidas (Sprint SS, panel Matrix, Firebase,
+    Leaflet, tutor IA, feed prensa, sandbox completo)
+  - Campo de contexto → pegar CHANGELOG antes de generar
+  - Botón Descargar → archivo listo para git push
+  - Historial de 10 generaciones en localStorage
+  - Timer en vivo + estadísticas de sesión
+
+COSTOS REALES (Anthropic 2026):
+  Sonnet 4.6: $0.003/1K entrada | $0.015/1K salida
+  Haiku 3:    $0.00025/1K entrada | $0.00125/1K salida
+  index.html completo (~600 líneas) ≈ USD 0.05 con Sonnet
+  Con USD 5 → ~100 archivos completos con Sonnet
+
+ESTRATEGIA:
+  generador.html → produce HTMLs (Sprint 2 en adelante)
+  DeepSeek → arquitectura, prompts, debugging conceptual
+  Claude app → revisión, CHANGELOG, decisiones estratégicas
+
+ROAD MAP: Ver sección GENERADOR.HTML v3.0 — UPGRADES PLANIFICADOS.
+
+
+=======================================================================
+ ESTRUCTURA DE FIREBASE (nodos activos)
+=======================================================================
+
+partida/
+  tiempo/
+    trimestre_actual: Integer (inicia en 1)
+    simulacion_pausada: Boolean (default: true)
+    modo_tiempo: "turnos" | "acelerado" | "libre"
+  finanzas/
+    tesoreria: Float (inicia en 500000)
+    burn_rate_mensual: Integer
+    ingresos_saas_mensual: Integer
+    deuda_bancaria_total: Integer
+    fondo_reserva_liquida: Float
+    indice_inflacion_virtual: Float (base 1.0 — Sprint 7)
+    tipo_cambio_virtual: Float (base 1.0 — Sprint 7)
+  estado/
+    puntos_reputacion: Integer
+    nivel_actual: 1 | 2 | 3
+    aprobacion_economista: Boolean
+    aprobacion_civil: Boolean
+  buzon_ordenes/
+    presupuesto_preaprobado_infraestructura: Integer
+    nota_directorio: String
+  ppc/ (Sprint 7)
+    pmc_activa: Boolean
+    rutas_bloqueadas: Boolean
+    obligaciones_negociables: Float
+  tecnologia/ (Sprint 6)
+    puntos_id: Integer
+    nivel_autonomia: Integer
+    nivel_intercepcion: Integer
+    nivel_blindaje: Integer
+
+
+=======================================================================
+ OBSTÁCULOS TÉCNICOS CONOCIDOS — REGLAS PARA LAS IAs
+=======================================================================
+
+1. TIPOS DE VARIABLES (JavaScript no tipado):
+   PapaParse lee strings. SIEMPRE parseFloat() o Number() antes
+   de operar. Error típico: "1500" + 1 = "15001".
+
+2. LEAFLET ASÍNCRONO:
+   SIEMPRE validar: if (typeof L === 'undefined') esperar 500ms.
+   Nunca inicializar el mapa antes de que el CDN haya cargado.
+
+3. FIREBASE ESCRITURA MASIVA:
+   Animaciones corren LOCAL (CSS/Canvas/RequestAnimationFrame).
+   Firebase recibe SOLO el resultado final (Éxito/Fallo/Costo).
+
+4. API KEY SEGURIDAD:
+   NUNCA en código fuente ni en GitHub.
+   SIEMPRE: localStorage.getItem('ss_anthropic_key').
+
+5. RACE CONDITIONS EN TESORERÍA:
+   SIEMPRE usar transaction() para debitar/acreditar tesorería.
+   Nunca usar set() directo para valores financieros compartidos.
+
+6. ANTI-SPAM API:
+   Cooldown de 15 segundos en botón de crisis geopolítica.
+   Barra de progreso visual durante el cooldown.
+
+
+=======================================================================
+ PUNTOS CIEGOS LEGALES (RESOLVER ANTES DE ESCALAR)
+=======================================================================
+
+1. ANMaC (Argentina):
+   Civil no puede fabricar/operar dron artillado.
+   SOLUCIÓN: Presentarse como "Plataforma ISR" (Inteligencia,
+   Vigilancia y Reconocimiento). SS vende los ojos, no el gatillo.
+
+2. ITAR (EE.UU.):
+   Conexión a APIs militares clasificadas → restricciones de export.
+   SOLUCIÓN Stack Soberano Anti-ITAR:
+     Datos: Sentinel (ESA/Copernicus) + CONAE Argentina.
+     Satelital: SATELLOGIC (empresa argentina, cotiza en Wall St).
+     Hardware: NVIDIA Jetson o Apple Silicon (off-the-shelf).
+
+3. Liquidez vs Contratos Estatales:
+   Contratos de defensa tardan años en cobrarse.
+   SOLUCIÓN: Línea Dual-Use comercial desde Día 1.
+     El mismo algoritmo de frontera detecta fallas en Vaca Muerta
+     o estrés hídrico en el agro → flujo de caja inmediato en USD.
+
+
+=======================================================================
+ RELACIÓN CON ECOSISTEMA PEI
+=======================================================================
+
+SAVT (Sistema Autónomo de Vigilancia Territorial):
+  Proyecto OSINT personal de PEI. Sin socios.
+  Comparte stack GIS (Mapbox, Leaflet, Computer Vision).
+  Convergencia proyectada con Sovereign Shield en Fase 3.
+
+ZAR Capital Simulator:
+  Proyecto completamente independiente. No mezclar.
+  Simulador de hedge fund institucional con ZAR Capital Partners.
+
+Ikariam Sandbox Greco-Romano (FUTURO — no activo):
+  Dracmas de Plata, Mar Egeo en Leaflet, consejeros IA.
+  Se programa DESPUÉS de completar Sovereign Shield.
+
+
+=======================================================================
+ PROTOCOLOS DE AUDITORÍA Y CONTROL — REGLA DE DOWNSCALING
+ Fuente: Sesión de diseño DeepSeek 13/06/2026
+=======================================================================
+
+REGLA DE ORO — FILTRO QUIRÚRGICO:
+  Queda PROHIBIDO pegar el HTML completo (~16K/30K tokens) dentro de
+  Claude App. Hacerlo anula el ahorro de tokens y satura el contexto.
+
+PROTOCOLO DE CONTROL DE CALIDAD POR PARCHES:
+  1. EJECUCIÓN LOCAL: Abrir el HTML en Chrome en la Mac.
+  2. DETECCIÓN: Usar Consola de Desarrollador (Cmd + Option + I).
+     Identificar el error específico en texto rojo.
+  3. EXTRACCIÓN: Copiar únicamente la función o bloque CSS que falla.
+     Fragmentos menores a 500 tokens.
+  4. CONSULTA CORTA: Pegar en Claude App solo el fragmento + el error.
+
+RESULTADO CONTABLE:
+  El consumo por pregunta baja de ~30,000 a ~500 tokens.
+  La sesión web de Claude se mantiene limpia, ligera y libre de
+  bloqueos por contexto saturado.
+
+DERIVADO: Esta regla complementa la estrategia de bloques quirúrgicos
+  documentada en la sección FLUJO DE TRABAJO.
+
+
+=======================================================================
+ FLUJO DE TRABAJO (desde Sprint 2 en adelante)
+=======================================================================
+
+1. Abrir generador.html localmente en Chrome
+2. Pegar CHANGELOG actualizado en campo "Contexto"
+3. ESTRATEGIA CONFIRMADA (Sprint 2):
+   a. Para archivos NUEVOS: usar 16K tokens, archivo completo
+   b. Para MODIFICAR existentes: prompts quirúrgicos por bloques
+      Bloque CSS → Bloque HTML → Bloque JS (partes A/B/C/D)
+      DeepSeek genera los bloques, Claude los aplica con str_replace
+4. Generar → revisar → aplicar quirúrgicamente
+5. cp ~/Desktop/archivo.html ~/Documents/Simuladores/sovereign-shield-sandbox/
+6. git add . → git commit -m "Sprint X: descripción" → git push origin main
+7. Verificar en https://pedritozar.github.io/Sovereign-shield-sandbox
+
+NOTA v2.6: Los archivos generados van a ~/Desktop (no ~/Downloads).
+
+
+=======================================================================
+ REGLAS PARA PRÓXIMAS SESIONES CON IAs
+=======================================================================
+
+REGLAS DE DESARROLLO:
+  - Leer este CHANGELOG completo antes de proponer cualquier cambio.
+  - NO agregar features nuevas antes de cerrar el sprint actual.
+  - Scope creep activo: no saltar al Sprint 3 antes del 2b. ← CERRADO.
+  - transaction() para TODA operación que modifique tesorería.
+  - API Key NUNCA en código fuente ni en GitHub.
+  - Animaciones en CSS/Canvas LOCAL. Firebase recibe solo resultado.
+  - Leaflet: validar typeof L !== 'undefined' antes de usar.
+  - PapaParse: parseFloat() antes de operar cualquier número.
+  - Firebase: usar dbRef.child('ruta') — NO dbRef.ref() ni database.ref()
+  - TOKENS: archivos >600 líneas → estrategia bloques quirúrgicos.
+    Reactor en 16K solo para archivos NUEVOS desde cero.
+    Para MODIFICAR existentes → Claude aplica str_replace quirúrgico.
+  - DOWNSCALING (v2.6): NUNCA pegar HTML completo en Claude App.
+    Siempre extraer el bloque/función problemático (<500 tokens).
+
+REGLAS DE PROYECTO:
+  - Sovereign Academy = módulo INTERNO de Sovereign Shield.
+  - Ikariam Sandbox = proyecto FUTURO, no activo hoy.
+  - ZAR Capital = proyecto completamente independiente.
+  - generador.html = LOCAL, nunca deployar en GitHub Pages.
+  - Si PEI propone features nuevas antes de cerrar sprint → FRENAR.
+
+
+=======================================================================
+ PENDIENTES — SPRINTS SIGUIENTES
+=======================================================================
+
+SPRINT 2 — Motor Geopolítico y Mapas: ✅ COMPLETO
+  [✅] Círculos de radar intermitentes — 3 anillos 100/200/300km HQ BA
+  [✅] Líneas de patrullaje dinámicas — 2 rutas (Costera + Frontera)
+       L.polyline punteado #58a6ff + drones L.circleMarker animados
+       setInterval 3000ms, movimiento cíclico, limpieza en reset
+  [✅] Desbloqueo Base Patagónica N2 — listener Firebase, rojo→verde
+  [✅] Buzón de Órdenes al Primo — set() Firebase, display tiempo real
+  [✅] Clima en teatros — fetchClimaTeatro() con OpenWeatherMap
+       ⚠️ Migrar a Open-Meteo al inicio Sprint 3 (tarea 0 del sprint)
+
+SPRINT 3 — IA y Prensa Dinámica: ← PRÓXIMO
+  [ ] Migrar clima: OpenWeatherMap → Open-Meteo (sin API key, gratis)
+  [ ] Feed de Prensa 4 cabeceras CSS dinámicas
+  [ ] Noticias generadas por Claude Haiku según estado Firebase
+  [ ] GIPHY API para imágenes animadas
+  [ ] Evento "Kessler Syndrome" (canvas partículas CSS)
+  [ ] Efectos de sonido tácticos (Web Audio API nativa)
+  [ ] Chart.js Finance Terminal — Tab Tesorería
+      (FCF, EBITDA, Apalancamiento, Burn Rate — look Bloomberg)
+
+SPRINT 4 — Sovereign Academy (mejoras + upgrades profundos):
+  [ ] Export bitácora de estudio a Markdown (.md)
+  [ ] Historial de consultas separado
+  [ ] Detección "Zona de Alerta"
+  [ ] ACADEMY U3 — Cache SHA-256 anti-duplicado (IndexedDB + localStorage)
+      Implementar PRIMERO — infraestructura base para U1 y U2.
+  [ ] ACADEMY U1 — Anki Flashcard Generator (Haiku + CSS 3D flip)
+  [ ] ACADEMY U2 — Mock Exam Engine (Sonnet, notas 0-10, estilo UBA)
+  [ ] ACADEMY U4 — Voice Mode (window.speechSynthesis, cero tokens)
+
+SPRINT 5 — APIs externas y COOP avanzado:
+  [ ] FRED API (tasa Fed real → créditos del juego)
+  [ ] Open Notify API (ISS → bonus de radar)
+  [ ] Selector SOLO / COOP en UI
+  [ ] Modo Fantasma (primo offline → IA autopilota su rol)
+  [ ] Sistema de Leyes Dinámicas y Lobby Corporativo
+      ("Congreso de Accionistas" — eventos regulatorios + Academy)
+
+SPRINT 6 — Módulos de Ingeniería Civil + Trueque Tecnológico:
+  [ ] Blueprints (plantillas pre-armadas con costo y tiempo)
+  [ ] Cálculo estructural hormigón H-30/H-50
+  [ ] Simulación desastres naturales (sismos, inundaciones)
+  [ ] Fatiga de materiales por ataque real
+  [ ] Módulo de Trueque Tecnológico (prototipos vs PMC — Sprint 6)
+      Descuento logístico hasta 80% + Sistema I+D + árbol tecnológico
+  [ ] Animaciones Vectoriales Tácticas CSS3/SVG
+      (Tracción, Vuelo orbital, Impactos, Efecto Glitch/Derribo)
+
+SPRINT 7 — Mecánicas Profundas y Economía Geopolítica (NUEVO):
+  [ ] Motor de Eventos Históricos (1h Real = 1 Año Virtual en JS)
+  [ ] Matriz de Infortunios Históricos (Año 2→Balcanes, Año 5→LA...)
+  [ ] Integración Haiku → titulares adaptados al año virtual en curso
+  [ ] Sistema PPC — Contratistas Privados + Lobby + "Sovereign Tactical"
+  [ ] Currency Run Engine (devaluación/inflación virtual por deuda)
+      Firebase: indice_inflacion_virtual + tipo_cambio_virtual
+  [ ] Sovereign Telemetry — consola de logs flotante en el juego
+      (Reactor Upgrade 9 integrado al juego)
+
+REACTOR v3.0 ROAD MAP (track paralelo, no bloquea sprints):
+  IMPLEMENTADOS v3.0 (sesión 13/06/2026): ✅
+  [✅] Upgrade 2  — Filtro Sanitario Anti-Bugs
+  [✅] Upgrade 7  — Patch Inverse Engineering
+  [✅] Upgrade 10 — IndexedDB Versioning / Git Local
+  [✅] Upgrade 12 — GitHub API Connector / One-Click Deploy
+  [✅] Fable 5    — Motor claude-fable-5 integrado en selector
+
+  PENDIENTE v3.1 (mañana — implementar con el reactor):
+  [🎨] Animaciones de fondo (CSS puro — Opciones 2 + 4 de DeepSeek):
+       Opción 2: pulsos electromagnéticos en bordes (::before/::after CSS)
+       Opción 4: ondas concéntricas desde botón GENERAR (@keyframes CSS)
+       Switch ON/OFF en sidebar → preferencia en localStorage
+       Costo implementación: ~30 líneas CSS, cero impacto performance.
+
+  ALTA (próximas sesiones):
+  [Alta]  Upgrade 1  — Inyección Modular Lego-Style
+  [Alta]  Upgrade 3  — Auto-Documenter (mapa_codigo.txt)
+
+  MEDIA (cuando corresponda):
+  [Media] Upgrade 6  — Offline Emergency Mode
+  [Media] Upgrade 9  — Sovereign Telemetry
+
+  BAJA / DEBATIDO:
+  [Baja]  Upgrade 4  — CDN Dynamic Switchboard
+  [Baja]  Upgrade 8  — CSS Compiler / Purgado Estético
+  [❌]    Upgrade 5  — Tree Shaking (descartado por ahora)
+  [⚠️→plantilla] Upgrade 11 — Stress Test Engine
+    NOTA: Convertido a plantilla "🔥 Stress Test Firebase" en TEMPLATES.
+
+  SINERGIA IndexedDB:
+    Upgrade 10 (reactor) y Academy Upgrade 3 (index.html) comparten
+    el mismo patrón de apertura/lectura/escritura de IndexedDB.
+    Implementar Upgrade 10 primero y reutilizar la función base.
+
+PROYECTOS FUTUROS (no activos):
+  [ ] Ikariam Sandbox Greco-Romano
+  [ ] ZAR Capital Simulator (independiente)
+
+
+=======================================================================
+ ARCHIVOS EN PRODUCCIÓN
+=======================================================================
+
+index.html      → Panel Economista. Sprint 2+2b ✅ GitHub Pages.
+                  862 líneas. Commit: 4d7a56b
+primo.html      → Panel Civil v2 ✅ GitHub Pages.
+                  1162 líneas. Commit: ca1f2d4
+generador.html  → Reactor Nuclear IA. LOCAL en Mac. NO a GitHub.
+                  Fix 16K tokens aplicado ✅
+                  Road Map v3.0: ver sección UPGRADES PLANIFICADOS.
+README.md       → Generado por GitHub al crear el repo.
+
+
+=======================================================================
+ HISTORIAL DE VERSIONES
+=======================================================================
+
+v0.1.0-Alpha (04/06/2026): Concepto "Global Situation Room".
+  Hardware 3 pantallas, capas de datos GIS, paleta de colores.
+
+v1.0 (09/06/2026): Primera documentación formal.
+  Motor base GitHub Actions, módulo financiero v1.1, CI/CD activo.
+
+v2.0 (11/06/2026): Consolidación maestra completa.
+  Arquitectura 100% JS definida. Niveles por PR. Military Scaling.
+  Sovereign Academy integrada. Motor híbrido Haiku/Sonnet.
+  APIs externas confirmadas. Tiempo asincrónico Ikariam Engine.
+  Session Selector SOLO/COOP. Feed de Prensa 4 cabeceras.
+
+v2.1 (11/06/2026): Sprint 0 y Sprint 1 completados y deployados.
+  index.html + primo.html en GitHub Pages.
+  Firebase conectado y sincronizando en tiempo real entre 2 PCs.
+
+v2.2 (12/06/2026): Reactor Nuclear IA (generador.html) completado.
+  Estrategia API propia documentada. Flujo Sprint 2+ definido.
+
+v2.3 (12/06/2026): FUSIÓN DEFINITIVA v2.0 + v2.2.
+  Documento maestro único con doctrina completa + estado de desarrollo.
+
+v2.4 (13/06/2026): Sprint 2 core completado y deployado.
+  Sesión nocturna PEI — Stack IA: Claude + DeepSeek + Reactor.
+  Features deployadas en index.html (732 líneas, commit 2124923):
+    - Radares CSS: 3 anillos concéntricos pulsantes sobre HQ Buenos Aires
+      @keyframes radarPulse, L.circle 100/200/300km, clases radar-ring-1/2/3
+    - Base Patagónica dinámica: L.circleMarker rojo→verde según nivel_actual
+      función actualizarEstadoMapa(nivel), listener Firebase en tiempo real
+    - Buzón de Órdenes al Primo: panel completo en Tab Tesorería
+      set() en partida/buzon_ordenes/, display reactivo, verificado ✅
+  Reactor Nuclear IA: fix 16K tokens aplicado en generador.html
+  Metodología confirmada: bloques quirúrgicos > archivos completos
+  Lección tokens: archivos >600 líneas no caben en 8K. Usar 16K o bloques.
+
+v2.5 (13/06/2026): Sprint 2b completado — SPRINT 2 CERRADO ✅
+  Features deployadas (commit 4d7a56b — 862 líneas):
+    - Patrullaje drones: 2 rutas L.polyline punteadas + markers animados
+      setInterval 3000ms, movimiento cíclico, limpieza en resetPartida()
+    - Clima OpenWeatherMap: fetchClimaTeatro(), localStorage('ss_owm_key')
+      ⚠️ Migrar a Open-Meteo al inicio Sprint 3 (sin API Key, instantáneo)
+  primo.html v2 (commit ca1f2d4 — 1162 líneas):
+    - Buzón Órdenes recibidas + display nivel/trimestre tiempo real
+  Deploy confirmado: archivos generados van a ~/Desktop (no ~/Downloads)
+  Stack sesión: Claude (str_replace quirúrgico) + DeepSeek (bloques JS)
+
+v2.6 (13/06/2026): Sesión de diseño nocturna — DeepSeek + PEI.
+  EXPANSIÓN DE DOCTRINA: 5 secciones nuevas incorporadas al CHANGELOG.
+  No hay código deployado — es una sesión de arquitectura y diseño.
+    - Sección nueva: GENERADOR.HTML v3.0 — 9 UPGRADES planificados
+      (modular, sanitario, documenter, CDN switch, tree shake,
+       offline mode, patch inverse, CSS purge, telemetry)
+    - Sección nueva: ANIMACIONES VECTORIALES TÁCTICAS CSS3/SVG
+      (tracción, vuelo orbital, impactos, efecto glitch/derribo)
+    - Sección nueva: MECÁNICAS DE JUEGO PROFUNDO
+      (Leyes & Lobby, Trueque Tecnológico, Motor Histórico, PPC)
+    - Sección nueva: PROTOCOLOS DE AUDITORÍA Y CONTROL
+      (Regla Downscaling — 30K tokens → 500 tokens por consulta)
+    - Sprint 7 creado: Currency Run Engine, Motor Histórico, PPC
+    - Sprint 3 ampliado: Chart.js Finance Terminal integrado
+    - Sprint 5 ampliado: Leyes Dinámicas & Lobby
+    - Sprint 6 ampliado: Trueque Tecnológico + Animaciones SVG
+    - Firebase: nodos PPC y tecnologia/ esquematizados para Sprint 7
+    - Sistema de Niveles N1/N2/N3 ampliado con capa PPC por nivel
+
+v2.8 (13/06/2026): Reactor Nuclear IA v3.0 deployado — sesión nocturna PEI.
+  Código implementado y testeado. generador.html: 713 líneas → LOCAL en Mac.
+    - U2 Sanitizer Anti-Bugs: corre automático post-generación.
+        Detecta: output truncado (</html> faltante), comentarios truncación
+        (// ...), llaves JS desbalanceadas, tags HTML sin cerrar.
+        Status bar se pone rojo si hay advertencias.
+    - U7 Patch Inverse Engineering: botón 🔧 Parche en el output.
+        Find exacto por indexOf (no regex — evita conflictos con $ en código).
+        Re-sanitiza automáticamente después de aplicar el parche.
+    - U10 IndexedDB Versioning: snapshots automáticos en IndexedDB del browser.
+        DB: 'ReactorNuclearV3' / Store: 'snaps'. Sobrevive al reload.
+        Últimos 10 snapshots en sidebar. Restaurar con un clic.
+        Re-sanitiza al restaurar. Botón limpiar todo.
+    - U12 GitHub One-Click Deploy: deploy directo sin terminal.
+        Flujo: GET SHA del archivo actual → PUT base64 (TextEncoder UTF-8).
+        Token ghp_ guardado en localStorage enmascarado.
+        Commit SHA confirmado en pantalla. GitHub Pages actualiza en ~1min.
+    - Upgrade 11 reconvertido: plantilla "🔥 Stress Test Firebase" en TEMPLATES.
+    - claude-fable-5 integrado: selector + PRECIOS ($0.01/$0.05 por 1K tokens).
+        API string oficial: claude-fable-5 (lanzado 09/06/2026).
+        Pricing: $10/M input | $50/M output. 3-4x más caro que Sonnet.
+        Disponible vía API aunque "unavailable" en UI Claude.ai (capacidad).
+    - Animaciones reactor v3.1: PENDIENTE para mañana (CSS Opciones 2+4).
+  Academy upgrades U1-U4: diseño completo en v2.7. Implementación: Sprint 4.
+  Animaciones del reactor: diseño completo de DeepSeek archivado. Sprint v3.1.
+
+
+=======================================================================
+ FIN DEL CHANGELOG v2.8 — SOVEREIGN SHIELD AEROESPACIAL
+ Próxima sesión: Reactor v3.1 (animaciones CSS) + SPRINT 3 sandbox
+=======================================================================
