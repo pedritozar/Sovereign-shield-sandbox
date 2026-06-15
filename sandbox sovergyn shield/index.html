@@ -98,6 +98,11 @@
         .btn-amber{border-color:#e3b341;color:#e3b341}
         .btn-amber:hover{background:#e3b341;color:#0d1117;border-color:#e3b341}
         #financeChart{background:#000;border-radius:4px;padding:4px}
+        /* ========== SPRINT 4 - ACADEMY UPGRADES ========== */
+        .hist-item{padding:5px 7px;border-bottom:1px solid #21262d;cursor:pointer;border-radius:3px}
+        .hist-item:hover{background:#21262d}
+        .hist-pregunta{color:var(--txt);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .hist-meta{color:#8b949e;font-size:10px;margin-top:2px}
     </style>
 </head>
 <body>
@@ -262,6 +267,35 @@
     </div>
     <div class="chat-area" id="chatArea">
         <div class="msg">📘 Tutor listo. Fijá contexto con tus apuntes o hacé una pregunta directa.</div>
+    </div>
+    <!-- ========== SPRINT 4 - U2: EXPORTAR SESIÓN ========== -->
+    <div style="margin-top:6px">
+        <button id="exportarSesionBtn" class="btn-blue" style="width:auto">📄 EXPORTAR SESIÓN (.txt)</button>
+    </div>
+    <!-- ========== SPRINT 4 - U1: NOTAS PERSISTENTES ========== -->
+    <div class="panel" style="margin-top:10px">
+        <h3>📚 NOTAS POR MATERIA — persistentes</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+            <select id="materiaSelect" style="flex:1;background:#0d1117;border:1px solid #30363d;color:var(--txt);font-family:monospace;padding:6px;border-radius:4px">
+                <option value="Economía">Economía</option>
+                <option value="Contabilidad">Contabilidad</option>
+                <option value="Derecho">Derecho</option>
+                <option value="Física">Física</option>
+                <option value="Ingeniería Civil">Ingeniería Civil</option>
+            </select>
+            <button id="cargarNotasBtn" class="btn-blue" style="width:auto">📂 Cargar</button>
+            <button id="guardarNotasBtn" style="width:auto;border-color:var(--green);color:var(--green)">💾 Guardar</button>
+        </div>
+        <textarea id="notasMateria" rows="4" placeholder="Notas para la materia seleccionada — se guardan en IndexedDB, persisten entre sesiones." style="background:#0d1117;color:var(--txt);font-family:monospace;font-size:12px;border:1px solid #30363d;width:100%;border-radius:4px;padding:7px"></textarea>
+        <small style="color:#8b949e;display:block;margin-top:5px">📌 No consumen API. Almacenadas localmente en tu navegador.</small>
+    </div>
+    <!-- ========== SPRINT 4 - U3: HISTORIAL DE CONSULTAS ========== -->
+    <div class="panel" id="historialPanel" style="margin-top:10px">
+        <h3 style="cursor:pointer" onclick="toggleHistorial()">📋 HISTORIAL DE CONSULTAS ▼</h3>
+        <div id="historialContent" style="display:none">
+            <div id="historialList" style="max-height:200px;overflow-y:auto;margin-bottom:8px;font-size:12px"></div>
+            <button id="verTodoHistorialBtn" class="btn-blue" style="width:auto">Ver últimas 20</button>
+        </div>
     </div>
 </div>
 
@@ -766,6 +800,8 @@ async function consultarTutor() {
         tutorDiv.innerHTML = '<strong>🎓 Tutor (' + (modeloActivo.includes('sonnet') ? 'Sonnet' : 'Haiku') + '):</strong><br>' + respuesta.replace(/\n/g, '<br>');
         chatArea.appendChild(tutorDiv);
         agregarEvento("Academy: consulta respondida.", "info");
+        if (typeof guardarConsultaHistorial === 'function') guardarConsultaHistorial(pregunta, respuesta);
+        if (typeof incrementarContador === 'function') incrementarContador();
     } catch(err) {
         thinkDiv.remove();
         var errDiv = document.createElement('div');
@@ -971,6 +1007,118 @@ async function updateFinanceChart(tipo) {
     agregarEvento('📊 Finance Terminal: ' + label, 'info');
 }
 
+// ========== SPRINT 4 - U1/U3: ACADEMY IndexedDB ==========
+let dbAcademy = null;
+function initAcademyDB() {
+    return new Promise(function(resolve, reject) {
+        if (dbAcademy) return resolve(dbAcademy);
+        var request = indexedDB.open('SovereignAcademy', 1);
+        request.onupgradeneeded = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains('notas')) db.createObjectStore('notas', { keyPath: 'materia' });
+            if (!db.objectStoreNames.contains('historial')) db.createObjectStore('historial', { autoIncrement: true });
+        };
+        request.onsuccess = function() { dbAcademy = request.result; resolve(dbAcademy); };
+        request.onerror = function() { reject(request.error); };
+    });
+}
+async function guardarNotasMateria(materia, texto) {
+    var db = await initAcademyDB();
+    var tx = db.transaction('notas', 'readwrite');
+    tx.objectStore('notas').put({ materia: materia, texto: texto, updatedAt: Date.now() });
+    return new Promise(function(resolve) { tx.oncomplete = resolve; });
+}
+async function cargarNotasMateria(materia) {
+    var db = await initAcademyDB();
+    var tx = db.transaction('notas', 'readonly');
+    return new Promise(function(resolve) {
+        var req = tx.objectStore('notas').get(materia);
+        req.onsuccess = function() { resolve(req.result ? req.result.texto : ''); };
+        req.onerror = function() { resolve(''); };
+    });
+}
+function guardarConsultaHistorial(pregunta, respuesta) {
+    if (!dbAcademy) return;
+    var tx = dbAcademy.transaction('historial', 'readwrite');
+    var store = tx.objectStore('historial');
+    var getAllReq = store.getAll();
+    getAllReq.onsuccess = function() {
+        var items = getAllReq.result;
+        items.unshift({ pregunta: pregunta, respuesta: respuesta, timestamp: Date.now() });
+        if (items.length > 20) items.pop();
+        store.clear();
+        items.forEach(function(item) { store.add(item); });
+    };
+}
+async function cargarHistorialItems(limite) {
+    limite = limite || 5;
+    if (!dbAcademy) return [];
+    var tx = dbAcademy.transaction('historial', 'readonly');
+    return new Promise(function(resolve) {
+        var req = tx.objectStore('historial').getAll();
+        req.onsuccess = function() {
+            var items = req.result.sort(function(a,b) { return b.timestamp - a.timestamp; });
+            resolve(items.slice(0, limite));
+        };
+        req.onerror = function() { resolve([]); };
+    });
+}
+async function mostrarHistorial(limite) {
+    limite = limite || 5;
+    var container = document.getElementById('historialList');
+    if (!container) return;
+    var items = await cargarHistorialItems(limite);
+    if (items.length === 0) { container.innerHTML = '<p style="color:#8b949e;font-size:12px">Sin consultas aún.</p>'; return; }
+    container.innerHTML = '';
+    items.forEach(function(item) {
+        var div = document.createElement('div');
+        div.className = 'hist-item';
+        div.innerHTML = '<div class="hist-pregunta">❓ ' + item.pregunta.substring(0,60) + (item.pregunta.length>60?'…':'') + '</div>' +
+                        '<div class="hist-meta">' + new Date(item.timestamp).toLocaleTimeString('es-AR') + '</div>';
+        div.onclick = function() { document.getElementById('preguntaInput').value = item.pregunta; };
+        container.appendChild(div);
+    });
+}
+function toggleHistorial() {
+    var content = document.getElementById('historialContent');
+    if (!content) return;
+    var visible = content.style.display !== 'none';
+    content.style.display = visible ? 'none' : 'block';
+    if (!visible) mostrarHistorial(5);
+}
+// ========== SPRINT 4 - U2: EXPORTAR SESIÓN ==========
+function exportarSesionAcademy() {
+    var chatContainer = document.getElementById('chatArea');
+    if (!chatContainer) return;
+    var mensajes = Array.from(chatContainer.querySelectorAll('.msg')).map(function(m) { return m.innerText; }).join('\n\n---\n\n');
+    var fecha = new Date().toLocaleString('es-AR').replace(/[/:]/g, '-');
+    var materia = (document.getElementById('materiaSelect') || {}).value || 'General';
+    var contenido = 'SOVEREIGN ACADEMY — SESIÓN DE ESTUDIO\nMateria: ' + materia + '\nFecha: ' + fecha + '\n\n' + mensajes;
+    var blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'Academy_' + materia + '_' + fecha + '.txt';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    agregarEvento('📄 Sesión Academy exportada.', 'info');
+}
+// ========== SPRINT 4 - U4: BADGE CONTADOR ==========
+var contadorConsultas = parseInt(localStorage.getItem('academy_contador') || '0');
+function actualizarBadgeAcademy() {
+    var tabBtn = Array.from(document.querySelectorAll('.tab-btn')).find(function(b) { return b.textContent.includes('SOVEREIGN ACADEMY'); });
+    if (tabBtn) tabBtn.textContent = contadorConsultas > 0 ? '🎓 SOVEREIGN ACADEMY (' + contadorConsultas + ')' : '🎓 SOVEREIGN ACADEMY';
+}
+function incrementarContador() {
+    contadorConsultas++;
+    localStorage.setItem('academy_contador', contadorConsultas);
+    actualizarBadgeAcademy();
+}
+function resetearContadorAcademy() {
+    contadorConsultas = 0;
+    localStorage.setItem('academy_contador', 0);
+    actualizarBadgeAcademy();
+}
+
 // ============ DOM READY ============
 document.addEventListener('DOMContentLoaded', function() {
     // Modal API Key
@@ -1081,7 +1229,29 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('apuntesTextarea').value = '';
         document.getElementById('chatArea').innerHTML = '<div class="msg">📘 Pizarrón limpio.</div>';
         agregarEvento("Academy: pizarrón limpiado.", "info");
+        resetearContadorAcademy();
     });
+    // ========== SPRINT 4 - ACADEMY UPGRADES ==========
+    initAcademyDB();
+    actualizarBadgeAcademy();
+    var cargarNotasBtn = document.getElementById('cargarNotasBtn');
+    var guardarNotasBtn = document.getElementById('guardarNotasBtn');
+    var notasTA = document.getElementById('notasMateria');
+    var materiaSelect = document.getElementById('materiaSelect');
+    if (cargarNotasBtn) cargarNotasBtn.addEventListener('click', async function() {
+        var materia = materiaSelect.value;
+        notasTA.value = await cargarNotasMateria(materia);
+        agregarEvento('📚 Notas cargadas: ' + materia, 'info');
+    });
+    if (guardarNotasBtn) guardarNotasBtn.addEventListener('click', async function() {
+        await guardarNotasMateria(materiaSelect.value, notasTA.value);
+        agregarEvento('💾 Notas guardadas: ' + materiaSelect.value, 'ingreso');
+    });
+    var exportarSesBtn = document.getElementById('exportarSesionBtn');
+    if (exportarSesBtn) exportarSesBtn.addEventListener('click', exportarSesionAcademy);
+    var verTodoBtn = document.getElementById('verTodoHistorialBtn');
+    if (verTodoBtn) verTodoBtn.addEventListener('click', function() { mostrarHistorial(20); });
+    setTimeout(function() { if (cargarNotasBtn) cargarNotasBtn.click(); }, 400);
     document.getElementById('modoHaikuBtn').addEventListener('click', function() {
         modeloActivo = 'claude-3-haiku-20240307';
         document.getElementById('modoHaikuBtn').style.background = 'var(--green)';
