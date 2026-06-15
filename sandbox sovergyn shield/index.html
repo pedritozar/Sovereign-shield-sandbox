@@ -136,6 +136,7 @@
     <button class="tab-btn" data-tab="tab3">🎓 SOVEREIGN ACADEMY</button>
     <button class="tab-btn" data-tab="tab4">📋 BITÁCORA</button>
     <button class="tab-btn" data-tab="tab5">📰 PRENSA</button>
+    <button class="tab-btn" data-tab="tab6">⚖️ LEYES & CONTRATOS</button>
 </div>
 
 <!-- TAB 1: TESORERÍA -->
@@ -347,6 +348,44 @@
     </div>
 </div>
 
+<!-- ========== SPRINT 5 - LEYES Y LOBBY ========== -->
+<div id="tab6" class="tab-content">
+    <div class="panel">
+        <h3>📜 MARCO LEGAL ACTIVO</h3>
+        <div id="leyesContainer" style="min-height:80px">
+            <p style="color:#8b949e;font-size:12px">Cargando leyes...</p>
+        </div>
+        <button id="refreshLeyesBtn" style="border-color:var(--blue);color:var(--blue);margin-top:8px">🔄 Actualizar leyes</button>
+    </div>
+    <div class="panel">
+        <h3>📄 CONTRATOS GUBERNAMENTALES</h3>
+        <div id="contratosContainer" style="min-height:80px">
+            <p style="color:#8b949e;font-size:12px">No hay contratos disponibles.</p>
+        </div>
+        <button id="aceptarContratoBtn" style="border-color:var(--green);color:var(--green);margin-top:8px">✅ Aceptar contrato seleccionado</button>
+    </div>
+    <div class="panel">
+        <h3>📋 CONTRATOS ACTIVOS</h3>
+        <div id="contratosActivosContainer">
+            <p style="color:#8b949e;font-size:12px">No hay contratos activos.</p>
+        </div>
+    </div>
+    <div class="panel">
+        <h3>🏛️ ACCIONES DE LOBBY</h3>
+        <p style="color:#8b949e;font-size:12px;margin-bottom:8px">Invertí 100 Puntos de Reputación para intentar modificar una ley activa.</p>
+        <select id="leyLobbySelect" style="margin:8px 0;background:var(--bg);color:var(--txt);border:1px solid #30363d;font-family:monospace;padding:6px;width:100%;border-radius:4px">
+            <option>Seleccioná una ley...</option>
+        </select>
+        <button id="hacerLobbyBtn" style="border-color:#e67e22;color:#e67e22">💰 Hacer lobby (gasta 100 PR)</button>
+    </div>
+    <div class="panel">
+        <h3>🌍 EVENTO POLÍTICO RECIENTE</h3>
+        <div id="eventoPoliticoDisplay">
+            <p style="color:#8b949e;font-size:12px">Sin eventos políticos recientes.</p>
+        </div>
+    </div>
+</div>
+
 <!-- FOOTER -->
 <div class="footer">
     <button id="playPauseBtn">▶ PLAY</button>
@@ -440,7 +479,10 @@ function inicializarFirebaseData() {
                 tiempo: { trimestre_actual: 1, simulacion_pausada: true, modo_tiempo: "turnos" },
                 finanzas: { tesoreria: 500000, burn_rate_mensual: 0, ingresos_saas_mensual: 0, deuda_bancaria_total: 0, fondo_reserva_liquida: 0 },
                 estado: { puntos_reputacion: 0, nivel_actual: 1, aprobacion_economista: false, aprobacion_civil: false },
-                buzon_ordenes: { presupuesto_preaprobado_infraestructura: 0, nota_directorio: "" }
+                buzon_ordenes: { presupuesto_preaprobado_infraestructura: 0, nota_directorio: "" },
+                legislacion: { leyes_activas: [], proximas_leyes: [] },
+                contratos: { activos: [], historial: [] },
+                lobby: { gasto_reputacion: 0, ultima_accion: null }
             }).then(function() { agregarEvento("Base de datos Firebase inicializada.", "info"); });
         } else {
             agregarEvento("Partida existente cargada.", "info");
@@ -556,6 +598,9 @@ function cerrarTrimestre() {
                     dbRef.child('partida/estado/aprobacion_economista').set(false);
                     dbRef.child('partida/estado/aprobacion_civil').set(false);
                     agregarEvento("✅ TRIMESTRE CERRADO. Ambos directores aprobaron.", "info");
+                    aplicarEfectosLeyes();
+                    verificarContratos();
+                    generarEventoPolitico();
                 }
             });
         });
@@ -1119,6 +1164,295 @@ function resetearContadorAcademy() {
     actualizarBadgeAcademy();
 }
 
+// ========== SPRINT 5 - BLOQUE 6: LEYES DINÁMICAS CON HAIKU ==========
+var cooldownLeyes = false;
+
+function cargarLeyesDinamicas() {
+    if (cooldownLeyes) { agregarEvento('⏳ Esperá 30 segundos antes de generar nuevas leyes.', 'gasto'); return; }
+    var btn = document.getElementById('refreshLeyesBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando...'; }
+    cooldownLeyes = true;
+    setTimeout(function() {
+        cooldownLeyes = false;
+        if (btn) { btn.disabled = false; btn.textContent = '🔄 Actualizar leyes'; }
+    }, 30000);
+    dbRef.child('partida/finanzas/tesoreria').once('value', function(snap) {
+        var tesoreria = snap.val() || 0;
+        dbRef.child('partida/estado/nivel_actual').once('value', function(snap2) {
+            var nivel = snap2.val() || 1;
+            dbRef.child('partida/tiempo/trimestre_actual').once('value', function(snap3) {
+                generarLeyesConHaiku(tesoreria, nivel, snap3.val() || 1);
+            });
+        });
+    });
+}
+
+function generarLeyesConHaiku(tesoreria, nivel, trimestre) {
+    var apiKey = localStorage.getItem('ss_anthropic_key');
+    if (!apiKey) { agregarEvento('⚠️ Sin API Key. Usando leyes estáticas de respaldo.', 'gasto'); cargarLeyesEstaticasFallback(); return; }
+    var prompt = 'Eres un legislador experto en economía de defensa. Generá 3 leyes ficticias para un simulador de empresa aeroespacial. Estado: tesorería=' + tesoreria + ' USD, nivel=' + nivel + ' (1=garaje,2=oficina,3=planta), trimestre=' + trimestre + '. Cada ley: nombre (corto), efecto (solo "impuesto_importaciones", "subsidio_id" o "aumento_burn"), valor (entero -30 a +30, negativo para subsidio). Respondé ÚNICAMENTE con JSON array sin markdown: [{"nombre":"...","efecto":"...","valor":0}]';
+    fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-3-haiku-20240307', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+    })
+    .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(function(data) {
+        var raw = data.content[0].text.replace(/```json/g,'').replace(/```/g,'').trim();
+        var leyes = JSON.parse(raw);
+        leyes = leyes.filter(function(l) { return l.nombre && ['impuesto_importaciones','subsidio_id','aumento_burn'].indexOf(l.efecto) !== -1 && typeof l.valor === 'number'; });
+        if (!leyes.length) throw new Error('Leyes inválidas');
+        dbRef.child('partida/legislacion/leyes_activas').set(leyes, function(err) {
+            if (err) { agregarEvento('❌ Error al guardar leyes.', 'gasto'); cargarLeyesEstaticasFallback(); }
+            else { agregarEvento('📜 Leyes dinámicas generadas por Haiku.', 'ingreso'); renderizarLeyes(); }
+        });
+    })
+    .catch(function() { agregarEvento('❌ Falló Haiku. Usando respaldo.', 'gasto'); cargarLeyesEstaticasFallback(); });
+}
+
+function cargarLeyesEstaticasFallback() {
+    dbRef.child('partida/legislacion/leyes_activas').set([
+        { nombre: "Ley de Protección Industrial", efecto: "impuesto_importaciones", valor: 20 },
+        { nombre: "Beneficios fiscales para I+D", efecto: "subsidio_id", valor: -15 },
+        { nombre: "Regulación ambiental estricta", efecto: "aumento_burn", valor: 10 }
+    ]).then(function() { agregarEvento('📜 Leyes estáticas de respaldo cargadas.', 'info'); renderizarLeyes(); });
+}
+
+function renderizarLeyes() {
+    var container = document.getElementById('leyesContainer');
+    if (!container) return;
+    dbRef.child('partida/legislacion/leyes_activas').once('value', function(snap) {
+        var leyes = snap.val() || [];
+        if (leyes.length === 0) {
+            container.innerHTML = '<p style="color:#8b949e;font-size:12px">No hay leyes activas.</p>';
+            return;
+        }
+        var html = '<ul style="list-style:none;padding-left:0">';
+        leyes.forEach(function(ley, idx) {
+            var efectoTexto = '';
+            if (ley.efecto === 'impuesto_importaciones') efectoTexto = '➕ Impuesto a importaciones: +' + ley.valor + '%';
+            else if (ley.efecto === 'subsidio_id') efectoTexto = '➖ Subsidio I+D: ' + Math.abs(ley.valor) + '% descuento';
+            else if (ley.efecto === 'aumento_burn') efectoTexto = '🔥 Aumento burn rate: +' + ley.valor + '%';
+            else efectoTexto = ley.efecto + ': ' + ley.valor;
+            html += '<li style="margin-bottom:8px;border-left:2px solid #238636;padding-left:8px"><strong>' + ley.nombre + '</strong><br><span style="color:#8b949e;font-size:11px">' + efectoTexto + '</span></li>';
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+        var select = document.getElementById('leyLobbySelect');
+        if (select) {
+            select.innerHTML = '<option value="">Seleccioná una ley...</option>';
+            leyes.forEach(function(ley, idx) {
+                var option = document.createElement('option');
+                option.value = idx;
+                option.textContent = ley.nombre;
+                select.appendChild(option);
+            });
+        }
+    });
+}
+
+async function aplicarEfectosLeyes() {
+    var snapshot = await dbRef.child('partida/legislacion/leyes_activas').once('value');
+    var leyes = snapshot.val() || [];
+    var ajustes = { impuesto: 0, subsidio: 0, burnExtra: 0 };
+    leyes.forEach(function(ley) {
+        if (ley.efecto === 'impuesto_importaciones') ajustes.impuesto += ley.valor;
+        else if (ley.efecto === 'subsidio_id') ajustes.subsidio += ley.valor;
+        else if (ley.efecto === 'aumento_burn') ajustes.burnExtra += ley.valor;
+    });
+    if (ajustes.impuesto !== 0) {
+        var tesoroSnap = await dbRef.child('partida/finanzas/tesoreria').once('value');
+        var tesoro = tesoroSnap.val() || 0;
+        var impuestoMonto = Math.floor(tesoro * (ajustes.impuesto / 100));
+        await dbRef.child('partida/finanzas/tesoreria').transaction(function(cur) { return (cur || 0) - impuestoMonto; });
+        agregarEvento('💰 Impuesto por leyes: -USD ' + impuestoMonto.toLocaleString() + ' aplicado.', 'gasto');
+    }
+    if (ajustes.burnExtra !== 0) {
+        var burnSnap = await dbRef.child('partida/finanzas/burn_rate_mensual').once('value');
+        var burnActual = burnSnap.val() || 0;
+        var nuevoBurn = Math.floor(burnActual * (1 + ajustes.burnExtra / 100));
+        await dbRef.child('partida/finanzas/burn_rate_mensual').set(nuevoBurn);
+        agregarEvento('📈 Burn rate ajustado por leyes: +' + ajustes.burnExtra + '% → USD ' + nuevoBurn + '/mes', 'gasto');
+    }
+    if (ajustes.subsidio !== 0) {
+        agregarEvento('💡 Subsidio activo: ' + Math.abs(ajustes.subsidio) + '% descuento en I+D.', 'ingreso');
+    }
+}
+
+// ========== SPRINT 5 - BLOQUE 4: LOBBY ==========
+async function hacerLobby() {
+    var select = document.getElementById('leyLobbySelect');
+    var leyIndex = select ? parseInt(select.value) : -1;
+    if (isNaN(leyIndex) || leyIndex < 0) {
+        agregarEvento('⚠️ Seleccioná una ley válida para hacer lobby.', 'gasto');
+        return;
+    }
+    var prSnap = await dbRef.child('partida/estado/puntos_reputacion').once('value');
+    var prActual = prSnap.val() || 0;
+    if (prActual < 100) {
+        agregarEvento('❌ No tenés suficientes PR (' + prActual + '). Necesitás 100 PR.', 'gasto');
+        return;
+    }
+    var nivelSnap = await dbRef.child('partida/estado/nivel_actual').once('value');
+    var nivel = nivelSnap.val() || 1;
+    var bonus = nivel === 1 ? 5 : nivel === 2 ? 10 : 15;
+    var exitoProb = 40 + bonus;
+    var exito = Math.random() * 100 < exitoProb;
+    await dbRef.child('partida/estado/puntos_reputacion').transaction(function(cur) { return (cur || 0) - 100; });
+    var leyesSnap = await dbRef.child('partida/legislacion/leyes_activas').once('value');
+    var leyes = leyesSnap.val() || [];
+    if (leyIndex >= leyes.length) {
+        agregarEvento('❌ La ley seleccionada ya no existe.', 'gasto');
+        return;
+    }
+    var ley = leyes[leyIndex];
+    if (exito) {
+        var nuevoValor = Math.abs(ley.valor) / 2;
+        ley.valor = ley.valor < 0 ? -nuevoValor : nuevoValor;
+        leyes[leyIndex] = ley;
+        await dbRef.child('partida/legislacion/leyes_activas').set(leyes);
+        agregarEvento('🏛️ LOBBY EXITOSO: Impacto de "' + ley.nombre + '" reducido a ' + ley.valor + '%.', 'ingreso');
+    } else {
+        agregarEvento('😤 LOBBY FALLIDO: No se pudo modificar "' + ley.nombre + '". Seguirá vigente.', 'gasto');
+    }
+    renderizarLeyes();
+}
+
+// ========== SPRINT 5 - BLOQUE 5: CONTRATOS ==========
+var contratosDisponibles = [
+    { id: 1, nombre: "Suministro de drones tácticos", ingreso: 80000, plazo: 2, penalidad: 40000 },
+    { id: 2, nombre: "Mantenimiento de radar costero", ingreso: 50000, plazo: 1, penalidad: 25000 },
+    { id: 3, nombre: "Construcción de búnker estratégico", ingreso: 120000, plazo: 3, penalidad: 60000 }
+];
+
+function renderizarContratosDisponibles() {
+    var container = document.getElementById('contratosContainer');
+    if (!container) return;
+    if (contratosDisponibles.length === 0) {
+        container.innerHTML = '<p style="color:#8b949e;font-size:12px">No hay contratos disponibles.</p>';
+        return;
+    }
+    var html = '<div style="display:flex;flex-direction:column;gap:8px">';
+    contratosDisponibles.forEach(function(cto) {
+        html += '<label style="display:flex;align-items:center;gap:8px;border:1px solid #30363d;padding:8px;border-radius:4px;cursor:pointer">' +
+            '<input type="radio" name="contratoSeleccionado" value="' + cto.id + '">' +
+            '<div><strong>' + cto.nombre + '</strong><br>' +
+            '<span style="color:#8b949e;font-size:11px">💰 ' + cto.ingreso.toLocaleString() + ' USD | ⏱️ ' + cto.plazo + ' trim. | ⚠️ Penalidad: ' + cto.penalidad.toLocaleString() + ' USD</span></div></label>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+async function aceptarContrato() {
+    var selectedRadio = document.querySelector('input[name="contratoSeleccionado"]:checked');
+    if (!selectedRadio) { agregarEvento('⚠️ Seleccioná un contrato para aceptar.', 'gasto'); return; }
+    var contratoId = parseInt(selectedRadio.value);
+    var contrato = contratosDisponibles.find(function(c) { return c.id === contratoId; });
+    if (!contrato) return;
+    var trimSnap = await dbRef.child('partida/tiempo/trimestre_actual').once('value');
+    var trimestreActual = trimSnap.val() || 1;
+    var nuevoContrato = {
+        id: contrato.id, nombre: contrato.nombre, ingreso: contrato.ingreso,
+        plazo: contrato.plazo, penalidad: contrato.penalidad,
+        trimestre_inicio: trimestreActual, estado: 'activo'
+    };
+    var activosSnap = await dbRef.child('partida/contratos/activos').once('value');
+    var activos = activosSnap.val() || [];
+    activos.push(nuevoContrato);
+    await dbRef.child('partida/contratos/activos').set(activos);
+    var index = contratosDisponibles.findIndex(function(c) { return c.id === contratoId; });
+    if (index !== -1) contratosDisponibles.splice(index, 1);
+    renderizarContratosDisponibles();
+    renderizarContratosActivos();
+    agregarEvento('📄 Contrato aceptado: "' + contrato.nombre + '". Plazo: ' + contrato.plazo + ' trimestres.', 'ingreso');
+}
+
+async function renderizarContratosActivos() {
+    var container = document.getElementById('contratosActivosContainer');
+    if (!container) return;
+    var activosSnap = await dbRef.child('partida/contratos/activos').once('value');
+    var activos = activosSnap.val() || [];
+    if (activos.length === 0) {
+        container.innerHTML = '<p style="color:#8b949e;font-size:12px">No hay contratos activos.</p>';
+        return;
+    }
+    var trimSnap = await dbRef.child('partida/tiempo/trimestre_actual').once('value');
+    var trimActual = trimSnap.val() || 1;
+    var html = '<ul style="list-style:none;padding-left:0">';
+    activos.forEach(function(cto) {
+        var trimTranscurridos = trimActual - cto.trimestre_inicio;
+        var venceEn = Math.max(0, cto.plazo - trimTranscurridos);
+        var color = venceEn <= 1 ? '#f85149' : '#e67e22';
+        html += '<li style="margin-bottom:8px;border-left:2px solid ' + color + ';padding-left:8px">' +
+            '<strong>' + cto.nombre + '</strong><br>' +
+            '<span style="color:#8b949e;font-size:11px">Plazo: ' + cto.plazo + ' trim. | Vence en: ' + venceEn + ' trim. | Penalidad: ' + cto.penalidad.toLocaleString() + ' USD</span></li>';
+    });
+    html += '</ul>';
+    container.innerHTML = html;
+}
+
+async function verificarContratos() {
+    var activosSnap = await dbRef.child('partida/contratos/activos').once('value');
+    var activos = activosSnap.val() || [];
+    var trimSnap = await dbRef.child('partida/tiempo/trimestre_actual').once('value');
+    var trimActual = trimSnap.val() || 1;
+    var modificado = false;
+    for (var i = 0; i < activos.length; i++) {
+        var cto = activos[i];
+        if ((trimActual - cto.trimestre_inicio) >= cto.plazo) {
+            await dbRef.child('partida/finanzas/tesoreria').transaction(function(cur) { return (cur || 0) - cto.penalidad; });
+            await dbRef.child('partida/estado/puntos_reputacion').transaction(function(pr) { return (pr || 0) - 20; });
+            agregarEvento('⚠️ CONTRATO INCUMPLIDO: "' + cto.nombre + '". Penalidad: -USD ' + cto.penalidad.toLocaleString() + ' y -20 PR.', 'gasto');
+            activos.splice(i, 1);
+            i--;
+            modificado = true;
+        }
+    }
+    if (modificado) {
+        await dbRef.child('partida/contratos/activos').set(activos);
+        renderizarContratosActivos();
+    }
+}
+
+// ========== SPRINT 5 - BLOQUE 7: EVENTO POLÍTICO ALEATORIO ==========
+async function generarEventoPolitico() {
+    if (Math.random() > 0.3) return;
+    var apiKey = localStorage.getItem('ss_anthropic_key');
+    if (!apiKey) { agregarEvento('⚠️ Sin API Key para evento político.', 'gasto'); return; }
+    var tSnap = await dbRef.child('partida/finanzas/tesoreria').once('value');
+    var rSnap = await dbRef.child('partida/estado/puntos_reputacion').once('value');
+    var nSnap = await dbRef.child('partida/estado/nivel_actual').once('value');
+    var prompt = 'Eres un analista geopolítico. Generá un evento político único para un simulador de defensa aeroespacial. Estado: tesorería=' + (tSnap.val()||0) + ' USD, reputación=' + (rSnap.val()||0) + ', nivel=' + (nSnap.val()||1) + '. Respondé SOLO con JSON: {"titulo":"...","descripcion":"...","efecto_tipo":"tesoreria|reputacion|burn_rate","efecto_valor":número}. El efecto debe ser coherente con la descripción.';
+    try {
+        var res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+            body: JSON.stringify({ model: 'claude-3-haiku-20240307', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        var raw = data.content[0].text.replace(/```json/g,'').replace(/```/g,'').trim();
+        var ev = JSON.parse(raw);
+        var val = Number(ev.efecto_valor) || 0;
+        var signo = val > 0 ? '+' : '';
+        if (ev.efecto_tipo === 'tesoreria') {
+            await dbRef.child('partida/finanzas/tesoreria').transaction(function(c) { return (c||0)+val; });
+            agregarEvento('🌍 EVENTO: ' + ev.titulo + ' — ' + ev.descripcion + ' (Tesorería: ' + signo + val + ' USD)', 'info');
+        } else if (ev.efecto_tipo === 'reputacion') {
+            await dbRef.child('partida/estado/puntos_reputacion').transaction(function(c) { return (c||0)+val; });
+            agregarEvento('🌍 EVENTO: ' + ev.titulo + ' — ' + ev.descripcion + ' (Reputación: ' + signo + val + ' PR)', 'info');
+        } else if (ev.efecto_tipo === 'burn_rate') {
+            await dbRef.child('partida/finanzas/burn_rate_mensual').transaction(function(c) { return Math.max(0,(c||0)+val); });
+            agregarEvento('🌍 EVENTO: ' + ev.titulo + ' — ' + ev.descripcion + ' (Burn Rate: ' + signo + val + ' USD/mes)', 'info');
+        }
+        var displayDiv = document.getElementById('eventoPoliticoDisplay');
+        if (displayDiv) displayDiv.innerHTML = '<div style="border-left:3px solid #e67e22;padding-left:8px"><strong>' + ev.titulo + '</strong><br><span style="color:#8b949e;font-size:11px">' + ev.descripcion + '</span><br><span style="color:#e3b341">Efecto: ' + (ev.efecto_tipo || '') + ' ' + signo + val + '</span></div>';
+    } catch(err) {
+        console.error('Evento político error:', err);
+        agregarEvento('⚠️ No se pudo generar evento político.', 'gasto');
+    }
+}
+
 // ============ DOM READY ============
 document.addEventListener('DOMContentLoaded', function() {
     // Modal API Key
@@ -1152,6 +1486,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1500);
         }
     }, 1200);
+    // SPRINT 5 - LEYES
+    setTimeout(function() { if (typeof dbRef !== 'undefined') renderizarLeyes(); }, 1500);
+    var refreshLeyesBtn = document.getElementById('refreshLeyesBtn');
+    if (refreshLeyesBtn) refreshLeyesBtn.addEventListener('click', cargarLeyesDinamicas);
+    var lobbyBtn = document.getElementById('hacerLobbyBtn');
+    if (lobbyBtn) lobbyBtn.addEventListener('click', hacerLobby);
+    var aceptarBtn = document.getElementById('aceptarContratoBtn');
+    if (aceptarBtn) aceptarBtn.addEventListener('click', aceptarContrato);
+    renderizarContratosDisponibles();
+    setTimeout(function() { if (typeof dbRef !== 'undefined') renderizarContratosActivos(); }, 1600);
 
     // Botones
     document.getElementById('cargarCSVBtn').addEventListener('click', cargarCSV);
