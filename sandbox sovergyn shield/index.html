@@ -103,6 +103,17 @@
         .hist-item:hover{background:#21262d}
         .hist-pregunta{color:var(--txt);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .hist-meta{color:#8b949e;font-size:10px;margin-top:2px}
+        /* ========== SPRINT 6 - TRAZADO DE DESPLIEGUE ========== */
+        .traccion-line{stroke:#58a6ff;stroke-width:2;fill:none;stroke-dasharray:10 15;animation:dashMove 1.5s linear infinite}
+        @keyframes dashMove{to{stroke-dashoffset:-25}}
+        .traccion-punto{fill:#e3b341;animation:pulseLight .8s ease-in-out infinite alternate}
+        @keyframes pulseLight{0%{opacity:.3}100%{opacity:1}}
+        body:not(.traccion-activa) .traccion-line,body:not(.traccion-activa) .traccion-punto{display:none}
+        /* SPRINT 6 - ÓRBITA / IMPACTO / DERRIBO */
+        .impacto-flash{position:absolute;width:20px;height:20px;background:radial-gradient(circle,#e3b341,#ff8c00);border-radius:50%;pointer-events:none;animation:impactoAnim .6s ease-out forwards;z-index:1000}
+        @keyframes impactoAnim{0%{transform:scale(.2);opacity:1}100%{transform:scale(3);opacity:0}}
+        @keyframes derriboFlash{0%{opacity:1;fill:#f85149}50%{opacity:.2;fill:#fff}100%{opacity:1;fill:#f85149}}
+        .base-derribada{animation:derriboFlash .4s ease-in-out 3}
     </style>
 </head>
 <body>
@@ -231,6 +242,11 @@
         <button class="teatro-btn" data-lat="-51.681" data-lng="-59.177" data-zoom="9" data-req="2">🌊 MALVINAS [N2]</button>
         <button class="teatro-btn" data-lat="37.5665" data-lng="126.978" data-zoom="10" data-req="2">🇰🇷 COREA [N2]</button>
         <button class="teatro-btn" data-lat="31.9686" data-lng="-99.9018" data-zoom="6" data-req="3">🤠 TEXAS [N3]</button>
+        <button id="toggleTraccionBtn" style="border-color:var(--blue);color:var(--blue)">🔄 TRAZAR RUTA</button>
+        <button id="toggleOrbitaBtn" style="border-color:var(--blue);color:var(--blue)">🛸 ÓRBITA</button>
+        <button id="toggleImpactoBtn" style="border-color:#e3b341;color:#e3b341">💥 MODO IMPACTO</button>
+        <button id="simularDerriboBtn" style="border-color:var(--red);color:var(--red)">⚡ SIMULAR DERRIBO</button>
+        <button id="repararBaseBtn" style="border-color:var(--green);color:var(--green)">🔧 REPARAR BASE</button>
     </div>
     <div id="map"></div>
     <div class="panel">
@@ -711,6 +727,9 @@ function inicializarMapa() {
     }, 3000);
     mapaInicializado = true;
     agregarEvento("Mapa táctico inicializado.", "info");
+    mapaObj.on('moveend', actualizarTraccionPosicion);
+    mapaObj.on('zoomend', actualizarTraccionPosicion);
+    mapaObj.on('click', crearImpacto);
 }
 
 // ========== SPRINT 3 - CLIMA: Open-Meteo (sin API key) ==========
@@ -1453,6 +1472,127 @@ async function generarEventoPolitico() {
     }
 }
 
+// ========== SPRINT 6 - BLOQUE A: TRACCIÓN DE DESPLIEGUE ==========
+var lineaTraccion = null;
+var puntosTraccion = [];
+var traccionActiva = false;
+
+function toggleTraccion() {
+    if (!mapaObj) return;
+    traccionActiva = !traccionActiva;
+    if (traccionActiva) {
+        var svgContainer = document.querySelector('.leaflet-overlay-pane svg');
+        if (!svgContainer) { setTimeout(toggleTraccion, 200); traccionActiva = false; return; }
+        if (lineaTraccion) lineaTraccion.remove();
+        puntosTraccion.forEach(function(p) { if(p) p.remove(); });
+        puntosTraccion = [];
+        var p1 = mapaObj.latLngToLayerPoint(L.latLng(-45.8, -67.5));
+        var p2 = mapaObj.latLngToLayerPoint(L.latLng(-34.6, -58.3));
+        lineaTraccion = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        lineaTraccion.setAttribute('d', 'M '+p1.x+' '+p1.y+' L '+p2.x+' '+p2.y);
+        lineaTraccion.setAttribute('class', 'traccion-line');
+        svgContainer.appendChild(lineaTraccion);
+        ['traccion-punto','traccion-punto'].forEach(function(cls, i) {
+            var pt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            var pos = i === 0 ? p1 : p2;
+            pt.setAttribute('cx', pos.x); pt.setAttribute('cy', pos.y);
+            pt.setAttribute('r', '4'); pt.setAttribute('class', cls);
+            svgContainer.appendChild(pt);
+            puntosTraccion.push(pt);
+        });
+        document.body.classList.add('traccion-activa');
+        agregarEvento('🔄 Tracción activada: Base Patagónica → HQ BA.', 'info');
+    } else {
+        if (lineaTraccion) { lineaTraccion.remove(); lineaTraccion = null; }
+        puntosTraccion.forEach(function(p) { if(p) p.remove(); });
+        puntosTraccion = [];
+        document.body.classList.remove('traccion-activa');
+        agregarEvento('🔄 Tracción desactivada.', 'info');
+    }
+    localStorage.setItem('ss_traccion', traccionActiva ? '1' : '0');
+}
+
+function actualizarTraccionPosicion() {
+    if (!traccionActiva || !lineaTraccion || !mapaObj) return;
+    var p1 = mapaObj.latLngToLayerPoint(L.latLng(-45.8, -67.5));
+    var p2 = mapaObj.latLngToLayerPoint(L.latLng(-34.6, -58.3));
+    lineaTraccion.setAttribute('d', 'M '+p1.x+' '+p1.y+' L '+p2.x+' '+p2.y);
+    if (puntosTraccion[0]) { puntosTraccion[0].setAttribute('cx', p1.x); puntosTraccion[0].setAttribute('cy', p1.y); }
+    if (puntosTraccion[1]) { puntosTraccion[1].setAttribute('cx', p2.x); puntosTraccion[1].setAttribute('cy', p2.y); }
+}
+
+// ========== SPRINT 6 - BLOQUE B: ÓRBITA DRON ==========
+var orbitaActiva = false, marcadorOrbita = null, intervaloOrbita = null, anguloOrbita = 0;
+function toggleOrbita() {
+    if (!mapaObj) return;
+    orbitaActiva = !orbitaActiva;
+    if (orbitaActiva) {
+        if (!marcadorOrbita) {
+            marcadorOrbita = L.circleMarker([-34.6,-58.3], { radius:4, color:'#58a6ff', fillColor:'#58a6ff', fillOpacity:1, weight:1 }).addTo(mapaObj);
+            marcadorOrbita.bindTooltip('🛸 Dron orbital', { permanent:false, direction:'top' });
+        }
+        var radioGrados = 0.12;
+        if (intervaloOrbita) clearInterval(intervaloOrbita);
+        intervaloOrbita = setInterval(function() {
+            anguloOrbita += 0.1;
+            if (marcadorOrbita) marcadorOrbita.setLatLng([-34.6 + radioGrados*Math.cos(anguloOrbita), -58.3 + radioGrados*Math.sin(anguloOrbita)]);
+        }, 200);
+        agregarEvento('🛸 Dron orbital activado sobre Buenos Aires.', 'info');
+    } else {
+        if (intervaloOrbita) { clearInterval(intervaloOrbita); intervaloOrbita = null; }
+        if (marcadorOrbita) { mapaObj.removeLayer(marcadorOrbita); marcadorOrbita = null; }
+        agregarEvento('🛸 Dron orbital desactivado.', 'info');
+    }
+    localStorage.setItem('ss_orbita', orbitaActiva ? '1' : '0');
+}
+
+// ========== SPRINT 6 - BLOQUE C: IMPACTOS ==========
+var modoImpactoActivo = false;
+function toggleImpacto() {
+    modoImpactoActivo = !modoImpactoActivo;
+    localStorage.setItem('ss_impacto', modoImpactoActivo ? '1' : '0');
+    agregarEvento(modoImpactoActivo ? '💥 Modo impacto activado: click en mapa genera destellos.' : '💥 Modo impacto desactivado.', 'info');
+}
+function crearImpacto(e) {
+    if (!modoImpactoActivo) return;
+    var container = document.querySelector('.leaflet-map-pane');
+    if (!container) return;
+    var point = mapaObj.latLngToContainerPoint(e.latlng);
+    var div = document.createElement('div');
+    div.className = 'impacto-flash';
+    div.style.left = (point.x - 10) + 'px';
+    div.style.top = (point.y - 10) + 'px';
+    container.appendChild(div);
+    setTimeout(function() { if (div && div.remove) div.remove(); }, 600);
+    agregarEvento('💥 Destello de impacto en ' + e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4), 'info');
+}
+
+// ========== SPRINT 6 - BLOQUE D: DERRIBO / REPARACIÓN ==========
+function simularDerribo() {
+    if (!markerPatagonica) { agregarEvento('⚠️ No se encontró la Base Patagónica.', 'gasto'); return; }
+    var elemento = markerPatagonica._path;
+    if (elemento) elemento.classList.add('base-derribada');
+    agregarEvento('💥 ¡Dron derribado! Base Patagónica bajo ataque.', 'gasto');
+    setTimeout(function() {
+        if (markerPatagonica) {
+            markerPatagonica.setStyle({ fillOpacity: 0, opacity: 0 });
+            markerPatagonica.setPopupContent('💀 BASE PATAGÓNICA — DESTRUIDA (requiere reparación)');
+            agregarEvento('⚙️ Base Patagónica fuera de servicio. Usá "REPARAR BASE".', 'gasto');
+        }
+    }, 1200);
+}
+function repararBase() {
+    if (!markerPatagonica) return;
+    markerPatagonica.setStyle({ fillOpacity: 0.3, opacity: 1 });
+    var elemento = markerPatagonica._path;
+    if (elemento) elemento.classList.remove('base-derribada');
+    dbRef.child('partida/estado/nivel_actual').once('value', function(snap) {
+        var nivel = snap.val() || 1;
+        markerPatagonica.setPopupContent(nivel >= 2 ? '✅ BASE PATAGÓNICA — OPERATIVA' : '🔒 BASE PATAGÓNICA — BLOQUEADA (Nivel 2)');
+    });
+    agregarEvento('🔧 Base Patagónica reparada y operativa.', 'ingreso');
+}
+
 // ============ DOM READY ============
 document.addEventListener('DOMContentLoaded', function() {
     // Modal API Key
@@ -1488,7 +1628,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1200);
     // SPRINT 5 - LEYES
     setTimeout(function() { if (typeof dbRef !== 'undefined') renderizarLeyes(); }, 1500);
-    var refreshLeyesBtn = document.getElementById('refreshLeyesBtn');
+    var traccionBtn = document.getElementById('toggleTraccionBtn');
+    if (traccionBtn) traccionBtn.addEventListener('click', toggleTraccion);
+    if (localStorage.getItem('ss_traccion') === '1') setTimeout(function() { if (mapaObj) toggleTraccion(); }, 600);
+    var orbitaBtn = document.getElementById('toggleOrbitaBtn');
+    if (orbitaBtn) orbitaBtn.addEventListener('click', toggleOrbita);
+    if (localStorage.getItem('ss_orbita') === '1') setTimeout(function() { if (mapaObj) toggleOrbita(); }, 800);
+    var impactoBtn = document.getElementById('toggleImpactoBtn');
+    if (impactoBtn) impactoBtn.addEventListener('click', toggleImpacto);
+    if (localStorage.getItem('ss_impacto') === '1') { modoImpactoActivo = true; }
+    var derriboBtn = document.getElementById('simularDerriboBtn');
+    if (derriboBtn) derriboBtn.addEventListener('click', simularDerribo);
+    var repararBtn = document.getElementById('repararBaseBtn');
+    if (repararBtn) repararBtn.addEventListener('click', repararBase);
     if (refreshLeyesBtn) refreshLeyesBtn.addEventListener('click', cargarLeyesDinamicas);
     var lobbyBtn = document.getElementById('hacerLobbyBtn');
     if (lobbyBtn) lobbyBtn.addEventListener('click', hacerLobby);
