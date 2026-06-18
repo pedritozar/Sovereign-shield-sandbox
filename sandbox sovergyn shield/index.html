@@ -161,6 +161,10 @@
             <div>Reputación: <strong id="reputacionValor">0</strong> PR</div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
             <small id="progressLabel">Progreso hacia Nivel 2 (0 / 10,000 PR)</small>
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid #30363d">
+                <small style="color:var(--blue)">💱 MERCADOS GLOBALES (base USD=100):</small><br>
+                <small id="uiEconomiaGlobal" style="color:#8b949e">Sin datos aún — se inicializa al cerrar el primer trimestre.</small>
+            </div>
         </div>
         <div class="card">
             <h3>ACCIONES DEL ECONOMISTA</h3>
@@ -630,6 +634,7 @@ function cerrarTrimestre() {
                     aplicarEfectosLeyes();
                     verificarContratos();
                     generarEventoPolitico();
+                    aplicarCurrencyRun();
                 }
             });
         });
@@ -738,6 +743,7 @@ async function motorHistorico_procesarUnTrimestre() {
     await aplicarEfectosLeyes();
     await verificarContratos();
     await generarEventoPolitico();
+    await aplicarCurrencyRun();
 
     // No se tocan aprobacion_economista / aprobacion_civil: ese gate es solo
     // para el modo "turnos".
@@ -750,6 +756,111 @@ function motorHistorico_evaluarEstado(modo, pausada) {
     } else {
         motorHistorico_detener();
     }
+}
+
+// ========== SPRINT 7 - CURRENCY RUN ENGINE: MULTI-MONEDA ==========
+// (DSK-06, generado por DeepSeek, integrado por Claude. Único cambio:
+//  aplicarCurrencyRun() pasó de leer+set() a transaction() sobre el
+//  nodo completo de monedas. Motivo: dispararShockMoneda() escribe
+//  sobre una moneda individual, y si llegara a correr al mismo tiempo
+//  que esta función, un set() del nodo padre podría pisarle el shock.
+//  Con transaction() Firebase detecta el conflicto y reintenta con el
+//  dato más reciente — mismo patrón que ya usa Tesorería en este
+//  archivo (regla 5). Hoy no hay riesgo real porque nada llama a
+//  dispararShockMoneda() todavía, pero así no hay que volver a tocar
+//  esto cuando lo haga la Matriz de Infortunios.)
+var BANDAS = {
+  estable:    { min: -0.004, max: 0.004 },
+  gestionada: { min: -0.003, max: 0.003 },
+  volatil:    { min: -0.02,  max: 0.02  },
+  crisis:     { min: -0.08,  max: 0.02  },
+  hegemon:    { min: 0.005,  max: 0.015 }
+};
+var CODIGOS_MONEDA = ['EUR', 'GBP', 'CAD', 'JPY', 'RUB', 'CNY'];
+
+// 1. Aplicar variación a todas las monedas (llamado desde Motor Histórico o manual)
+async function aplicarCurrencyRun() {
+  var fueInicializacion = false;
+
+  var resultado = await dbRef.child('partida/economia/monedas').transaction(function(monedas) {
+    // Primera vez: inicializar nodo y salir sin variar
+    if (!monedas) {
+      fueInicializacion = true;
+      var inicial = {};
+      CODIGOS_MONEDA.forEach(function(cod) {
+        inicial[cod] = { valor_relativo: 100, estabilidad: 'estable' };
+      });
+      return inicial;
+    }
+
+    fueInicializacion = false;
+    var actualizadas = {};
+    CODIGOS_MONEDA.forEach(function(cod) {
+      var entry = monedas[cod] || { valor_relativo: 100, estabilidad: 'estable' };
+      var estab = entry.estabilidad || 'estable';
+      var banda = BANDAS[estab] || BANDAS.estable;
+      var variacion = banda.min + Math.random() * (banda.max - banda.min);
+      var nuevoValor = entry.valor_relativo * (1 + variacion);
+      // Evitar valores negativos o absurdos
+      if (nuevoValor < 0.01) nuevoValor = 0.01;
+      actualizadas[cod] = { valor_relativo: nuevoValor, estabilidad: estab };
+    });
+    return actualizadas;
+  });
+
+  if (!resultado.committed) return;
+  var monedasFinal = resultado.snapshot.val();
+  if (!monedasFinal) return;
+
+  if (fueInicializacion) {
+    agregarEvento('💱 Mercados inicializados (todas las monedas base 100).', 'info');
+  } else {
+    var partes = CODIGOS_MONEDA.map(function(cod) {
+      return cod + ' ' + monedasFinal[cod].valor_relativo.toFixed(1);
+    });
+    agregarEvento('💱 Mercados: ' + partes.join(' · '), 'info');
+  }
+
+  actualizarUIEconomia(monedasFinal);
+}
+
+// 2. Actualizar la UI con el objeto de monedas
+function actualizarUIEconomia(monedas) {
+  var div = document.getElementById('uiEconomiaGlobal');
+  if (!div) return;
+  var partes = CODIGOS_MONEDA.map(function(cod) {
+    var entry = monedas[cod] || { valor_relativo: 100 };
+    return cod + ': ' + entry.valor_relativo.toFixed(1);
+  });
+  div.innerHTML = partes.join(' · ');
+}
+
+// 3. Función de shock (gancho para Matriz de Infortunios)
+async function dispararShockMoneda(codigoMoneda, nuevaEstabilidad, shockInmediatoPct, motivo) {
+  if (CODIGOS_MONEDA.indexOf(codigoMoneda) === -1) {
+    agregarEvento('⚠️ Shock ignorado: moneda "' + codigoMoneda + '" no válida.', 'gasto');
+    return;
+  }
+
+  var snap = await dbRef.child('partida/economia/monedas/' + codigoMoneda).once('value');
+  var entry = snap.val() || { valor_relativo: 100, estabilidad: 'estable' };
+  var valorActual = entry.valor_relativo || 100;
+  var factor = 1 + (shockInmediatoPct / 100);
+  var nuevoValor = valorActual * factor;
+  if (nuevoValor < 0.01) nuevoValor = 0.01;
+
+  await dbRef.child('partida/economia/monedas/' + codigoMoneda).set({
+    valor_relativo: nuevoValor,
+    estabilidad: nuevaEstabilidad || entry.estabilidad || 'estable'
+  });
+
+  var tipo = shockInmediatoPct < 0 ? 'gasto' : 'ingreso';
+  var signo = shockInmediatoPct > 0 ? '+' : '';
+  agregarEvento('💱 ' + motivo + ' (' + codigoMoneda + ': ' + signo + shockInmediatoPct + '%)', tipo);
+
+  var snapAll = await dbRef.child('partida/economia/monedas').once('value');
+  var all = snapAll.val() || {};
+  actualizarUIEconomia(all);
 }
 
 // ============ RESET ============
