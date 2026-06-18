@@ -181,6 +181,21 @@
             </div>
         </div>
     </div>
+    <!-- ========== SPRINT 7 - PPC AVANZADO: CONTRATISTAS PRIVADOS ========== -->
+    <div class="panel">
+        <h3>🪖 PPC — CONTRATISTAS PRIVADOS</h3>
+        <button id="subcontratarPMCBtn">🛡️ SUBCONTRATAR PMC (Burn Rate +8%)</button>
+        <button id="lobbyMilitarBtn" style="margin-top:6px">🎖️ LOBBY MILITAR (100 PR)</button>
+        <div style="margin-top:12px;padding-top:8px;border-top:1px solid #30363d">
+            <small style="color:var(--blue)">FUNDAR PMC PROPIA — requiere Nivel 3:</small><br>
+            <select id="destinoPMCSelect" style="margin-top:6px">
+                <option value="Africa">África — litio y coltán</option>
+                <option value="Balcanes">Balcanes — rutas energéticas europeas</option>
+                <option value="Luna">Luna — helio-3 y tierras raras</option>
+            </select>
+            <button id="fundarPMCBtn" style="margin-top:6px">🚀 FUNDAR SOVEREIGN TACTICAL</button>
+        </div>
+    </div>
     <div class="panel">
         <h3>APROBACIONES DE TRIMESTRE</h3>
         <div style="display:flex;gap:20px;flex-wrap:wrap">
@@ -930,6 +945,115 @@ async function verificarInfortunios() {
   }
 
   // Si ningún evento se disparó, no se guarda nada (los disparados quedan como estaban)
+}
+
+// ========== SPRINT 7 - PPC AVANZADO: CONTRATISTAS PRIVADOS ==========
+
+// 1. Subcontratar PMC internacional (aumenta Burn Rate 8%)
+async function subcontratarPMC() {
+  // Verificar si ya hay una PMC activa
+  var snapPmc = await dbRef.child('partida/ppc/pmc_activa').once('value');
+  if (snapPmc.val() === true) {
+    agregarEvento('⚠️ Ya tenés una PMC subcontratada activa.', 'info');
+    return;
+  }
+
+  // Incrementar Burn Rate en 8%
+  await dbRef.child('partida/finanzas/burn_rate_mensual').transaction(function(actual) {
+    return Math.floor((Number(actual) || 0) * 1.08);
+  });
+
+  // Activar PMC y desbloquear rutas
+  await dbRef.child('partida/ppc/pmc_activa').set(true);
+  await dbRef.child('partida/ppc/rutas_bloqueadas').set(false);
+
+  agregarEvento('🛡️ PMC internacional subcontratada — rutas custodiadas, Burn Rate +8%.', 'gasto');
+}
+
+// 2. Hacer Lobby Militar (cuesta 100 PR, chance según nivel)
+async function hacerLobbyMilitar() {
+  // Leer reputación actual
+  var snapPr = await dbRef.child('partida/estado/puntos_reputacion').once('value');
+  var prActual = snapPr.val() || 0;
+  if (prActual < 100) {
+    agregarEvento('⚠️ Necesitás al menos 100 PR para el Lobby Militar.', 'info');
+    return;
+  }
+
+  // Restar 100 PR (transaction, ya garantizado que hay saldo)
+  await dbRef.child('partida/estado/puntos_reputacion').transaction(function(pr) {
+    return (Number(pr) || 0) - 100;
+  });
+
+  // Leer nivel y calcular probabilidad
+  var snapNivel = await dbRef.child('partida/estado/nivel_actual').once('value');
+  var nivel = snapNivel.val() || 1;
+  var prob = 0.40 + 0.05 * nivel; // 45%, 50%, 55%
+
+  if (Math.random() < prob) {
+    // ÉXITO: desbloquear rutas y ganar USD 20,000
+    await dbRef.child('partida/ppc/rutas_bloqueadas').set(false);
+    await dbRef.child('partida/finanzas/tesoreria').transaction(function(t) {
+      return (Number(t) || 0) + 20000;
+    });
+    agregarEvento('✅ Lobby Militar exitoso: el Ejército Nacional despliega cobertura. +USD 20,000 en contrato estatal.', 'ingreso');
+  } else {
+    // FALLO: solo log
+    agregarEvento('❌ Lobby Militar fallido. Los 100 PR no se recuperan.', 'gasto');
+  }
+}
+
+// 3. Fundar PMC propia (Sovereign Tactical) — requiere Nivel 3 y destino válido
+async function fundarPMCPropia(destino) {
+  // Validar destino
+  var destinosValidos = ['Africa', 'Balcanes', 'Luna'];
+  if (destinosValidos.indexOf(destino) === -1) {
+    agregarEvento('⚠️ Destino de despliegue no válido. Usá Africa, Balcanes o Luna.', 'info');
+    return;
+  }
+
+  // Validar nivel
+  var snapNivel = await dbRef.child('partida/estado/nivel_actual').once('value');
+  if ((snapNivel.val() || 1) < 3) {
+    agregarEvento('⚠️ Necesitás Nivel 3 (Planta Industrial) para fundar tu PMC propia.', 'info');
+    return;
+  }
+
+  // Verificar si ya existe una PMC propia
+  var snapPropia = await dbRef.child('partida/ppc/pmc_propia').once('value');
+  if (snapPropia.val() === true) {
+    agregarEvento('⚠️ Ya fundaste tu PMC propia.', 'info');
+    return;
+  }
+
+  // Mapeo de flavor por destino
+  var flavors = {
+    'Africa': 'monopolio de litio y coltán',
+    'Balcanes': 'posición estratégica sobre rutas energéticas europeas',
+    'Luna': 'concesión de helio-3 y tierras raras'
+  };
+
+  // Aplicar efectos financieros (transactions)
+  await dbRef.child('partida/finanzas/deuda_bancaria_total').transaction(function(d) {
+    return (Number(d) || 0) + 200000;
+  });
+  await dbRef.child('partida/ppc/obligaciones_negociables').transaction(function(o) {
+    return (Number(o) || 0) + 200000;
+  });
+  await dbRef.child('partida/finanzas/tesoreria').transaction(function(t) {
+    return (Number(t) || 0) + 200000;
+  });
+  await dbRef.child('partida/finanzas/burn_rate_mensual').transaction(function(b) {
+    return Math.floor((Number(b) || 0) * 1.05);
+  });
+
+  // Activar flags y guardar destino
+  await dbRef.child('partida/ppc/pmc_activa').set(true);
+  await dbRef.child('partida/ppc/pmc_propia').set(true);
+  await dbRef.child('partida/ppc/destino_despliegue').set(destino);
+
+  var flavor = flavors[destino] || '';
+  agregarEvento('🚀 Sovereign Tactical fundada — desplegada en ' + destino + ' (' + flavor + '). Financiado con USD 200,000 en obligaciones negociables.', 'ingreso');
 }
 
 // ============ RESET ============
@@ -1959,6 +2083,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('cargarCSVBtn').addEventListener('click', cargarCSV);
     document.getElementById('cerrarTrimestreBtn').addEventListener('click', cerrarTrimestre);
     document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
+    document.getElementById('subcontratarPMCBtn').addEventListener('click', subcontratarPMC);
+    document.getElementById('lobbyMilitarBtn').addEventListener('click', hacerLobbyMilitar);
+    document.getElementById('fundarPMCBtn').addEventListener('click', function() {
+        var destino = document.getElementById('destinoPMCSelect').value;
+        fundarPMCPropia(destino);
+    });
     document.getElementById('resetBtn').addEventListener('click', resetPartida);
     document.getElementById('exportarBitacoraBtn').addEventListener('click', exportarBitacora);
     // ========== SPRINT 3 - PRENSA ==========
