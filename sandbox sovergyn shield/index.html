@@ -114,6 +114,79 @@
         @keyframes impactoAnim{0%{transform:scale(.2);opacity:1}100%{transform:scale(3);opacity:0}}
         @keyframes derriboFlash{0%{opacity:1;fill:#f85149}50%{opacity:.2;fill:#fff}100%{opacity:1;fill:#f85149}}
         .base-derribada{animation:derriboFlash .4s ease-in-out 3}
+    /* ========== SPRINT 7 - COUNTDOWN PULSO ========== */
+    @keyframes pulseCountdown {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+    }
+    .pulse {
+        animation: pulseCountdown 0.8s ease-in-out infinite;
+    }
+    /* ========== SPRINT 7 - SOVEREIGN TELEMETRY (PIP) ========== */
+    .telemetry-panel {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        width: 300px;
+        max-height: 280px;
+        background: rgba(13, 17, 23, 0.95);
+        border: 1px solid #238636;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        overflow-y: auto;
+        z-index: 9999;
+        display: none;
+        flex-direction: column;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .telemetry-panel.telemetry-open {
+        display: flex;
+    }
+    .telemetry-header {
+        background: #161b22;
+        padding: 4px 8px;
+        border-bottom: 1px solid #238636;
+        font-weight: bold;
+        color: #58a6ff;
+        cursor: default;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .telemetry-header span {
+        cursor: pointer;
+        font-size: 14px;
+        padding: 0 4px;
+    }
+    .telemetry-header span:hover {
+        color: #f85149;
+    }
+    #telemetryList {
+        padding: 4px 6px;
+        flex: 1;
+        overflow-y: auto;
+        max-height: 240px;
+    }
+    .telemetry-entry {
+        padding: 2px 0;
+        border-bottom: 1px solid #21262d;
+        line-height: 1.4;
+        color: #e6edf3;
+    }
+    .telemetry-entry.ingreso { color: #238636; }
+    .telemetry-entry.gasto   { color: #f85149; }
+    .telemetry-entry.info    { color: #e6edf3; }
+
+    @keyframes telemetryFlash {
+        0%   { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+    .flash {
+        animation: telemetryFlash 0.4s ease-in-out;
+    }
     </style>
 </head>
 <body>
@@ -136,7 +209,11 @@
         <div class="indicator"><span class="led-red" id="ledStatus"></span><span id="firebaseText">CONECTANDO...</span></div>
         <div class="badge" id="levelDisplay">NIVEL 1 — EL GARAJE</div>
         <div class="badge" id="quarterDisplay">TRIMESTRE: 1</div>
+        <!-- SPRINT 7 - COUNTDOWN PROXIMO TRIMESTRE -->
+        <div class="badge" id="countdownDisplay">⏳ — manual —</div>
         <div class="badge" id="treasuryHeader">TESORERÍA: USD 500,000</div>
+        <!-- SPRINT 7 - TELEMETRY TOGGLE -->
+        <div class="badge" id="telemetryToggleBtn" style="cursor:pointer; border-left-color: #58a6ff; color: #58a6ff;">📡 TELEMETRY</div>
     </div>
 </div>
 
@@ -195,6 +272,88 @@
             </select>
             <button id="fundarPMCBtn" style="margin-top:6px">🚀 FUNDAR SOVEREIGN TACTICAL</button>
         </div>
+    </div>
+
+    <!-- ========== SPRINT 7 - TRUEQUE TECNOLÓGICO + ÁRBOL I+D ========== -->
+    <div class="panel" id="panel-idi" style="margin-top:18px; border:1px solid #238636; border-radius:8px; padding:16px; background:#0d1117;">
+      <h3 style="color:#58a6ff; margin:0 0 12px 0; font-size:1.05em; letter-spacing:1px;">🔬 TRUEQUE TECNOLÓGICO + I+D</h3>
+
+      <!-- Puntos I+D disponibles -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding:8px 10px; background:#161b22; border-radius:6px; border:1px solid #30363d;">
+        <span style="color:#e6edf3; font-size:0.9em;">⚗️ Puntos I+D disponibles:</span>
+        <span id="idi-puntos-display" style="color:#58a6ff; font-weight:bold; font-size:1.1em;">0</span>
+      </div>
+
+      <!-- Árbol de niveles tecnológicos -->
+      <div style="margin-bottom:14px;">
+        <div style="color:#e6edf3; font-size:0.82em; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px; opacity:0.7;">Árbol de Tecnología</div>
+
+        <!-- Fila Autonomía -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#161b22; border-radius:5px; margin-bottom:6px; border:1px solid #30363d;">
+          <span style="color:#e6edf3; font-size:0.88em;">🤖 Autonomía</span>
+          <span id="idi-nivel-autonomia-texto" style="color:#58a6ff; font-size:0.85em; margin:0 8px;">Nivel 0/3</span>
+          <button
+            id="btn-subir-autonomia"
+            onclick="subirNivelTecnologico('autonomia')"
+            style="background:#238636; color:#e6edf3; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:0.8em; transition:opacity 0.2s;">
+            ⬆️ Subir
+          </button>
+        </div>
+
+        <!-- Fila Intercepción -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#161b22; border-radius:5px; margin-bottom:6px; border:1px solid #30363d;">
+          <span style="color:#e6edf3; font-size:0.88em;">🎯 Intercepción</span>
+          <span id="idi-nivel-intercepcion-texto" style="color:#58a6ff; font-size:0.85em; margin:0 8px;">Nivel 0/3</span>
+          <button
+            id="btn-subir-intercepcion"
+            onclick="subirNivelTecnologico('intercepcion')"
+            style="background:#238636; color:#e6edf3; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:0.8em; transition:opacity 0.2s;">
+            ⬆️ Subir
+          </button>
+        </div>
+
+        <!-- Fila Blindaje -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#161b22; border-radius:5px; margin-bottom:6px; border:1px solid #30363d;">
+          <span style="color:#e6edf3; font-size:0.88em;">🛡️ Blindaje</span>
+          <span id="idi-nivel-blindaje-texto" style="color:#58a6ff; font-size:0.85em; margin:0 8px;">Nivel 0/3</span>
+          <button
+            id="btn-subir-blindaje"
+            onclick="subirNivelTecnologico('blindaje')"
+            style="background:#238636; color:#e6edf3; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:0.8em; transition:opacity 0.2s;">
+            ⬆️ Subir
+          </button>
+        </div>
+      </div>
+
+      <!-- Separador -->
+      <hr style="border:none; border-top:1px solid #30363d; margin:12px 0;">
+
+      <!-- Botón invertir en I+D -->
+      <button
+        onclick="invertirID()"
+        style="width:100%; background:#1f6feb; color:#e6edf3; border:none; border-radius:6px; padding:9px 0; cursor:pointer; font-size:0.88em; font-weight:bold; margin-bottom:8px; letter-spacing:0.5px; transition:background 0.2s;"
+        onmouseover="this.style.background='#388bfd'"
+        onmouseout="this.style.background='#1f6feb'">
+        🔬 INVERTIR EN I+D (-15,000 USD)
+      </button>
+
+      <!-- Botones de Trueque -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button
+          onclick="truequeConPMC()"
+          style="background:#0d1117; color:#238636; border:1px solid #238636; border-radius:6px; padding:9px 4px; cursor:pointer; font-size:0.82em; font-weight:bold; transition:background 0.2s;"
+          onmouseover="this.style.background='#161b22'"
+          onmouseout="this.style.background='#0d1117'">
+          🤝 TRUEQUE CON PMC
+        </button>
+        <button
+          onclick="truequeConLobby()"
+          style="background:#0d1117; color:#58a6ff; border:1px solid #58a6ff; border-radius:6px; padding:9px 4px; cursor:pointer; font-size:0.82em; font-weight:bold; transition:background 0.2s;"
+          onmouseover="this.style.background='#161b22'"
+          onmouseout="this.style.background='#0d1117'">
+          🤝 TRUEQUE CON LOBBY
+        </button>
+      </div>
     </div>
     <div class="panel">
         <h3>APROBACIONES DE TRIMESTRE</h3>
@@ -459,6 +618,12 @@ var motorHistoricoInterval = null;
 var motorHistoricoProcesando = false;
 var motorHistoricoModoActual = 'turnos';
 var motorHistoricoPausadaActual = true;
+// SPRINT 7 - COUNTDOWN
+var countdownInterval = null;
+var ultimoTickBase = null;
+// SPRINT 7 - TELEMETRY
+var telemetryAbierta = false;
+var TELEMETRY_MAX_ITEMS = 15;
 var HEARTBEAT_MS = 10000;          // 10 segundos entre ticks
 var QUARTER_MS = 900000;           // 1 trimestre virtual = 15 minutos reales (1h real = 1 año virtual)
 var MAX_QUARTERS_PER_TICK = 4;     // máximo procesado por heartbeat, para no saturar Firebase/API
@@ -499,6 +664,8 @@ function agregarEvento(mensaje, tipo) {
         div.innerHTML = '[' + ev.timestamp + '] — ' + ev.mensaje;
         logContainer.appendChild(div);
     });
+    // SPRINT 7 - TELEMETRY: actualizar panel flotante
+    telemetry_render();
 }
 
 function exportarBitacora() {
@@ -541,6 +708,19 @@ function bindFirebaseListeners() {
         document.getElementById('tesoreriaValor').innerText = val.toLocaleString('en-US');
         document.getElementById('treasuryHeader').innerHTML = 'TESORERÍA: USD ' + val.toLocaleString('en-US');
     });
+    // SPRINT 7 - TRUEQUE TECNOLÓGICO + I+D: listener de la rama completa
+    dbRef.child('partida/tecnologia').on('value', function(snapshot) {
+        var data = snapshot.val();
+        if (!data) {
+            actualizarUIArbolID(0, 0, 0, 0);
+            return;
+        }
+        var puntos = parseFloat(data.puntos_id) || 0;
+        var nivAut = parseFloat(data.nivel_autonomia) || 0;
+        var nivInt = parseFloat(data.nivel_intercepcion) || 0;
+        var nivBli = parseFloat(data.nivel_blindaje) || 0;
+        actualizarUIArbolID(puntos, nivAut, nivInt, nivBli);
+    });
     dbRef.child('partida/finanzas/burn_rate_mensual').on('value', function(snap) {
         document.getElementById('burnRateValor').innerText = Number(snap.val()) || 0;
     });
@@ -551,6 +731,23 @@ function bindFirebaseListeners() {
     });
     dbRef.child('partida/tiempo/trimestre_actual').on('value', function(snap) {
         document.getElementById('quarterDisplay').innerHTML = 'TRIMESTRE: ' + (snap.val() || 1);
+    });
+    // SPRINT 7 - COUNTDOWN: listener de la base de tiempo del Motor Histórico
+    // (va DENTRO de bindFirebaseListeners, no como código suelto, porque acá
+    //  dbRef ya está garantizado inicializado — ver initFirebaseWithRetry())
+    dbRef.child('partida/tiempo/historico_ultimo_tick').on('value', function(snap) {
+        ultimoTickBase = snap.val();
+        // FIX: este listener puede llegar DESPUÉS que los de modo_tiempo/
+        // simulacion_pausada (orden de respuesta de Firebase no garantizado).
+        // Si eso pasa, countdown_iniciar() ya se había llamado una vez con
+        // ultimoTickBase aún null y se frenó en su guarda, sin que nadie
+        // la vuelva a disparar. Por eso la re-intentamos acá: countdown_iniciar()
+        // ya tiene su propia guarda contra doble-arranque, así que es seguro
+        // llamarla de nuevo si el motor debería estar corriendo.
+        if (motorHistoricoModoActual === 'acelerado' && !motorHistoricoPausadaActual) {
+            countdown_iniciar();
+        }
+        // Si el countdown ya está corriendo, el intervalo usa la nueva base automáticamente
     });
     dbRef.child('partida/estado/aprobacion_economista').on('value', function(snap) {
         var el = document.getElementById('aprobEconomista');
@@ -770,9 +967,101 @@ async function motorHistorico_procesarUnTrimestre() {
 function motorHistorico_evaluarEstado(modo, pausada) {
     if (modo === 'acelerado' && !pausada) {
         motorHistorico_iniciar();
+        countdown_iniciar();
     } else {
         motorHistorico_detener();
+        countdown_detener();
     }
+}
+
+// ========== SPRINT 7 - COUNTDOWN ==========
+function countdown_iniciar() {
+    // Si ya hay un interval, no crear otro
+    if (countdownInterval !== null) return;
+    // Si ultimoTickBase es null, no hacer nada (esperar listener)
+    if (ultimoTickBase === null) return;
+
+    countdownInterval = setInterval(function() {
+        var ahora = Date.now();
+        var diff = ahora - ultimoTickBase;
+        var restante = QUARTER_MS - diff;
+        var display = document.getElementById('countdownDisplay');
+        if (!display) return;
+
+        // Si restante <= 0, mostrar "Procesando..." sin color de urgencia
+        if (restante <= 0) {
+            display.innerHTML = '⏳ Procesando...';
+            display.style.color = '';
+            display.classList.remove('pulse');
+            return;
+        }
+
+        // Formatear MM:SS
+        var totalSegundos = Math.floor(restante / 1000);
+        var minutos = Math.floor(totalSegundos / 60);
+        var segundos = totalSegundos % 60;
+        var mmss = String(minutos).padStart(2, '0') + ':' + String(segundos).padStart(2, '0');
+        display.innerHTML = '⏳ ' + mmss;
+
+        // Último minuto: estilo de urgencia
+        if (restante < 60000) {
+            display.style.color = '#f85149';
+            display.classList.add('pulse');
+        } else {
+            display.style.color = '';
+            display.classList.remove('pulse');
+        }
+    }, 1000);
+}
+
+function countdown_detener() {
+    if (countdownInterval !== null) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    var display = document.getElementById('countdownDisplay');
+    if (display) {
+        display.innerHTML = '⏳ — manual —';
+        display.style.color = '';
+        display.classList.remove('pulse');
+    }
+}
+
+// ========== SPRINT 7 - TELEMETRY FUNCTIONS ==========
+function telemetry_render() {
+    var container = document.getElementById('telemetryList');
+    if (!container) return;
+    container.innerHTML = '';
+    var items = bitacoraEventos.slice(0, TELEMETRY_MAX_ITEMS);
+    for (var i = 0; i < items.length; i++) {
+        var ev = items[i];
+        var entry = document.createElement('div');
+        entry.className = 'telemetry-entry';
+        if (ev.tipo === 'ingreso') entry.classList.add('ingreso');
+        else if (ev.tipo === 'gasto') entry.classList.add('gasto');
+        else entry.classList.add('info');
+        entry.textContent = '[' + ev.timestamp + '] ' + ev.mensaje;
+        if (i === 0) {
+            entry.classList.add('flash');
+            setTimeout(function(el) {
+                el.classList.remove('flash');
+            }, 400, entry);
+        }
+        container.appendChild(entry);
+    }
+}
+
+function telemetry_toggle() {
+    telemetryAbierta = !telemetryAbierta;
+    var panel = document.getElementById('telemetryPanel');
+    if (!panel) return;
+    if (telemetryAbierta) {
+        panel.classList.add('telemetry-open');
+        telemetry_render();
+    } else {
+        panel.classList.remove('telemetry-open');
+    }
+    localStorage.setItem('zss_telemetry_abierta', telemetryAbierta ? 'true' : 'false');
 }
 
 // ========== SPRINT 7 - CURRENCY RUN ENGINE: MULTI-MONEDA ==========
@@ -1054,6 +1343,181 @@ async function fundarPMCPropia(destino) {
 
   var flavor = flavors[destino] || '';
   agregarEvento('🚀 Sovereign Tactical fundada — desplegada en ' + destino + ' (' + flavor + '). Financiado con USD 200,000 en obligaciones negociables.', 'ingreso');
+}
+
+// ============================================================
+// SPRINT 7 - TRUEQUE TECNOLÓGICO + ÁRBOL I+D
+// ============================================================
+
+// ============ CONSTANTES MÓDULO I+D ============
+var CONST_COSTOS_NIVEL = [20, 50, 100]; // índice = nivel actual (0→1, 1→2, 2→3)
+
+// ============ FUNCIÓN 1: INVERTIR EN I+D ============
+async function invertirID() {
+    var snapshotFinanzas = await dbRef.child('partida/finanzas/tesoreria').once('value');
+    var tesoreriaActual = parseFloat(snapshotFinanzas.val()) || 0;
+
+    if (tesoreriaActual < 15000) {
+        agregarEvento('⚠️ Fondos insuficientes para invertir en I+D (se necesitan USD 15,000).', 'info');
+        return;
+    }
+
+    await dbRef.child('partida/finanzas/tesoreria').transaction(function(actual) {
+        return (parseFloat(actual) || 0) - 15000;
+    });
+
+    await dbRef.child('partida/tecnologia/puntos_id').transaction(function(actual) {
+        return (parseFloat(actual) || 0) + 10;
+    });
+
+    agregarEvento('🔬 Inversión en I+D confirmada — +10 Puntos I+D registrados. (-USD 15,000)', 'gasto');
+}
+
+// ============ FUNCIÓN 2: SUBIR NIVEL TECNOLÓGICO ============
+async function subirNivelTecnologico(rama) {
+    if (rama !== 'autonomia' && rama !== 'intercepcion' && rama !== 'blindaje') {
+        agregarEvento('⚠️ Rama tecnológica no reconocida.', 'info');
+        return;
+    }
+
+    var rutaNivel = 'partida/tecnologia/nivel_' + rama;
+
+    var snapshotNivel = await dbRef.child(rutaNivel).once('value');
+    var nivelActual = parseFloat(snapshotNivel.val()) || 0;
+
+    if (nivelActual >= 3) {
+        agregarEvento('⚠️ La rama ' + rama + ' ya está en nivel máximo (3/3).', 'info');
+        return;
+    }
+
+    var costoPuntos = CONST_COSTOS_NIVEL[nivelActual];
+
+    var snapshotPuntos = await dbRef.child('partida/tecnologia/puntos_id').once('value');
+    var puntosDisponibles = parseFloat(snapshotPuntos.val()) || 0;
+
+    if (puntosDisponibles < costoPuntos) {
+        agregarEvento('⚠️ Puntos I+D insuficientes para subir ' + rama + ' (necesitás ' + costoPuntos + ' pts, tenés ' + puntosDisponibles + ').', 'info');
+        return;
+    }
+
+    await dbRef.child('partida/tecnologia/puntos_id').transaction(function(actual) {
+        return (parseFloat(actual) || 0) - costoPuntos;
+    });
+
+    await dbRef.child(rutaNivel).transaction(function(actual) {
+        return (parseFloat(actual) || 0) + 1;
+    });
+
+    agregarEvento('⬆️ ' + rama.charAt(0).toUpperCase() + rama.slice(1) + ' subida a Nivel ' + (nivelActual + 1) + '/3 (-' + costoPuntos + ' pts I+D).', 'ingreso');
+}
+
+// ============ FUNCIÓN 3: TRUEQUE CON PMC ============
+async function truequeConPMC() {
+    var snapshotAutonomia = await dbRef.child('partida/tecnologia/nivel_autonomia').once('value');
+    var nivelAutonomia = parseFloat(snapshotAutonomia.val()) || 0;
+
+    if (nivelAutonomia < 1) {
+        agregarEvento('⚠️ Necesitás Autonomía Nivel 1 para ofrecer prototipos a la PMC.', 'info');
+        return;
+    }
+
+    var multiplicadores = [0, 1.064, 1.04, 1.016]; // índice 0 no se usa (gate ya lo filtra)
+    var multiplicadorBurn = multiplicadores[nivelAutonomia];
+
+    var riesgoFallo = 0.35 - (0.08 * nivelAutonomia);
+
+    if (Math.random() < riesgoFallo) {
+        // FALLO: prototipo perdido
+        await dbRef.child('partida/ppc/pmc_activa').set(false);
+        await dbRef.child('partida/ppc/rutas_bloqueadas').set(true);
+        simularDerribo();
+        agregarEvento('💥 Prototipo perdido en campo — contrato anulado, rutas bloqueadas.', 'gasto');
+    } else {
+        // ÉXITO: aplicar multiplicador descontado al burn_rate_mensual
+        // CORRECCIÓN: el Reactor había puesto 'partida/ppc/burn_rate_mensual' (path
+        // huérfano que no existe en ningún otro lugar del archivo). El burn rate
+        // real vive en 'partida/finanzas/burn_rate_mensual' (mismo nodo que usan
+        // subcontratarPMC, fundarPMCPropia y el Motor Histórico).
+        await dbRef.child('partida/finanzas/burn_rate_mensual').transaction(function(actual) {
+            return Math.floor((parseFloat(actual) || 0) * multiplicadorBurn);
+        });
+        await dbRef.child('partida/ppc/pmc_activa').set(true);
+        await dbRef.child('partida/ppc/rutas_bloqueadas').set(false);
+        agregarEvento('🤝 Prototipo entregado con éxito — PMC subcontratada a descuento logístico. (×' + multiplicadorBurn + ' burn rate)', 'ingreso');
+    }
+}
+
+// ============ FUNCIÓN 4: TRUEQUE CON LOBBY ============
+async function truequeConLobby() {
+    var snapshotAutonomia = await dbRef.child('partida/tecnologia/nivel_autonomia').once('value');
+    var nivelAutonomia = parseFloat(snapshotAutonomia.val()) || 0;
+
+    if (nivelAutonomia < 1) {
+        agregarEvento('⚠️ Necesitás Autonomía Nivel 1 para ofrecer prototipos al lobby político.', 'info');
+        return;
+    }
+
+    var costosPR = [0, 80, 50, 20]; // índice 0 no se usa (gate ya lo filtra)
+    var costoPR = costosPR[nivelAutonomia];
+
+    var snapshotPR = await dbRef.child('partida/estado/puntos_reputacion').once('value');
+    var prActual = parseFloat(snapshotPR.val()) || 0;
+
+    if (prActual < costoPR) {
+        agregarEvento('⚠️ Reputación insuficiente para trueque con lobby (necesitás ' + costoPR + ' PR, tenés ' + prActual + ').', 'info');
+        return;
+    }
+
+    var snapshotNivelJugador = await dbRef.child('partida/estado/nivel_actual').once('value');
+    var nivelJugador = parseFloat(snapshotNivelJugador.val()) || 0;
+
+    var probabilidadExito = 0.40 + (0.05 * nivelJugador);
+
+    await dbRef.child('partida/estado/puntos_reputacion').transaction(function(actual) {
+        return (parseFloat(actual) || 0) - costoPR;
+    });
+
+    if (Math.random() < probabilidadExito) {
+        await dbRef.child('partida/ppc/rutas_bloqueadas').set(false);
+        await dbRef.child('partida/finanzas/tesoreria').transaction(function(actual) {
+            return (parseFloat(actual) || 0) + 20000;
+        });
+        agregarEvento('🤝 Lobby político receptivo — rutas desbloqueadas y +USD 20,000 obtenidos via trueque tecnológico. (-' + costoPR + ' PR)', 'ingreso');
+    } else {
+        agregarEvento('❌ El lobby rechazó el prototipo — sin acuerdo esta vez. (-' + costoPR + ' PR)', 'info');
+    }
+}
+
+// ============ FUNCIÓN AUXILIAR: actualizar UI del árbol I+D ============
+function actualizarUIArbolID(puntos, nivAutonomia, nivIntercepcion, nivBlindaje) {
+    var elPuntos = document.getElementById('idi-puntos-display');
+    if (elPuntos) elPuntos.textContent = parseFloat(puntos) || 0;
+
+    var ramas = [
+        { texto: 'idi-nivel-autonomia-texto', btn: 'btn-subir-autonomia', val: nivAutonomia },
+        { texto: 'idi-nivel-intercepcion-texto', btn: 'btn-subir-intercepcion', val: nivIntercepcion },
+        { texto: 'idi-nivel-blindaje-texto', btn: 'btn-subir-blindaje', val: nivBlindaje }
+    ];
+
+    ramas.forEach(function(r) {
+        var elTexto = document.getElementById(r.texto);
+        var elBtn = document.getElementById(r.btn);
+        var nivel = parseFloat(r.val) || 0;
+        if (elTexto) elTexto.textContent = 'Nivel ' + nivel + '/3';
+        if (elBtn) {
+            if (nivel >= 3) {
+                elBtn.disabled = true;
+                elBtn.style.opacity = '0.35';
+                elBtn.style.cursor = 'not-allowed';
+                elBtn.style.background = '#30363d';
+            } else {
+                elBtn.disabled = false;
+                elBtn.style.opacity = '1';
+                elBtn.style.cursor = 'pointer';
+                elBtn.style.background = '#238636';
+            }
+        }
+    });
 }
 
 // ============ RESET ============
@@ -2091,6 +2555,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById('resetBtn').addEventListener('click', resetPartida);
     document.getElementById('exportarBitacoraBtn').addEventListener('click', exportarBitacora);
+    // SPRINT 7 - TELEMETRY: listeners + restauración de estado
+    var telemetryToggleBtn = document.getElementById('telemetryToggleBtn');
+    if (telemetryToggleBtn) telemetryToggleBtn.addEventListener('click', telemetry_toggle);
+    var telemetryCloseBtn = document.getElementById('telemetryCloseBtn');
+    if (telemetryCloseBtn) telemetryCloseBtn.addEventListener('click', telemetry_toggle);
+    if (localStorage.getItem('zss_telemetry_abierta') === 'true') {
+        telemetry_toggle();
+    }
     // ========== SPRINT 3 - PRENSA ==========
     var generarPrensaBtn = document.getElementById('generarPrensaBtn');
     if (generarPrensaBtn) generarPrensaBtn.addEventListener('click', generarTitulares);
@@ -2231,5 +2703,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<!-- ========== SPRINT 7 - SOVEREIGN TELEMETRY ========== -->
+<div class="telemetry-panel" id="telemetryPanel">
+    <div class="telemetry-header">
+        <span>📡 SOVEREIGN TELEMETRY</span>
+        <span id="telemetryCloseBtn" title="Cerrar panel">✕</span>
+    </div>
+    <div id="telemetryList"></div>
+</div>
 </body>
 </html>
