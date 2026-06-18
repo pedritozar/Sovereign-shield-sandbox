@@ -635,6 +635,7 @@ function cerrarTrimestre() {
                     verificarContratos();
                     generarEventoPolitico();
                     aplicarCurrencyRun();
+                    verificarInfortunios();
                 }
             });
         });
@@ -744,6 +745,7 @@ async function motorHistorico_procesarUnTrimestre() {
     await verificarContratos();
     await generarEventoPolitico();
     await aplicarCurrencyRun();
+    await verificarInfortunios();
 
     // No se tocan aprobacion_economista / aprobacion_civil: ese gate es solo
     // para el modo "turnos".
@@ -861,6 +863,73 @@ async function dispararShockMoneda(codigoMoneda, nuevaEstabilidad, shockInmediat
   var snapAll = await dbRef.child('partida/economia/monedas').once('value');
   var all = snapAll.val() || {};
   actualizarUIEconomia(all);
+}
+
+// ========== SPRINT 7 - MATRIZ DE INFORTUNIOS: EVENTOS HISTÓRICOS ==========
+// (DSK-07, generado por DeepSeek, integrado sin cambios por Claude — el
+//  código vino limpio, sin riesgos de concurrencia: corre secuencial
+//  dentro del mismo cierre de trimestre que aplicarCurrencyRun(), nunca
+//  en paralelo con sí misma.)
+async function verificarInfortunios() {
+  // 1. Leer trimestre actual y calcular año virtual
+  var snapTrim = await dbRef.child('partida/tiempo/trimestre_actual').once('value');
+  var trimestre = snapTrim.val() || 1;
+  var añoVirtual = Math.ceil(trimestre / 4);
+
+  // 2. Leer eventos ya disparados
+  var snapDisparados = await dbRef.child('partida/infortunios/eventosDisparados').once('value');
+  var disparados = snapDisparados.val() || {};
+
+  // 3. Leer estado actual de RUB (necesario para evaluar rub_hegemon)
+  var snapRub = await dbRef.child('partida/economia/monedas/RUB').once('value');
+  var rubEntry = snapRub.val() || { estabilidad: 'estable' };
+  var rubEstabilidad = rubEntry.estabilidad || 'estable';
+
+  // 4. Evaluar en orden y disparar el primero que matchee
+  // a) rub_colapso
+  if (!disparados.rub_colapso && añoVirtual >= 2 && Math.random() < 0.15) {
+    await dispararShockMoneda('RUB', 'crisis', -35,
+      '🇷🇺 Colapso del rublo: corrida bancaria tras sanciones occidentales.');
+    disparados.rub_colapso = true;
+    await dbRef.child('partida/infortunios/eventosDisparados').set(disparados);
+    return;
+  }
+
+  // b) rub_hegemon (requiere RUB en crisis)
+  if (!disparados.rub_hegemon && añoVirtual >= 6 && rubEstabilidad === 'crisis' && Math.random() < 0.10) {
+    await dispararShockMoneda('RUB', 'hegemon', +20,
+      '🇷🇺 El Banco Central ruso se consolida como hegemón regional tras la crisis.');
+    disparados.rub_hegemon = true;
+    await dbRef.child('partida/infortunios/eventosDisparados').set(disparados);
+    return;
+  }
+
+  // c) cny_consolidacion
+  if (!disparados.cny_consolidacion && añoVirtual >= 5 && Math.random() < 0.10) {
+    await dispararShockMoneda('CNY', 'hegemon', +15,
+      '🇨🇳 China consolida el yuan como reserva alternativa.');
+    disparados.cny_consolidacion = true;
+    await dbRef.child('partida/infortunios/eventosDisparados').set(disparados);
+    return;
+  }
+
+  // d) us_inestabilidad
+  if (!disparados.us_inestabilidad && añoVirtual >= 4 && Math.random() < 0.12) {
+    // Burn Rate +15%
+    await dbRef.child('partida/finanzas/burn_rate_mensual').transaction(function(actual) {
+      return Math.floor((Number(actual) || 0) * 1.15);
+    });
+    // Reputación -15 PR (con piso en 0)
+    await dbRef.child('partida/estado/puntos_reputacion').transaction(function(pr) {
+      return Math.max(0, (Number(pr) || 0) - 15);
+    });
+    agregarEvento('🇺🇸 Guerra Civil 2.0 / secesión de estados: la cadena de suministro y el riesgo país se resienten (Burn Rate +15%, -15 PR).', 'gasto');
+    disparados.us_inestabilidad = true;
+    await dbRef.child('partida/infortunios/eventosDisparados').set(disparados);
+    return;
+  }
+
+  // Si ningún evento se disparó, no se guarda nada (los disparados quedan como estaban)
 }
 
 // ============ RESET ============
