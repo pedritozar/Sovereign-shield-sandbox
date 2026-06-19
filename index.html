@@ -187,6 +187,470 @@
     .flash {
         animation: telemetryFlash 0.4s ease-in-out;
     }
+    /* ========== SPRINT 8 - VISOR 3D ========== */
+    #globo3d {
+      height: 340px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      position: relative;
+      background: #000;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    #globo3d canvas {
+      border-radius: 6px;
+      display: block;
+    }
+    #btnSimularLanzamiento {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 999;
+      background: rgba(13, 17, 23, 0.85);
+      color: #238636;
+      border: 1px solid #238636;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 6px #238636;
+      box-shadow: 0 0 8px rgba(35, 134, 54, 0.4);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    #btnSimularLanzamiento:hover {
+      background: rgba(35, 134, 54, 0.2);
+      box-shadow: 0 0 14px rgba(35, 134, 54, 0.7);
+      color: #58a6ff;
+      border-color: #58a6ff;
+    }
+
+    /* ============ SPRINT 8 - ANIMACIONES BÉLICAS: CSS ============ */
+
+    /* Flash de explosión */
+    @keyframes ss-explosion-ring {
+      0%   { transform: scale(0);   opacity: 1; }
+      60%  { transform: scale(1.4); opacity: 0.7; }
+      100% { transform: scale(2);   opacity: 0; }
+    }
+
+    /* Pulso de impacto */
+    @keyframes ss-impacto-pulso {
+      0%   { box-shadow: 0 0 0 0 rgba(248,81,73,0.9); }
+      70%  { box-shadow: 0 0 0 18px rgba(248,81,73,0); }
+      100% { box-shadow: 0 0 0 0 rgba(248,81,73,0); }
+    }
+
+    /* Flash blanco en impacto */
+    @keyframes ss-flash-blanco {
+      0%   { opacity: 1; transform: scale(0.2); }
+      40%  { opacity: 0.8; transform: scale(1.5); }
+      100% { opacity: 0; transform: scale(2.5); }
+    }
+
+    /* Misil subiendo */
+    @keyframes ss-misil-subida {
+      0%   { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Torpedo / naval */
+    @keyframes ss-torpedo {
+      0%   { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+
+    /* Parpadeo nodo táctico */
+    @keyframes ss-nodo-parpadeo {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* Canvas de animaciones sobre el mapa */
+    #ss-canvas-belico {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 500;
+    }
+
+    /* Marcador de explosión DOM */
+    .ss-explosion-marker {
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0%, #e3b341 30%, #f85149 60%, transparent 100%);
+      animation: ss-explosion-ring 0.8s ease-out forwards;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* Flash blanco DOM */
+    .ss-flash-marker {
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+      animation: ss-flash-blanco 0.5s ease-out forwards;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* Ícono barco naval */
+    .ss-barco-marker {
+      font-size: 20px;
+      line-height: 1;
+      user-select: none;
+      text-shadow: 0 0 6px #58a6ff;
+    }
+
+    /* Ícono misil */
+    .ss-misil-marker {
+      font-size: 16px;
+      line-height: 1;
+      user-select: none;
+      text-shadow: 0 0 8px #238636;
+      animation: ss-misil-subida 1.5s ease-out forwards;
+    }
+/* ============ SPRINT 8 - RADIO: ESTILOS DEL PANEL FLOTANTE ============ */
+:root {
+  --radio-bg: #0d1117;
+  --radio-green: #238636;
+  --radio-blue: #58a6ff;
+  --radio-txt: #e6edf3;
+  --radio-red: #f85149;
+  --radio-amber: #e3b341;
+  --radio-dark: #161b22;
+  --radio-border: #30363d;
+}
+
+/* Botón trigger en footer */
+#srn-footer-btn {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 9999;
+  background: #161b22;
+  border: 1px solid var(--radio-green);
+  color: var(--radio-green);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 7px 13px;
+  cursor: pointer;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(35,134,54,0.3);
+  transition: box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#srn-footer-btn:hover {
+  box-shadow: 0 0 18px rgba(35,134,54,0.6);
+}
+#srn-footer-btn .srn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--radio-green);
+  animation: srn-blink 1.2s infinite;
+}
+#srn-footer-btn .srn-dot.off {
+  background: #444;
+  animation: none;
+}
+@keyframes srn-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* Panel flotante principal */
+#srn-panel {
+  display: none;
+  position: fixed;
+  bottom: 60px;
+  right: 18px;
+  z-index: 9998;
+  width: 340px;
+  background: #0d1117;
+  border: 1px solid var(--radio-border);
+  border-radius: 6px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.8), 0 0 15px rgba(35,134,54,0.15);
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--radio-txt);
+  overflow: hidden;
+}
+#srn-panel.visible {
+  display: block;
+}
+
+/* Header del panel */
+.srn-header {
+  background: #161b22;
+  border-bottom: 1px solid var(--radio-border);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.srn-header-title {
+  color: var(--radio-green);
+  font-weight: bold;
+  letter-spacing: 2px;
+  font-size: 11px;
+}
+.srn-header-freq {
+  color: var(--radio-amber);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.srn-close-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  padding: 0 4px;
+  line-height: 1;
+}
+.srn-close-btn:hover { color: var(--radio-red); }
+
+/* Visualizador de onda */
+#srn-canvas {
+  width: 100%;
+  height: 48px;
+  display: block;
+  background: #0a0f16;
+}
+
+/* Sección de frecuencia */
+.srn-freq-bar {
+  background: #0a0f16;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--radio-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.srn-freq-display {
+  color: var(--radio-green);
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.srn-freq-label {
+  color: #555;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+/* Controles del reproductor */
+.srn-player-controls {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--radio-border);
+}
+.srn-btn {
+  background: #161b22;
+  border: 1px solid var(--radio-border);
+  color: var(--radio-txt);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.srn-btn:hover { border-color: var(--radio-green); color: var(--radio-green); }
+.srn-btn.active { border-color: var(--radio-green); color: var(--radio-green); background: rgba(35,134,54,0.1); }
+.srn-btn.danger:hover { border-color: var(--radio-red); color: var(--radio-red); }
+.srn-btn.amber:hover { border-color: var(--radio-amber); color: var(--radio-amber); }
+.srn-btn.blue:hover { border-color: var(--radio-blue); color: var(--radio-blue); }
+
+/* Slider de volumen */
+.srn-vol-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+}
+.srn-vol-label {
+  color: #555;
+  font-size: 9px;
+  letter-spacing: 1px;
+  min-width: 20px;
+}
+#srn-vol-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  background: #30363d;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+#srn-vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--radio-green);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Pestañas internas */
+.srn-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--radio-border);
+}
+.srn-tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #555;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  padding: 6px 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.srn-tab-btn.active {
+  color: var(--radio-green);
+  border-bottom-color: var(--radio-green);
+}
+.srn-tab-btn:hover { color: var(--radio-txt); }
+
+/* Contenido de pestañas */
+.srn-tab-content {
+  display: none;
+  padding: 10px 12px;
+}
+.srn-tab-content.active { display: block; }
+
+/* Display de boletines / scanner / números */
+.srn-output {
+  background: #0a0f16;
+  border: 1px solid var(--radio-border);
+  border-radius: 3px;
+  padding: 8px;
+  min-height: 55px;
+  max-height: 80px;
+  overflow-y: auto;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--radio-green);
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+.srn-output.amber-text { color: var(--radio-amber); }
+.srn-output.blue-text { color: var(--radio-blue); }
+.srn-output .srn-static {
+  color: #333;
+  letter-spacing: 0;
+}
+
+/* Cooldown indicator */
+.srn-cooldown {
+  font-size: 9px;
+  color: #555;
+  text-align: right;
+  margin-top: 3px;
+}
+
+/* Status bar inferior */
+.srn-status-bar {
+  background: #0a0f16;
+  border-top: 1px solid var(--radio-border);
+  padding: 4px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.srn-status-txt {
+  font-size: 9px;
+  color: #444;
+  letter-spacing: 1px;
+}
+.srn-status-txt.active-status { color: var(--radio-green); }
+
+/* Efecto de interferencia — overlay */
+#srn-interference-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,0.03) 2px,
+    rgba(255,255,255,0.03) 4px
+  );
+  transition: opacity 0.1s;
+}
+#srn-interference-overlay.active {
+  opacity: 1;
+  animation: srn-interference 0.15s infinite;
+}
+@keyframes srn-interference {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(1px); }
+  75% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+/* Números Estación: display especial */
+.srn-numbers-display {
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--radio-amber);
+  text-align: center;
+  padding: 6px 0;
+  font-weight: bold;
+  min-height: 28px;
+}
+.srn-numbers-phrase {
+  font-size: 9px;
+  color: #555;
+  text-align: center;
+  letter-spacing: 2px;
+  margin-top: 3px;
+}
+
+/* Scrollbar mínimo */
+.srn-output::-webkit-scrollbar { width: 3px; }
+.srn-output::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+
+/* Indicador de señal */
+.srn-signal-bars {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+}
+.srn-signal-bar {
+  width: 3px;
+  background: var(--radio-green);
+  border-radius: 1px;
+  opacity: 0.3;
+}
+.srn-signal-bar.lit { opacity: 1; }
+.srn-signal-bar:nth-child(1) { height: 4px; }
+.srn-signal-bar:nth-child(2) { height: 7px; }
+.srn-signal-bar:nth-child(3) { height: 10px; }
+.srn-signal-bar:nth-child(4) { height: 13px; }
+.srn-signal-bar:nth-child(5) { height: 16px; }
     </style>
 </head>
 <body>
@@ -425,8 +889,97 @@
         <button id="toggleImpactoBtn" style="border-color:#e3b341;color:#e3b341">💥 MODO IMPACTO</button>
         <button id="simularDerriboBtn" style="border-color:var(--red);color:var(--red)">⚡ SIMULAR DERRIBO</button>
         <button id="repararBaseBtn" style="border-color:var(--green);color:var(--green)">🔧 REPARAR BASE</button>
+        <!-- SPRINT 8 - VISOR 3D -->
+        <button id="toggleVisor3DBtn" class="teatro-btn" onclick="toggleVisor3D()" title="Alternar entre mapa 2D y globo 3D">🌐 VISOR 3D</button>
+        <!-- SPRINT 8 - ANIMACIONES BÉLICAS -->
+        <div id="sprint8-controles" style="
+          position:absolute;
+          top:10px;
+          right:10px;
+          z-index:1000;
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          pointer-events:all;
+        ">
+          <button id="btn-artilleria" onclick="iniciarBombardeoArtilleria()" style="
+            background:#1c2128;
+            color:#e3b341;
+            border:1px solid #e3b341;
+            padding:6px 10px;
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            cursor:pointer;
+            border-radius:3px;
+            text-align:left;
+            letter-spacing:0.5px;
+          ">⚡ ARTILLERÍA</button>
+          <button id="btn-frente" onclick="iniciarLineasFrente()" style="
+            background:#1c2128;
+            color:#f85149;
+            border:1px solid #f85149;
+            padding:6px 10px;
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            cursor:pointer;
+            border-radius:3px;
+            text-align:left;
+            letter-spacing:0.5px;
+          ">🔴 LÍNEA FRENTE</button>
+          <button id="btn-humo" onclick="iniciarHumo()" style="
+            background:#1c2128;
+            color:#8b949e;
+            border:1px solid #8b949e;
+            padding:6px 10px;
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            cursor:pointer;
+            border-radius:3px;
+            text-align:left;
+            letter-spacing:0.5px;
+          ">💨 HUMO</button>
+          <button id="btn-naval" onclick="iniciarCombateNaval()" style="
+            background:#1c2128;
+            color:#58a6ff;
+            border:1px solid #58a6ff;
+            padding:6px 10px;
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            cursor:pointer;
+            border-radius:3px;
+            text-align:left;
+            letter-spacing:0.5px;
+          ">⚓ NAVAL</button>
+          <button id="btn-aerea" onclick="iniciarDefensaAerea()" style="
+            background:#1c2128;
+            color:#238636;
+            border:1px solid #238636;
+            padding:6px 10px;
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            cursor:pointer;
+            border-radius:3px;
+            text-align:left;
+            letter-spacing:0.5px;
+          ">🚀 DEF. AÉREA</button>
+          <button id="btn-limpiar" onclick="limpiarAnimaciones()" style="
+            background:#1c2128;
+            color:#6e7681;
+            border:1px solid #30363d;
+            padding:6px 10px;
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            cursor:pointer;
+            border-radius:3px;
+            text-align:left;
+            letter-spacing:0.5px;
+          ">✖ LIMPIAR</button>
+        </div>
     </div>
     <div id="map"></div>
+    <div id="globo3d" style="display:none;">
+      <button id="btnSimularLanzamiento" onclick="simularLanzamiento()" title="Agregar nuevo satélite a la órbita">🚀 Simular Lanzamiento</button>
+    </div>
     <div class="panel">
         <h3>TEATROS DE OPERACIONES</h3>
         <p>📍 <strong>HQ Buenos Aires</strong> — Operativo &nbsp;|&nbsp; 🚧 <strong>Base Patagónica</strong> — Bloqueada (Nivel 2)</p>
@@ -796,6 +1349,13 @@ function bindFirebaseListeners() {
             el.innerText = 'Presupuesto enviado al Primo: USD ' + valor.toLocaleString('en-US');
         }
     });
+
+    // ========== SPRINT 8 - RADIO NETWORK: listener de interferencia táctica ==========
+    // (va acá, no en el DOMContentLoaded propio del módulo — dbRef recién
+    //  está garantizado a esta altura, ver Regla 18 / Lección 1)
+    if (typeof srnBindInterferenceEvents === 'function') {
+        srnBindInterferenceEvents();
+    }
 }
 
 // ============ SISTEMA DE NIVELES ============
@@ -1550,6 +2110,401 @@ function boostReputacion() {
 }
 
 // ============ MAPA LEAFLET ============
+// ========== SPRINT 8 - VISOR 3D (Three.js) ==========
+
+function cargarScript(url) {
+  return new Promise(function(resolve, reject) {
+    var scripts = document.querySelectorAll('script[src]');
+    for (var i = 0; i < scripts.length; i++) {
+      if (scripts[i].src === url) {
+        resolve();
+        return;
+      }
+    }
+    var script = document.createElement('script');
+    script.src = url;
+    script.onload = function() { resolve(); };
+    script.onerror = function() { reject(new Error('Error cargando: ' + url)); };
+    document.head.appendChild(script);
+  });
+}
+
+var cantidadSatelitesPropios = 3;
+var totalSatelites = 8;
+var globo3DIniciado = false;
+var escena3D = null;
+var camara3D = null;
+var renderer3D = null;
+var controles3D = null;
+var satelitesEnOrbita = [];
+var orbitasAngulos = [];
+var animacionGlobo3DId = null;
+var RADIO_TIERRA = 2.5;
+var ORBITAS_RADIOS = [3.4, 4.1, 4.8];
+
+function toggleVisor3D() {
+  var mapa2D = document.getElementById('map');
+  var globo3DEl = document.getElementById('globo3d');
+  var btn = document.getElementById('toggleVisor3DBtn');
+
+  if (!mapa2D || !globo3DEl) {
+    console.warn('[Visor3D] Elementos #map o #globo3d no encontrados.');
+    return;
+  }
+
+  var visorActivo = globo3DEl.style.display !== 'none';
+
+  if (visorActivo) {
+    globo3DEl.style.display = 'none';
+    mapa2D.style.display = 'block';
+    if (btn) {
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.style.boxShadow = '';
+    }
+    localStorage.setItem('ss_visor3d', '0');
+    if (animacionGlobo3DId) {
+      cancelAnimationFrame(animacionGlobo3DId);
+      animacionGlobo3DId = null;
+    }
+    agregarEvento('🗺️ Visor 3D desactivado. Mapa táctico 2D activo.', 'info');
+  } else {
+    mapa2D.style.display = 'none';
+    globo3DEl.style.display = 'block';
+    if (btn) {
+      btn.style.borderColor = '#58a6ff';
+      btn.style.color = '#58a6ff';
+      btn.style.boxShadow = '0 0 10px rgba(88,166,255,0.5)';
+    }
+    localStorage.setItem('ss_visor3d', '1');
+    agregarEvento('🌐 Visor 3D activado. Vista orbital en tiempo real.', 'info');
+
+    if (!globo3DIniciado) {
+      cargarScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
+        .then(function() {
+          return cargarScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+        })
+        .then(function() {
+          inicializarGlobo3D();
+        })
+        .catch(function(err) {
+          console.error('[Visor3D] Error al cargar dependencias Three.js:', err);
+          agregarEvento('⚠️ Error cargando motor 3D. Revise conexión.', 'gasto');
+        });
+    } else {
+      animarGlobo3D();
+      ajustarRendererGlobo3D();
+    }
+  }
+}
+
+function inicializarGlobo3D() {
+  if (typeof THREE === 'undefined') {
+    console.error('[Visor3D] THREE no está definido después de cargar scripts.');
+    agregarEvento('⚠️ Motor 3D no disponible.', 'gasto');
+    return;
+  }
+
+  var contenedor = document.getElementById('globo3d');
+  if (!contenedor) return;
+
+  var ancho = contenedor.clientWidth;
+  var alto = contenedor.clientHeight;
+
+  escena3D = new THREE.Scene();
+  escena3D.background = new THREE.Color(0x010a14);
+
+  camara3D = new THREE.PerspectiveCamera(45, ancho / alto, 0.1, 100);
+  camara3D.position.set(0, 3, 10);
+
+  renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer3D.setSize(ancho, alto);
+  renderer3D.setPixelRatio(window.devicePixelRatio || 1);
+  renderer3D.shadowMap.enabled = false;
+  contenedor.appendChild(renderer3D.domElement);
+
+  if (typeof THREE.OrbitControls !== 'undefined') {
+    controles3D = new THREE.OrbitControls(camara3D, renderer3D.domElement);
+    controles3D.enableDamping = true;
+    controles3D.dampingFactor = 0.05;
+    controles3D.minDistance = 4;
+    controles3D.maxDistance = 20;
+    controles3D.enablePan = false;
+  } else {
+    console.warn('[Visor3D] OrbitControls no disponible, sin interacción de cámara.');
+  }
+
+  var luzAmbiente = new THREE.AmbientLight(0x333355, 0.6);
+  escena3D.add(luzAmbiente);
+
+  var luzSol = new THREE.DirectionalLight(0xffffff, 1.2);
+  luzSol.position.set(8, 4, 6);
+  escena3D.add(luzSol);
+
+  crearEstrellasFondo();
+  crearGloboTerrestre();
+  crearAnillosOrbita();
+  crearSatelitesIniciales();
+
+  window.addEventListener('resize', ajustarRendererGlobo3D);
+
+  globo3DIniciado = true;
+  animarGlobo3D();
+
+  agregarEvento('🛰️ Sistema orbital Sovereign Shield inicializado. ' + totalSatelites + ' satélites en seguimiento.', 'ingreso');
+}
+
+function crearEstrellasFondo() {
+  var cantEstrellas = 1500;
+  var geometria = new THREE.BufferGeometry();
+  var posiciones = new Float32Array(cantEstrellas * 3);
+
+  for (var i = 0; i < cantEstrellas; i++) {
+    posiciones[i * 3]     = (Math.random() - 0.5) * 80;
+    posiciones[i * 3 + 1] = (Math.random() - 0.5) * 80;
+    posiciones[i * 3 + 2] = (Math.random() - 0.5) * 80;
+  }
+
+  geometria.setAttribute('position', new THREE.BufferAttribute(posiciones, 3));
+
+  var materialEstrellas = new THREE.PointsMaterial({
+    color: 0xaaaacc,
+    size: 0.06,
+    sizeAttenuation: true
+  });
+
+  var estrellas = new THREE.Points(geometria, materialEstrellas);
+  escena3D.add(estrellas);
+}
+
+function crearGloboTerrestre() {
+  var geometriaTierra = new THREE.SphereGeometry(RADIO_TIERRA, 48, 48);
+
+  var cargadorTextura = new THREE.TextureLoader();
+  var urlTextura = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
+
+  var materialTierra = new THREE.MeshPhongMaterial({
+    color: 0x1a3a5c,
+    shininess: 15
+  });
+
+  var tierra = new THREE.Mesh(geometriaTierra, materialTierra);
+  tierra.name = 'tierra';
+  escena3D.add(tierra);
+
+  cargadorTextura.load(
+    urlTextura,
+    function(textura) {
+      materialTierra.map = textura;
+      materialTierra.color = new THREE.Color(0xffffff);
+      materialTierra.needsUpdate = true;
+    },
+    undefined,
+    function(err) {
+      console.warn('[Visor3D] Textura de la Tierra no disponible, usando color sólido.');
+    }
+  );
+
+  var geometriaAtmos = new THREE.SphereGeometry(RADIO_TIERRA + 0.07, 48, 48);
+  var materialAtmos = new THREE.MeshPhongMaterial({
+    color: 0x4488ff,
+    transparent: true,
+    opacity: 0.08,
+    side: THREE.FrontSide
+  });
+  var atmosfera = new THREE.Mesh(geometriaAtmos, materialAtmos);
+  escena3D.add(atmosfera);
+}
+
+function crearAnillosOrbita() {
+  var coloresOrbita = [0x1a472a, 0x0d3356, 0x2d1b4e];
+  var segmentos = 96;
+
+  for (var o = 0; o < ORBITAS_RADIOS.length; o++) {
+    var radio = ORBITAS_RADIOS[o];
+    var vertices = [];
+
+    for (var s = 0; s <= segmentos; s++) {
+      var angulo = (s / segmentos) * Math.PI * 2;
+      vertices.push(Math.cos(angulo) * radio, 0, Math.sin(angulo) * radio);
+    }
+
+    var geomAnillo = new THREE.BufferGeometry();
+    geomAnillo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+
+    var matAnillo = new THREE.LineBasicMaterial({
+      color: coloresOrbita[o],
+      transparent: true,
+      opacity: 0.55,
+      linewidth: 1
+    });
+
+    var anillo = new THREE.LineLoop(geomAnillo, matAnillo);
+    anillo.rotation.x = (o * 0.28) + 0.15;
+    anillo.rotation.z = o * 0.12;
+    escena3D.add(anillo);
+  }
+}
+
+function crearSatelitesIniciales() {
+  satelitesEnOrbita = [];
+  orbitasAngulos = [];
+
+  for (var i = 0; i < totalSatelites; i++) {
+    // Población inicial: los primeros cantidadSatelitesPropios son verdes
+    crearSatelite(i, i < cantidadSatelitesPropios);
+  }
+}
+
+/**
+ * Crea un satélite individual y lo agrega a la escena.
+ * @param {number} indice - Índice del satélite (determina posición/órbita).
+ * @param {boolean} esSoberano - Color explícito: true=verde (Sovereign Shield), false=azul.
+ * CORRECCIÓN vs el output del Reactor: el original inferĺa el color con
+ * "indice < cantidadSatelitesPropios", que solo funciona para la tanda inicial
+ * (0..7). Un satélite lanzado después con simularLanzamiento() tiene un índice
+ * más alto que cantidadSatelitesPropios y salía AZUL en vez de verde, pese a que
+ * el propio comentario del código decía "el nuevo satélite siempre es soberano".
+ * Ahora el color se pasa explícito en vez de inferirse del índice.
+ */
+function crearSatelite(indice, esSoberano) {
+  var colorHex = esSoberano ? 0x238636 : 0x58a6ff;
+
+  var geomSat = new THREE.OctahedronGeometry(0.07, 0);
+  var matSat = new THREE.MeshPhongMaterial({
+    color: colorHex,
+    emissive: colorHex,
+    emissiveIntensity: 0.6,
+    shininess: 80
+  });
+
+  var satelite = new THREE.Mesh(geomSat, matSat);
+  satelite.name = esSoberano ? ('ss_sat_' + indice) : ('ext_sat_' + indice);
+
+  var orbitaIdx = indice % ORBITAS_RADIOS.length;
+  var anguloInicial = (indice / totalSatelites) * Math.PI * 2;
+
+  var radio = ORBITAS_RADIOS[orbitaIdx];
+  satelite.position.set(
+    Math.cos(anguloInicial) * radio,
+    0,
+    Math.sin(anguloInicial) * radio
+  );
+
+  satelite.userData = {
+    orbitaIdx: orbitaIdx,
+    angulo: anguloInicial,
+    velocidad: 0.004 + (orbitaIdx * 0.002) + (Math.random() * 0.002),
+    inclinacionX: (orbitaIdx * 0.28) + 0.15,
+    inclinacionZ: orbitaIdx * 0.12
+  };
+
+  escena3D.add(satelite);
+  satelitesEnOrbita.push(satelite);
+
+  if (esSoberano) {
+    var geomHalo = new THREE.SphereGeometry(0.12, 8, 8);
+    var matHalo = new THREE.MeshBasicMaterial({
+      color: 0x238636,
+      transparent: true,
+      opacity: 0.18,
+      wireframe: false
+    });
+    var halo = new THREE.Mesh(geomHalo, matHalo);
+    satelite.add(halo);
+  }
+}
+
+function animarGlobo3D() {
+  var globo3DEl = document.getElementById('globo3d');
+  if (!globo3DEl || globo3DEl.style.display === 'none') {
+    animacionGlobo3DId = null;
+    return;
+  }
+
+  animacionGlobo3DId = requestAnimationFrame(animarGlobo3D);
+
+  for (var i = 0; i < satelitesEnOrbita.length; i++) {
+    var sat = satelitesEnOrbita[i];
+    var ud = sat.userData;
+
+    ud.angulo += ud.velocidad;
+
+    var radio = ORBITAS_RADIOS[ud.orbitaIdx];
+
+    var x = Math.cos(ud.angulo) * radio;
+    var z = Math.sin(ud.angulo) * radio;
+
+    var cosX = Math.cos(ud.inclinacionX);
+    var sinX = Math.sin(ud.inclinacionX);
+    var cosZ = Math.cos(ud.inclinacionZ);
+    var sinZ = Math.sin(ud.inclinacionZ);
+
+    var yRot = -z * sinX;
+    var zRot =  z * cosX;
+    var xRot =  x * cosZ - yRot * sinZ;
+    var yFinal = x * sinZ + yRot * cosZ;
+
+    sat.position.set(xRot, yFinal, zRot);
+
+    sat.rotation.y += 0.02;
+    sat.rotation.x += 0.01;
+  }
+
+  var tierraObj = escena3D.getObjectByName('tierra');
+  if (tierraObj) {
+    tierraObj.rotation.y += 0.0008;
+  }
+
+  if (controles3D) {
+    controles3D.update();
+  }
+
+  renderer3D.render(escena3D, camara3D);
+}
+
+function ajustarRendererGlobo3D() {
+  var contenedor = document.getElementById('globo3d');
+  if (!contenedor || !renderer3D || !camara3D) return;
+  if (contenedor.style.display === 'none') return;
+
+  var ancho = contenedor.clientWidth;
+  var alto = contenedor.clientHeight;
+
+  if (ancho === 0 || alto === 0) return;
+
+  camara3D.aspect = ancho / alto;
+  camara3D.updateProjectionMatrix();
+  renderer3D.setSize(ancho, alto);
+}
+
+function simularLanzamiento() {
+  if (!globo3DIniciado || !escena3D) {
+    agregarEvento('⚠️ Visor 3D no activo. Active el visor para lanzar satélites.', 'gasto');
+    return;
+  }
+
+  cantidadSatelitesPropios++;
+  totalSatelites++;
+
+  var nuevoIndice = totalSatelites - 1;
+
+  // CORRECCIÓN: forzar esSoberano=true explícito (ver nota en crearSatelite)
+  crearSatelite(nuevoIndice, true);
+
+  agregarEvento('🚀 Nuevo satélite Sovereign Shield en órbita. Total en constelación: ' + cantidadSatelitesPropios + '.', 'ingreso');
+
+  var btnLanz = document.getElementById('btnSimularLanzamiento');
+  if (btnLanz) {
+    btnLanz.style.background = 'rgba(35,134,54,0.4)';
+    btnLanz.style.boxShadow = '0 0 20px rgba(35,134,54,0.9)';
+    setTimeout(function() {
+      btnLanz.style.background = '';
+      btnLanz.style.boxShadow = '';
+    }, 600);
+  }
+}
+
 function inicializarMapa() {
     if (typeof L === 'undefined') { setTimeout(inicializarMapa, 500); return; }
     if (mapaInicializado) { if (mapaObj) mapaObj.invalidateSize(); return; }
@@ -2535,6 +3490,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (derriboBtn) derriboBtn.addEventListener('click', simularDerribo);
     var repararBtn = document.getElementById('repararBaseBtn');
     if (repararBtn) repararBtn.addEventListener('click', repararBase);
+    // SPRINT 8 - VISOR 3D: restaurar preferencia (el onclick inline ya cubre
+    // el toggle y el lanzamiento; solo falta restaurar el estado guardado)
+    if (localStorage.getItem('ss_visor3d') === '1') {
+        setTimeout(function() { toggleVisor3D(); }, 800);
+    }
     if (refreshLeyesBtn) refreshLeyesBtn.addEventListener('click', cargarLeyesDinamicas);
     var lobbyBtn = document.getElementById('hacerLobbyBtn');
     if (lobbyBtn) lobbyBtn.addEventListener('click', hacerLobby);
@@ -2711,5 +3671,1801 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div id="telemetryList"></div>
 </div>
+<!-- JS: Módulo de animaciones bélicas -->
+<script>
+// ============ SPRINT 8 - ANIMACIONES BÉLICAS: MÓDULO PRINCIPAL ============
+
+// Variables globales del módulo (var para consistencia)
+var ss8Canvas = null;
+var ss8Ctx = null;
+var ss8AnimFrame = null;
+var ss8Particulas = [];
+var ss8ElementosDOM = [];
+var ss8CapasLeaflet = [];
+var ss8AnimActiva = null;
+var ss8LoopActivo = false;
+
+// ============ SPRINT 8 - INIT: Inicialización del canvas sobre el mapa ============
+function ss8IniciarCanvas() {
+  // Validar que Leaflet esté disponible
+  if (typeof L === 'undefined') {
+    agregarEvento('[SPRINT8] Leaflet no disponible — canvas abortado', 'info');
+    return false;
+  }
+
+  // Buscar contenedor del mapa
+  var contenedorMapa = document.getElementById('map');
+  if (!contenedorMapa) {
+    agregarEvento('[SPRINT8] Contenedor #map no encontrado', 'info');
+    return false;
+  }
+
+  // Si ya existe el canvas, reutilizarlo
+  if (ss8Canvas && document.getElementById('ss-canvas-belico')) {
+    return true;
+  }
+
+  // Crear canvas sobre el mapa
+  ss8Canvas = document.createElement('canvas');
+  ss8Canvas.id = 'ss-canvas-belico';
+  ss8Canvas.width  = contenedorMapa.offsetWidth  || 800;
+  ss8Canvas.height = contenedorMapa.offsetHeight || 600;
+  contenedorMapa.style.position = 'relative';
+  contenedorMapa.appendChild(ss8Canvas);
+  ss8Ctx = ss8Canvas.getContext('2d');
+
+  // Ajustar canvas al resize
+  window.addEventListener('resize', function() {
+    var c = document.getElementById('map');
+    if (c && ss8Canvas) {
+      ss8Canvas.width  = c.offsetWidth;
+      ss8Canvas.height = c.offsetHeight;
+    }
+  });
+
+  return true;
+}
+
+// ============ SPRINT 8 - UTILS: Convertir lat/lng a píxeles del canvas ============
+function ss8LatLngAPixel(lat, lng) {
+  if (typeof L === 'undefined' || !mapaObj) return { x: 0, y: 0 };
+  var punto = mapaObj.latLngToContainerPoint(L.latLng(lat, lng));
+  return { x: punto.x, y: punto.y };
+}
+
+// ============ SPRINT 8 - UTILS: Limpiar todas las animaciones activas ============
+function limpiarAnimaciones() {
+  // Detener loop
+  ss8LoopActivo = false;
+  if (ss8AnimFrame) {
+    cancelAnimationFrame(ss8AnimFrame);
+    ss8AnimFrame = null;
+  }
+
+  // Limpiar partículas
+  ss8Particulas = [];
+
+  // Limpiar canvas
+  if (ss8Ctx && ss8Canvas) {
+    ss8Ctx.clearRect(0, 0, ss8Canvas.width, ss8Canvas.height);
+  }
+
+  // Remover elementos DOM creados
+  for (var i = 0; i < ss8ElementosDOM.length; i++) {
+    if (ss8ElementosDOM[i] && ss8ElementosDOM[i].parentNode) {
+      ss8ElementosDOM[i].parentNode.removeChild(ss8ElementosDOM[i]);
+    }
+  }
+  ss8ElementosDOM = [];
+
+  // Remover capas Leaflet
+  for (var j = 0; j < ss8CapasLeaflet.length; j++) {
+    if (ss8CapasLeaflet[j] && mapaObj) {
+      try { mapaObj.removeLayer(ss8CapasLeaflet[j]); } catch(e) {}
+    }
+  }
+  ss8CapasLeaflet = [];
+
+  ss8AnimActiva = null;
+  agregarEvento('[SPRINT8] Animaciones limpiadas', 'info');
+}
+
+// ============ SPRINT 8 - LOOP: Motor de animación principal ============
+function ss8Loop() {
+  if (!ss8LoopActivo) return;
+  if (!ss8Ctx || !ss8Canvas) return;
+
+  // Limpiar frame
+  ss8Ctx.clearRect(0, 0, ss8Canvas.width, ss8Canvas.height);
+
+  // Actualizar y dibujar cada partícula según su tipo
+  var vivas = [];
+  for (var i = 0; i < ss8Particulas.length; i++) {
+    var p = ss8Particulas[i];
+    if (!p || p.muerta) continue;
+
+    p.tick = (p.tick || 0) + 1;
+
+    if (p.tipo === 'bala_artilleria')    { ss8DibujarBalaArtilleria(p); }
+    else if (p.tipo === 'humo')          { ss8DibujarHumo(p); }
+    else if (p.tipo === 'explosion')     { ss8DibujarExplosion(p); }
+    else if (p.tipo === 'torpedo')       { ss8DibujarTorpedo(p); }
+    else if (p.tipo === 'estela_naval')  { ss8DibujarEstelaNaval(p); }
+    else if (p.tipo === 'misil_linea')   { ss8DibujarMisilLinea(p); }
+    else if (p.tipo === 'frente')        { ss8DibujarLineasFrente(p); }
+
+    if (!p.muerta) vivas.push(p);
+  }
+  ss8Particulas = vivas;
+
+  ss8AnimFrame = requestAnimationFrame(ss8Loop);
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 1: BOMBARDEO DE ARTILLERÍA ============
+function iniciarBombardeoArtilleria() {
+  if (!ss8IniciarCanvas()) return;
+
+  // Coordenadas de origen y destino (sobre Patagonia argentina)
+  var origenLat  = -38.0, origenLng  = -63.0;
+  var destinoLat = -45.8, destinoLng = -67.5;
+
+  // Número de salvas
+  var numSalvas = 5;
+
+  agregarEvento('[SPRINT8] ⚡ Bombardeo de artillería iniciado — ' + numSalvas + ' salvas', 'gasto');
+
+  // Disparar salvas con delay
+  for (var s = 0; s < numSalvas; s++) {
+    (function(saInd) {
+      setTimeout(function() {
+        ss8LanzarSalva(
+          origenLat  + (Math.random() - 0.5) * 2,
+          origenLng  + (Math.random() - 0.5) * 2,
+          destinoLat + (Math.random() - 0.5) * 1.5,
+          destinoLng + (Math.random() - 0.5) * 1.5
+        );
+      }, saInd * 600);
+    })(s);
+  }
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8LanzarSalva(oLat, oLng, dLat, dLng) {
+  var pOrig  = ss8LatLngAPixel(oLat, oLng);
+  var pDest  = ss8LatLngAPixel(dLat, dLng);
+  var duracion = 60; // frames
+
+  // Crear partícula de bala (parábola)
+  var bala = {
+    tipo: 'bala_artilleria',
+    x0: pOrig.x, y0: pOrig.y,
+    x1: pDest.x, y1: pDest.y,
+    tick: 0,
+    duracion: duracion,
+    muerta: false,
+    // Control de parábola: punto más alto
+    ctrlX: (pOrig.x + pDest.x) / 2,
+    ctrlY: Math.min(pOrig.y, pDest.y) - 80 - Math.random() * 40,
+    oLat: oLat, oLng: oLng,
+    dLat: dLat, dLng: dLng,
+    humoGenerado: false
+  };
+  ss8Particulas.push(bala);
+
+  // Programar explosión al llegar
+  setTimeout(function() {
+    ss8CrearExplosionDOM(dLat, dLng);
+    ss8GenerarNubeHumo(dLat, dLng, 8);
+  }, parseFloat(duracion) * 16.67);
+}
+
+function ss8DibujarBalaArtilleria(p) {
+  // Recalcular posiciones (el mapa puede moverse)
+  var pOrig = ss8LatLngAPixel(p.oLat, p.oLng);
+  var pDest = ss8LatLngAPixel(p.dLat, p.dLng);
+
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  // Posición cuadrática de Bezier
+  var ctrlX = (pOrig.x + pDest.x) / 2;
+  var ctrlY = Math.min(pOrig.y, pDest.y) - 80;
+  var bx = (1 - t) * (1 - t) * pOrig.x + 2 * (1 - t) * t * ctrlX + t * t * pDest.x;
+  var by = (1 - t) * (1 - t) * pOrig.y + 2 * (1 - t) * t * ctrlY + t * t * pDest.y;
+
+  // Traza de puntos anteriores (estela)
+  var pasos = 8;
+  for (var k = 0; k < pasos; k++) {
+    var tAnterior = Math.max(0, t - k * 0.015);
+    var bxK = (1-tAnterior)*(1-tAnterior)*pOrig.x + 2*(1-tAnterior)*tAnterior*ctrlX + tAnterior*tAnterior*pDest.x;
+    var byK = (1-tAnterior)*(1-tAnterior)*pOrig.y + 2*(1-tAnterior)*tAnterior*ctrlY + tAnterior*tAnterior*pDest.y;
+    var alpha = parseFloat(1 - k / pasos) * 0.8;
+    var radio = parseFloat(3 - k * 0.3);
+
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(bxK, byK, Math.max(0.5, radio), 0, Math.PI * 2);
+    ss8Ctx.fillStyle = k === 0
+      ? 'rgba(255,200,50,' + alpha + ')'
+      : 'rgba(248,81,73,' + alpha + ')';
+    ss8Ctx.fill();
+  }
+
+  // Punto cabeza (amarillo brillante)
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(bx, by, 4, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#fff';
+  ss8Ctx.fill();
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(bx, by, 2, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#e3b341';
+  ss8Ctx.fill();
+}
+
+// Explosión en canvas
+function ss8DibujarExplosion(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pos = ss8LatLngAPixel(p.lat, p.lng);
+  var radioMax = parseFloat(p.radioMax);
+  var radio = radioMax * t;
+  var alpha = parseFloat(1 - t);
+
+  // Anillo exterior
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(pos.x, pos.y, radio, 0, Math.PI * 2);
+  ss8Ctx.strokeStyle = 'rgba(248,81,73,' + alpha + ')';
+  ss8Ctx.lineWidth = 3;
+  ss8Ctx.stroke();
+
+  // Anillo interior más brillante
+  var radio2 = radio * 0.5;
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(pos.x, pos.y, radio2, 0, Math.PI * 2);
+  ss8Ctx.strokeStyle = 'rgba(227,179,65,' + (alpha * 0.8) + ')';
+  ss8Ctx.lineWidth = 2;
+  ss8Ctx.stroke();
+
+  // Centro destello
+  if (t < 0.3) {
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(pos.x, pos.y, radio2 * 0.4, 0, Math.PI * 2);
+    ss8Ctx.fillStyle = 'rgba(255,255,255,' + (parseFloat(1 - t/0.3)) + ')';
+    ss8Ctx.fill();
+  }
+}
+
+// Explosión DOM (overlay Leaflet)
+function ss8CrearExplosionDOM(lat, lng) {
+  if (typeof L === 'undefined' || !mapaObj) return;
+
+  // Agregar círculo de explosión en canvas
+  ss8Particulas.push({
+    tipo: 'explosion',
+    lat: lat, lng: lng,
+    tick: 0,
+    duracion: 45,
+    radioMax: 40 + Math.random() * 20,
+    muerta: false
+  });
+
+  // Marcador DOM flash
+  var pos = mapaObj.latLngToContainerPoint(L.latLng(lat, lng));
+  var mapa = document.getElementById('map');
+  if (!mapa) return;
+
+  var flash = document.createElement('div');
+  flash.className = 'ss-flash-marker';
+  var tam = 60;
+  flash.style.cssText = [
+    'width:' + tam + 'px',
+    'height:' + tam + 'px',
+    'left:' + (pos.x - tam/2) + 'px',
+    'top:' + (pos.y - tam/2) + 'px',
+    'z-index:600'
+  ].join(';');
+  mapa.appendChild(flash);
+  ss8ElementosDOM.push(flash);
+
+  // Auto-remover después de la animación
+  setTimeout(function() {
+    if (flash.parentNode) flash.parentNode.removeChild(flash);
+  }, 600);
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 2: LÍNEAS DE FRENTE DINÁMICAS ============
+function iniciarLineasFrente() {
+  if (!ss8IniciarCanvas()) return;
+
+  // Índice de ruptura simulado (0 a 1)
+  var indiceRuptura = 0;
+  var maxTicks = 200;
+
+  agregarEvento('[SPRINT8] 🔴 Línea de frente activada — ruptura en progreso', 'info');
+
+  // Crear partícula de frente
+  var frente = {
+    tipo: 'frente',
+    tick: 0,
+    duracion: maxTicks,
+    muerta: false,
+    ruptura: 0,
+    // Puntos de la línea de frente (lat/lng)
+    puntos: [
+      { lat: -33.0, lng: -68.0 },
+      { lat: -35.5, lng: -66.0 },
+      { lat: -38.0, lng: -65.5 },
+      { lat: -40.5, lng: -64.0 },
+      { lat: -42.0, lng: -65.0 },
+      { lat: -44.0, lng: -65.5 },
+      { lat: -46.0, lng: -66.5 }
+    ]
+  };
+  ss8Particulas.push(frente);
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8DibujarLineasFrente(p) {
+  if (p.tick > p.duracion) { p.muerta = true; return; }
+
+  // Actualizar ruptura
+  p.ruptura = parseFloat(p.tick) / parseFloat(p.duracion);
+
+  var puntos = p.puntos;
+  if (!puntos || puntos.length < 2) return;
+
+  // Convertir a píxeles y aplicar desplazamiento por ruptura
+  var pixeles = [];
+  for (var i = 0; i < puntos.length; i++) {
+    var px = ss8LatLngAPixel(puntos[i].lat, puntos[i].lng);
+    // Desplazar hacia el este según ruptura (simulando avance/retroceso)
+    var despl = parseFloat(p.ruptura) * 15 * Math.sin(parseFloat(p.tick) * 0.05 + i);
+    pixeles.push({ x: px.x + despl, y: px.y });
+  }
+
+  // Línea principal de frente
+  ss8Ctx.beginPath();
+  ss8Ctx.moveTo(pixeles[0].x, pixeles[0].y);
+  for (var j = 1; j < pixeles.length; j++) {
+    ss8Ctx.lineTo(pixeles[j].x, pixeles[j].y);
+  }
+  ss8Ctx.strokeStyle = 'rgba(248,81,73,0.85)';
+  ss8Ctx.lineWidth = 2.5;
+  ss8Ctx.setLineDash([8, 4]);
+  ss8Ctx.stroke();
+  ss8Ctx.setLineDash([]);
+
+  // Muescas estilo "alambre de púas" sobre la línea
+  for (var k = 0; k < pixeles.length - 1; k++) {
+    var ax = pixeles[k].x, ay = pixeles[k].y;
+    var bx = pixeles[k+1].x, by = pixeles[k+1].y;
+    var dx = bx - ax, dy = by - ay;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    var pasos = Math.floor(dist / 12);
+    var nx = -dy / dist, ny = dx / dist; // normal
+
+    for (var m = 0; m <= pasos; m++) {
+      var tx = ax + (dx / dist) * m * 12;
+      var ty = ay + (dy / dist) * m * 12;
+      var lado = (m % 2 === 0) ? 1 : -1;
+      // Pequeña púa
+      ss8Ctx.beginPath();
+      ss8Ctx.moveTo(tx, ty);
+      ss8Ctx.lineTo(tx + nx * 7 * lado, ty + ny * 7 * lado);
+      ss8Ctx.strokeStyle = 'rgba(227,179,65,0.7)';
+      ss8Ctx.lineWidth = 1.5;
+      ss8Ctx.stroke();
+    }
+  }
+
+  // Nodos de control en vértices
+  for (var n = 0; n < pixeles.length; n++) {
+    var alpha = parseFloat(0.5 + 0.5 * Math.sin(parseFloat(p.tick) * 0.15 + n));
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(pixeles[n].x, pixeles[n].y, 5, 0, Math.PI * 2);
+    ss8Ctx.fillStyle = 'rgba(248,81,73,' + alpha + ')';
+    ss8Ctx.fill();
+    ss8Ctx.strokeStyle = '#fff';
+    ss8Ctx.lineWidth = 1;
+    ss8Ctx.stroke();
+  }
+
+  // Etiqueta de ruptura
+  var midX = pixeles[Math.floor(pixeles.length/2)].x;
+  var midY = pixeles[Math.floor(pixeles.length/2)].y - 12;
+  ss8Ctx.font = '10px "Courier New"';
+  ss8Ctx.fillStyle = '#e3b341';
+  ss8Ctx.fillText('RUPTURA: ' + Math.round(p.ruptura * 100) + '%', midX + 8, midY);
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 3: PARTÍCULAS DE HUMO ============
+function iniciarHumo() {
+  if (!ss8IniciarCanvas()) return;
+
+  // Zona de humo sobre Comodoro Rivadavia
+  var lat = -45.8, lng = -67.5;
+  agregarEvento('[SPRINT8] 💨 Columna de humo iniciada en zona Patagónica', 'info');
+
+  ss8GenerarNubeHumo(lat, lng, 20);
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8GenerarNubeHumo(lat, lng, cantidad) {
+  for (var i = 0; i < cantidad; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        ss8Particulas.push({
+          tipo: 'humo',
+          lat: lat,
+          lng: lng,
+          tick: 0,
+          duracion: 120 + Math.floor(Math.random() * 60),
+          muerta: false,
+          offsetX: (Math.random() - 0.5) * 20,
+          offsetY: (Math.random() - 0.5) * 10,
+          radio: 6 + Math.random() * 8,
+          velY: -(0.3 + Math.random() * 0.4),   // sube
+          velX: (Math.random() - 0.5) * 0.2,     // deriva lateral
+          expansion: 0.15 + Math.random() * 0.1,  // expansión radial
+          gris: Math.floor(Math.random() * 60 + 60) // variación de gris
+        });
+      }, idx * 80);
+    })(i);
+  }
+}
+
+function ss8DibujarHumo(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var base = ss8LatLngAPixel(p.lat, p.lng);
+  var x = base.x + parseFloat(p.offsetX) + parseFloat(p.velX) * parseFloat(p.tick);
+  var y = base.y + parseFloat(p.offsetY) + parseFloat(p.velY) * parseFloat(p.tick);
+  var radio = parseFloat(p.radio) + parseFloat(p.expansion) * parseFloat(p.tick);
+
+  // Opacidad: crece luego decrece
+  var alpha;
+  if (t < 0.2) {
+    alpha = t / 0.2 * 0.5;
+  } else {
+    alpha = parseFloat(0.5 * (1 - (t - 0.2) / 0.8));
+  }
+
+  var g = parseFloat(p.gris);
+  var grad = ss8Ctx.createRadialGradient(x, y, 0, x, y, radio);
+  grad.addColorStop(0, 'rgba(' + g + ',' + g + ',' + g + ',' + alpha + ')');
+  grad.addColorStop(0.6, 'rgba(' + Math.floor(g*0.8) + ',' + Math.floor(g*0.8) + ',' + Math.floor(g*0.8) + ',' + (alpha * 0.5) + ')');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, radio, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = grad;
+  ss8Ctx.fill();
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 4: COMBATE NAVAL ============
+function iniciarCombateNaval() {
+  if (!ss8IniciarCanvas()) return;
+
+  agregarEvento('[SPRINT8] ⚓ Combate naval iniciado — Atlántico Sur', 'gasto');
+
+  // Barco A: viene del este
+  var barcoA = {
+    lat: -46.0, lng: -60.0,
+    destLat: -46.0, destLng: -64.5,
+    tick: 0, duracion: 150, muerta: false,
+    id: 'A', emoji: '🚢'
+  };
+
+  // Barco B: viene del oeste
+  var barcoB = {
+    lat: -46.5, lng: -70.0,
+    destLat: -46.5, destLng: -65.5,
+    tick: 0, duracion: 150, muerta: false,
+    id: 'B', emoji: '⛵'
+  };
+
+  // Crear marcadores Leaflet de barcos
+  ss8CrearBarcoLeaflet(barcoA);
+  ss8CrearBarcoLeaflet(barcoB);
+
+  // Torpedos entre ellos
+  setTimeout(function() {
+    ss8LanzarTorpedo(-46.0, -64.5, -46.5, -65.5);
+    ss8LanzarTorpedo(-46.5, -65.5, -46.0, -64.5);
+    ss8CrearExplosionDOM(-46.2, -65.0);
+    ss8GenerarNubeHumo(-46.2, -65.0, 6);
+    agregarEvento('[SPRINT8] 💥 Impacto naval en coordenadas -46.2, -65.0', 'gasto');
+  }, 2500);
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8CrearBarcoLeaflet(barco) {
+  if (typeof L === 'undefined' || !mapaObj) return;
+
+  var icono = L.divIcon({
+    html: '<div class="ss-barco-marker">' + barco.emoji + '</div>',
+    className: '',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+
+  var marcador = L.marker([barco.lat, barco.lng], { icon: icono }).addTo(mapaObj);
+  ss8CapasLeaflet.push(marcador);
+
+  // Animar movimiento del barco
+  var pasos = 60;
+  var dLatDelta = (barco.destLat - barco.lat) / pasos;
+  var dLngDelta = (barco.destLng - barco.lng) / pasos;
+  var paso = 0;
+
+  var moverBarco = setInterval(function() {
+    paso++;
+    var newLat = parseFloat(barco.lat) + parseFloat(dLatDelta) * paso;
+    var newLng = parseFloat(barco.lng) + parseFloat(dLngDelta) * paso;
+    marcador.setLatLng([newLat, newLng]);
+
+    // Estela
+    ss8Particulas.push({
+      tipo: 'estela_naval',
+      lat: newLat, lng: newLng,
+      tick: 0, duracion: 30,
+      muerta: false,
+      radio: 4 + Math.random() * 3
+    });
+
+    if (paso >= pasos) clearInterval(moverBarco);
+  }, 50);
+}
+
+function ss8LanzarTorpedo(oLat, oLng, dLat, dLng) {
+  var duracion = 40;
+  ss8Particulas.push({
+    tipo: 'torpedo',
+    oLat: oLat, oLng: oLng,
+    dLat: dLat, dLng: dLng,
+    tick: 0, duracion: duracion,
+    muerta: false
+  });
+}
+
+function ss8DibujarTorpedo(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pO = ss8LatLngAPixel(p.oLat, p.oLng);
+  var pD = ss8LatLngAPixel(p.dLat, p.dLng);
+  var x = pO.x + (pD.x - pO.x) * t;
+  var y = pO.y + (pD.y - pO.y) * t;
+
+  // Burbuja de agua (torpedo)
+  for (var k = 0; k < 5; k++) {
+    var tAnterior = Math.max(0, t - k * 0.03);
+    var bx = pO.x + (pD.x - pO.x) * tAnterior;
+    var by = pO.y + (pD.y - pO.y) * tAnterior;
+    var alpha = parseFloat(1 - k * 0.18) * parseFloat(1 - t);
+
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(bx + (Math.random()-0.5)*3, by + (Math.random()-0.5)*3, 3 - k*0.4, 0, Math.PI*2);
+    ss8Ctx.fillStyle = 'rgba(88,166,255,' + alpha + ')';
+    ss8Ctx.fill();
+  }
+
+  // Cabeza del torpedo
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#fff';
+  ss8Ctx.fill();
+}
+
+function ss8DibujarEstelaNaval(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pos = ss8LatLngAPixel(p.lat, p.lng);
+  var alpha = parseFloat(0.5 * (1 - t));
+  var radio = parseFloat(p.radio) + t * 8;
+
+  ss8Ctx.beginPath();
+  ss8Ctx.ellipse(pos.x, pos.y, radio * 2, radio * 0.5, 0, 0, Math.PI * 2);
+  ss8Ctx.strokeStyle = 'rgba(88,166,255,' + alpha + ')';
+  ss8Ctx.lineWidth = 1;
+  ss8Ctx.stroke();
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 5: DEFENSA AÉREA ============
+function iniciarDefensaAerea() {
+  if (!ss8IniciarCanvas()) return;
+
+  agregarEvento('[SPRINT8] 🚀 Sistema de defensa aérea activado', 'info');
+
+  // Objetivo: satélite/avión entrante desde el norte
+  var objLat = -33.0, objLng = -65.0;
+  var lanzLat = -45.8, lanzLng = -67.5; // desde Patagónica
+
+  // Crear ícono de objetivo Leaflet
+  if (typeof L !== 'undefined' && mapaObj) {
+    var iconoObj = L.divIcon({
+      html: '<div style="font-size:18px;filter:drop-shadow(0 0 4px #f85149)">✈️</div>',
+      className: '',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    var marcadorObj = L.marker([objLat, objLng], { icon: iconoObj }).addTo(mapaObj);
+    ss8CapasLeaflet.push(marcadorObj);
+
+    // Mover el objetivo hacia el sur (amenaza)
+    var pasoObj = 0;
+    var totalPasos = 80;
+    var moverObj = setInterval(function() {
+      pasoObj++;
+      var nuevaLat = parseFloat(objLat) + (parseFloat(-42.0) - parseFloat(objLat)) * (pasoObj / totalPasos);
+      marcadorObj.setLatLng([nuevaLat, objLng]);
+      if (pasoObj >= totalPasos / 2) {
+        // Interceptar a mitad de camino
+        clearInterval(moverObj);
+        var interceptLat = (parseFloat(objLat) + parseFloat(-42.0)) / 2;
+        ss8LanzarMisilAA(lanzLat, lanzLng, interceptLat, objLng);
+        setTimeout(function() {
+          mapaObj.removeLayer(marcadorObj);
+          ss8CrearExplosionDOM(interceptLat, objLng);
+          ss8GenerarNubeHumo(interceptLat, objLng, 10);
+          agregarEvento('[SPRINT8] 🎯 Objetivo neutralizado en lat:' + interceptLat.toFixed(1) + ' lng:' + objLng.toFixed(1), 'info');
+        }, 1500);
+      }
+    }, 60);
+  }
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8LanzarMisilAA(oLat, oLng, dLat, dLng) {
+  var duracion = 55;
+  ss8Particulas.push({
+    tipo: 'misil_linea',
+    oLat: oLat, oLng: oLng,
+    dLat: dLat, dLng: dLng,
+    tick: 0, duracion: duracion,
+    muerta: false
+  });
+
+  // Ícono de misil en mapa
+  if (typeof L !== 'undefined' && mapaObj) {
+    var iconoMisil = L.divIcon({
+      html: '<div class="ss-misil-marker">🚀</div>',
+      className: '',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    var marcadorMisil = L.marker([oLat, oLng], { icon: iconoMisil }).addTo(mapaObj);
+    ss8CapasLeaflet.push(marcadorMisil);
+
+    var pasoM = 0;
+    var totalM = 30;
+    var moverMisil = setInterval(function() {
+      pasoM++;
+      var mLat = parseFloat(oLat) + (parseFloat(dLat) - parseFloat(oLat)) * (pasoM / totalM);
+      var mLng = parseFloat(oLng) + (parseFloat(dLng) - parseFloat(oLng)) * (pasoM / totalM);
+      marcadorMisil.setLatLng([mLat, mLng]);
+      if (pasoM >= totalM) {
+        clearInterval(moverMisil);
+        setTimeout(function() {
+          try { mapaObj.removeLayer(marcadorMisil); } catch(e) {}
+        }, 200);
+      }
+    }, 50);
+  }
+}
+
+function ss8DibujarMisilLinea(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pO = ss8LatLngAPixel(p.oLat, p.oLng);
+  var pD = ss8LatLngAPixel(p.dLat, p.dLng);
+  var x = pO.x + (pD.x - pO.x) * t;
+  var y = pO.y + (pD.y - pO.y) * t;
+  var alpha = parseFloat(1 - t * 0.3);
+
+  // Estela del misil (línea blanca que se desvanece)
+  var estelaLon = 0.2;
+  var txE = Math.max(0, t - estelaLon);
+  var xE = pO.x + (pD.x - pO.x) * txE;
+  var yE = pO.y + (pD.y - pO.y) * txE;
+
+  ss8Ctx.beginPath();
+  ss8Ctx.moveTo(xE, yE);
+  ss8Ctx.lineTo(x, y);
+  var grad = ss8Ctx.createLinearGradient(xE, yE, x, y);
+  grad.addColorStop(0, 'rgba(255,255,255,0)');
+  grad.addColorStop(1, 'rgba(255,255,255,' + alpha + ')');
+  ss8Ctx.strokeStyle = grad;
+  ss8Ctx.lineWidth = 3;
+  ss8Ctx.stroke();
+
+  // Chispas verdes (propulsor)
+  for (var s = 0; s < 4; s++) {
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(
+      xE + (Math.random() - 0.5) * 8,
+      yE + (Math.random() - 0.5) * 8,
+      1.5 + Math.random() * 1.5,
+      0, Math.PI * 2
+    );
+    ss8Ctx.fillStyle = 'rgba(35,134,54,' + (alpha * 0.7) + ')';
+    ss8Ctx.fill();
+  }
+
+  // Cabeza del misil
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#fff';
+  ss8Ctx.fill();
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, 2, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#238636';
+  ss8Ctx.fill();
+}
+
+// ============ SPRINT 8 - INTEGRACIÓN: Colocar controles dentro de .map-controls ============
+document.addEventListener('DOMContentLoaded', function() {
+  // Intentar mover los controles al contenedor existente .map-controls si existe
+  var mapControls = document.querySelector('.map-controls');
+  var sprint8Panel = document.getElementById('sprint8-controles');
+
+  if (mapControls && sprint8Panel) {
+    // Mover botones dentro del contenedor existente
+    sprint8Panel.style.position = 'relative';
+    sprint8Panel.style.top = 'auto';
+    sprint8Panel.style.right = 'auto';
+    mapControls.appendChild(sprint8Panel);
+  }
+
+  // Ajustar posición del canvas cuando el mapa se mueva
+  if (typeof L !== 'undefined' && typeof mapaObj !== 'undefined' && mapaObj) {
+    mapaObj.on('moveend zoomend', function() {
+      // El canvas es estático, las posiciones se recalculan en cada frame
+      // Solo refrescar si hay animación activa
+      if (ss8LoopActivo && ss8Particulas.length === 0) {
+        // No hacer nada, loop se auto-detiene
+      }
+    });
+  }
+
+  agregarEvento('[SPRINT8] Módulo de animaciones bélicas cargado', 'info');
+});
+
+// ============ SPRINT 8 - EXPOSICIÓN GLOBAL: Funciones accesibles ============
+// Exponer funciones necesarias al scope global (ya están en global por ser var en script raíz)
+window.iniciarBombardeoArtilleria = iniciarBombardeoArtilleria;
+window.iniciarLineasFrente        = iniciarLineasFrente;
+window.iniciarHumo                = iniciarHumo;
+window.iniciarCombateNaval        = iniciarCombateNaval;
+window.iniciarDefensaAerea        = iniciarDefensaAerea;
+window.limpiarAnimaciones         = limpiarAnimaciones;
+
+</script>
+
+<!-- Overlay de interferencia (global) -->
+<div id="srn-interference-overlay"></div>
+
+<!-- Botón flotante en esquina inferior derecha -->
+<button id="srn-footer-btn" onclick="srnTogglePanel()">
+  <span class="srn-dot off" id="srn-status-dot"></span>
+  ◈ SRN
+</button>
+
+<!-- Panel flotante de radio -->
+<div id="srn-panel">
+
+  <!-- Header -->
+  <div class="srn-header">
+    <span class="srn-header-title">◈ SOVEREIGN RADIO NETWORK</span>
+    <span class="srn-header-freq" id="srn-freq-label">FM 87.3 MHz</span>
+    <button class="srn-close-btn" onclick="srnTogglePanel()">✕</button>
+  </div>
+
+  <!-- Canvas visualizador -->
+  <canvas id="srn-canvas" width="340" height="48"></canvas>
+
+  <!-- Barra de frecuencia -->
+  <div class="srn-freq-bar">
+    <div>
+      <div class="srn-freq-display" id="srn-freq-num">087.30</div>
+      <div class="srn-freq-label">FRECUENCIA OPERATIVA</div>
+    </div>
+    <div class="srn-signal-bars" id="srn-signal-bars">
+      <div class="srn-signal-bar lit" id="srn-sig-1"></div>
+      <div class="srn-signal-bar lit" id="srn-sig-2"></div>
+      <div class="srn-signal-bar lit" id="srn-sig-3"></div>
+      <div class="srn-signal-bar" id="srn-sig-4"></div>
+      <div class="srn-signal-bar" id="srn-sig-5"></div>
+    </div>
+    <div>
+      <div style="font-size:9px;color:#555;letter-spacing:1px;text-align:right;">MODO</div>
+      <div style="font-size:10px;color:var(--radio-amber);letter-spacing:1px;" id="srn-mode-label">SYNTHWAVE</div>
+    </div>
+  </div>
+
+  <!-- Controles del reproductor -->
+  <div class="srn-player-controls">
+    <button class="srn-btn" id="srn-play-btn" onclick="srnTogglePlay()">▶ PLAY</button>
+    <button class="srn-btn" id="srn-mute-btn" onclick="srnToggleMute()">🔇 MUTE</button>
+    <div class="srn-vol-wrap">
+      <span class="srn-vol-label">VOL</span>
+      <input type="range" id="srn-vol-slider" min="0" max="100" value="60"
+             oninput="srnSetVolume(this.value)">
+      <span class="srn-vol-label" id="srn-vol-pct">60%</span>
+    </div>
+  </div>
+
+  <!-- Pestañas internas -->
+  <div class="srn-tabs">
+    <button class="srn-tab-btn active" onclick="srnSwitchTab('boletin')">BOLETÍN</button>
+    <button class="srn-tab-btn" onclick="srnSwitchTab('scanner')">SCANNER</button>
+    <button class="srn-tab-btn" onclick="srnSwitchTab('numeros')">NÚMEROS</button>
+  </div>
+
+  <!-- TAB: BOLETÍN ECONÓMICO -->
+  <div class="srn-tab-content active" id="srn-tab-boletin">
+    <div class="srn-output" id="srn-boletin-output">
+      <span style="color:#333;">— EN ESPERA DE TRANSMISIÓN —</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="srn-btn" id="srn-boletin-btn" onclick="srnGenerarBoletin()">
+        ▣ GENERAR BOLETÍN
+      </button>
+      <span class="srn-cooldown" id="srn-boletin-cd"></span>
+    </div>
+  </div>
+
+  <!-- TAB: SCANNER DE FRECUENCIAS -->
+  <div class="srn-tab-content" id="srn-tab-scanner">
+    <div class="srn-output amber-text" id="srn-scanner-output">
+      <span style="color:#333;">— SCANNER EN STANDBY —</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="srn-btn amber" id="srn-scanner-btn" onclick="srnEscanearFrecuencia()">
+        ◉ ESCANEAR
+      </button>
+      <button class="srn-btn danger" onclick="srnLimpiarScanner()">✕ LIMPIAR</button>
+      <span class="srn-cooldown" id="srn-scanner-cd"></span>
+    </div>
+  </div>
+
+  <!-- TAB: NÚMEROS ESTACIÓN -->
+  <div class="srn-tab-content" id="srn-tab-numeros">
+    <div class="srn-output blue-text" id="srn-numeros-output">
+      <div class="srn-numbers-display" id="srn-numbers-seq">—— —— ——</div>
+      <div class="srn-numbers-phrase" id="srn-numbers-phrase">AGUARDANDO TRANSMISIÓN CIFRADA</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="srn-btn blue" onclick="srnGenerarNumeros()">
+        ☰ TRANSMITIR SECUENCIA
+      </button>
+    </div>
+    <div style="font-size:9px;color:#333;margin-top:6px;line-height:1.5;" id="srn-numeros-hint"></div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="srn-status-bar">
+    <span class="srn-status-txt" id="srn-status-left">SEÑAL: NOMINAL</span>
+    <span class="srn-status-txt" id="srn-status-right">SRN v8.0 // ENCRIPTADO</span>
+  </div>
+
+</div>
+
+<script>
+// ============ SPRINT 8 - RADIO: MÓDULO SOVEREIGN RADIO NETWORK ============
+// Autocontenido, compatible con variables globales del proyecto (agregarEvento, dbRef, bitacoraEventos)
+// Usa var por consistencia con el resto del archivo
+
+// ============ SPRINT 8 - RADIO: VARIABLES GLOBALES DEL MÓDULO ============
+var srnAudioCtx = null;           // AudioContext principal
+var srnMasterGain = null;         // Nodo de ganancia principal (ducking)
+var srnMusicGain = null;          // Ganancia específica de la música
+var srnPlaying = false;           // Estado de reproducción
+var srnMuted = false;             // Estado de mute
+var srnVolume = 0.6;              // Volumen base (0-1)
+var srnOscNodes = [];             // Array de osciladores synthwave activos
+var srnDuckingActive = false;     // Estado de ducking
+var srnDuckTimeout = null;        // Timeout para restaurar volumen tras ducking
+var srnBoletinCooldown = false;   // Cooldown del boletín
+var srnBoletinCdTimer = null;     // Timer del cooldown de boletín
+var srnScannerCooldown = false;   // Cooldown del scanner
+var srnScannerCdTimer = null;     // Timer del cooldown de scanner
+var srnPanelOpen = false;         // Estado del panel flotante
+var srnCanvasCtx = null;          // Contexto 2D del canvas visualizador
+var srnAnimFrame = null;          // Handle de requestAnimationFrame
+var srnAnalyser = null;           // Nodo analizador de frecuencias
+var srnAnalyserData = null;       // Buffer de datos del analizador
+var srnFreqInterval = null;       // Intervalo de animación de frecuencia
+var srnInterferenceTimeout = null;// Timeout de interferencia
+var srnSignalLevel = 3;           // Nivel de señal (1-5)
+var srnCurrentFreq = 87.30;       // Frecuencia mostrada (decorativa)
+var srnSynthPhase = 0;            // Fase del sintetizador para variación
+var srnNoiseBuffer = null;        // Buffer de ruido blanco precalculado
+var srnNumerosMercadoHint = '';   // Hint del mercado en números estación
+
+// ============ SPRINT 8 - RADIO: FRECUENCIAS SYNTHWAVE ============
+// Conjunto de notas para el pad synthwave (Do menor pentatónica extendida)
+var SRN_NOTAS = [130.81, 155.56, 174.61, 195.99, 220.00, 261.63, 311.13, 349.23];
+var SRN_NOTAS_BAJO = [32.70, 38.89, 43.65, 48.99, 55.00];
+var SRN_ARPEGGIO = [0, 2, 4, 6, 2, 4, 1, 5]; // índices del arpegio
+var srnArpStep = 0;                // Paso actual del arpegio
+var srnArpInterval = null;         // Intervalo del arpegio
+
+// ============ SPRINT 8 - RADIO: MENSAJES PARÓDICOS DEL SCANNER ============
+var SRN_MENSAJES_CIVILES = [
+  "...el precio del pan subió otro 40%... mi esposa dice que ya no compramos más... cambio.",
+  "...¿escuchaste que cerraron el banco de la esquina?... sí, el tercero este mes... cambio.",
+  "...me dijeron que los del norte están acaparando azúcar otra vez... cambio.",
+  "...ATENCION CONDUCTORES: ruta 7 bloqueada por manifestantes con carteles de 'DEVUELVAN EL ORO'... cambio.",
+  "...vengo del mercado... tres horas de cola para nada... todo vacío... cambio.",
+  "...mi primo trabaja en el ministerio dice que vienen 4 ceros más... no sé si creerle... cambio.",
+  "...¿viste el comunicado de las 6?... dijeron que todo está bajo control... ¡QUÉ CONTROL!... cambio.",
+  "...me ofrecieron trabajo en la zona franca... pagan en especie, nada de moneda local... cambio.",
+  "...Pepe, Pepe... ¿me copiás?... traeme repuestos del motor que aquí no hay nada... cambio.",
+  "...la señora del kiosco cambia dólares a doce veces el oficial... no le digas a nadie... cambio.",
+  "...cortaron la luz en el sector 4 otra vez... dicen que hasta mañana... cambio.",
+  "...escuché en el colectivo que van a congelar los precios... ¡¡¡JAJAJA!!!... cambio.",
+  "...oye mija, ¿compraste los remedios?... no había... cambio.",
+  "...reunión del comité a las 20:00 en el galpón de siempre... traigan documentación... cambio.",
+  "...informamos que el sistema de trueque regional está operativo en plaza principal... cambio.",
+  "...hay ruido de helicópteros sobre el distrito financiero... ¿tú ves algo?... cambio.",
+  "...mi vecino dice que guardó todo en efectivo... efectivo de QUÉ si ya no vale nada... cambio.",
+  "...REPETICIÓN: se busca gasoil para generador, urgente, ofrezco víveres... cambio.",
+  "...el tipo del canal dijo 'ajuste necesario'... eso significa que nos apretamos otro poco... cambio.",
+  "...¿alguien sabe dónde venden café de verdad?... hace tres semanas que tomo achicoria... cambio."
+];
+
+// ============ SPRINT 8 - RADIO: FRASES CRÍPTICAS PARA NÚMEROS ESTACIÓN ============
+var SRN_FRASES_CRIPTICAS = [
+  "SIERRA TRES CONFIRMA",
+  "EL CÓNDOR NO DUERME",
+  "PROTOCOLO ÁMBAR ACTIVO",
+  "REPITA: ROMEO INDIA ALFA",
+  "VENTANA OPERATIVA ABIERTA",
+  "CÓDIGO ZARPAZO CONFIRMADO",
+  "EL MERCADO TIENE OÍDOS",
+  "POSICIÓN DELTA ESTABLE",
+  "SEÑAL NORTE: NEGATIVA",
+  "TANGO LIMA OMEGA",
+  "ESPERA INSTRUCCIONES FOXTROT",
+  "NEUTRALIZAR OBJETIVO BRAVO",
+  "LÍNEA SEGURA COMPROMETIDA",
+  "EXTRACCIÓN EN T-MINUS SEIS",
+  "ACTIVO DURMIENTE DESPIERTA",
+  "CORREDOR SUR: LIBRE",
+  "CONTACTO EN PUNTO CHARLIE",
+  "FRECUENCIA LIMPIA, PROCEDE"
+];
+
+// ============ SPRINT 8 - RADIO: HINTS DE MERCADO PARA NÚMEROS ESTACIÓN ============
+var SRN_MARKET_HINTS = [
+  { seq: "COMPRAR", color: "#238636", msg: "↑ Señal alcista detectada en el cifrado. Considera inversión." },
+  { seq: "VENDER", color: "#f85149", msg: "↓ Patrón bajista en la secuencia. Reducir exposición." },
+  { seq: "MANTENER", color: "#e3b341", msg: "→ Mercado lateral. La estación recomienda cautela." },
+  { seq: "INFLACION", color: "#f85149", msg: "⚠ El cifrado indica presión inflacionaria. Activos reales." },
+  { seq: "ORO", color: "#e3b341", msg: "★ La reserva áurea es mencionada. Diversificar." },
+  { seq: "RETIRAR", color: "#58a6ff", msg: "◈ Señal de liquidez. Consolidar posición defensiva." },
+  { seq: "EXPANDIR", color: "#238636", msg: "↑↑ Fase de expansión detectada. Oportunidad de crecimiento." }
+];
+
+// ============ SPRINT 8 - RADIO: INICIALIZACIÓN DEL MÓDULO ============
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar canvas
+  srnInitCanvas();
+  // FIX (integración Claude, Regla 18): srnBindInterferenceEvents() registra
+  // un dbRef.child(...).on('value', ...) — dbRef no está garantizado acá
+  // (Firebase carga async vía initFirebaseWithRetry, que puede terminar
+  // después de este DOMContentLoaded). Se llama en cambio desde dentro de
+  // bindFirebaseListeners() del index.html principal, donde dbRef ya existe.
+  // Animar barras de señal
+  srnAnimarSenial();
+  // Iniciar animación del visualizador (idle)
+  srnDrawWaveformIdle();
+  // Log de inicio
+  if (typeof agregarEvento === 'function') {
+    agregarEvento('◈ Sovereign Radio Network v8.0 inicializada — FM 87.3 MHz', 'info');
+  }
+});
+
+// ============ SPRINT 8 - RADIO: INICIALIZACIÓN DEL CANVAS ============
+function srnInitCanvas() {
+  var canvas = document.getElementById('srn-canvas');
+  if (!canvas) return;
+  srnCanvasCtx = canvas.getContext('2d');
+  // Ajustar resolución para pantallas retina
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = 340 * dpr;
+  canvas.height = 48 * dpr;
+  canvas.style.width = '340px';
+  canvas.style.height = '48px';
+  srnCanvasCtx.scale(dpr, dpr);
+}
+
+// ============ SPRINT 8 - RADIO: TOGGLE DEL PANEL ============
+function srnTogglePanel() {
+  srnPanelOpen = !srnPanelOpen;
+  var panel = document.getElementById('srn-panel');
+  if (panel) {
+    if (srnPanelOpen) {
+      panel.classList.add('visible');
+    } else {
+      panel.classList.remove('visible');
+    }
+  }
+}
+
+// ============ SPRINT 8 - RADIO: INICIALIZAR AUDIO CONTEXT ============
+function srnInitAudio() {
+  if (srnAudioCtx) return true; // Ya inicializado
+  try {
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) {
+      if (typeof agregarEvento === 'function') {
+        agregarEvento('⚠ SRN: Web Audio API no soportada en este navegador', 'info');
+      }
+      return false;
+    }
+    srnAudioCtx = new AudioCtx();
+
+    // Nodo master gain
+    srnMasterGain = srnAudioCtx.createGain();
+    srnMasterGain.gain.value = srnVolume;
+
+    // Nodo de música gain (para ducking independiente)
+    srnMusicGain = srnAudioCtx.createGain();
+    srnMusicGain.gain.value = 1.0;
+
+    // Analizador para visualización
+    srnAnalyser = srnAudioCtx.createAnalyser();
+    srnAnalyser.fftSize = 256;
+    srnAnalyser.smoothingTimeConstant = 0.8;
+    srnAnalyserData = new Uint8Array(srnAnalyser.frequencyBinCount);
+
+    // Cadena de señal: osciladores → musicGain → analyser → masterGain → destino
+    srnMusicGain.connect(srnAnalyser);
+    srnAnalyser.connect(srnMasterGain);
+    srnMasterGain.connect(srnAudioCtx.destination);
+
+    // Precalcular buffer de ruido blanco (2 segundos)
+    srnNoiseBuffer = srnCrearBufferRuido(2.0);
+
+    return true;
+  } catch (e) {
+    if (typeof agregarEvento === 'function') {
+      agregarEvento('⚠ SRN: Error al inicializar AudioContext — ' + e.message, 'info');
+    }
+    return false;
+  }
+}
+
+// ============ SPRINT 8 - RADIO: CREAR BUFFER DE RUIDO BLANCO ============
+function srnCrearBufferRuido(duracion) {
+  if (!srnAudioCtx) return null;
+  var sampleRate = srnAudioCtx.sampleRate;
+  var frameCount = Math.floor(sampleRate * duracion);
+  var buffer = srnAudioCtx.createBuffer(1, frameCount, sampleRate);
+  var data = buffer.getChannelData(0);
+  for (var i = 0; i < frameCount; i++) {
+    data[i] = (Math.random() * 2 - 1) * 0.3; // Ruido blanco atenuado
+  }
+  return buffer;
+}
+
+// ============ SPRINT 8 - RADIO: CREAR SYNTH WAVE ============
+function srnCrearSynthwave() {
+  if (!srnAudioCtx || !srnMusicGain) return;
+
+  // Limpiar osciladores anteriores
+  srnDetenerOsciladores();
+
+  // --- PAD SYNTHWAVE: 3 osciladores detuneados ---
+  var freqBase = SRN_NOTAS[2]; // La3 ≈ 175 Hz como raíz del pad
+
+  // Oscilador 1: sawtooth suavizado
+  var osc1 = srnAudioCtx.createOscillator();
+  var osc1Gain = srnAudioCtx.createGain();
+  var osc1Filter = srnAudioCtx.createBiquadFilter();
+  osc1.type = 'sawtooth';
+  osc1.frequency.value = freqBase;
+  osc1.detune.value = 0;
+  osc1Filter.type = 'lowpass';
+  osc1Filter.frequency.value = 800;
+  osc1Filter.Q.value = 2;
+  osc1Gain.gain.value = 0.08;
+  osc1.connect(osc1Filter);
+  osc1Filter.connect(osc1Gain);
+  osc1Gain.connect(srnMusicGain);
+  osc1.start();
+
+  // Oscilador 2: square detuneado +7 cents
+  var osc2 = srnAudioCtx.createOscillator();
+  var osc2Gain = srnAudioCtx.createGain();
+  var osc2Filter = srnAudioCtx.createBiquadFilter();
+  osc2.type = 'square';
+  osc2.frequency.value = freqBase * 1.5; // Quinta justa
+  osc2.detune.value = 7;
+  osc2Filter.type = 'lowpass';
+  osc2Filter.frequency.value = 600;
+  osc2Filter.Q.value = 1;
+  osc2Gain.gain.value = 0.04;
+  osc2.connect(osc2Filter);
+  osc2Filter.connect(osc2Gain);
+  osc2Gain.connect(srnMusicGain);
+  osc2.start();
+
+  // Oscilador 3: sine sub-bass
+  var osc3 = srnAudioCtx.createOscillator();
+  var osc3Gain = srnAudioCtx.createGain();
+  osc3.type = 'sine';
+  osc3.frequency.value = SRN_NOTAS_BAJO[2]; // Nota de bajo ~44 Hz
+  osc3Gain.gain.value = 0.12;
+  osc3.connect(osc3Gain);
+  osc3Gain.connect(srnMusicGain);
+  osc3.start();
+
+  // Oscilador 4: triangle para atmósfera
+  var osc4 = srnAudioCtx.createOscillator();
+  var osc4Gain = srnAudioCtx.createGain();
+  osc4.type = 'triangle';
+  osc4.frequency.value = freqBase * 2; // Octava superior
+  osc4.detune.value = -5;
+  osc4Gain.gain.value = 0.03;
+  osc4.connect(osc4Gain);
+  osc4Gain.connect(srnMusicGain);
+  osc4.start();
+
+  // Guardar referencias para detener después
+  srnOscNodes = [
+    { osc: osc1, gain: osc1Gain },
+    { osc: osc2, gain: osc2Gain },
+    { osc: osc3, gain: osc3Gain },
+    { osc: osc4, gain: osc4Gain }
+  ];
+
+  // Iniciar arpegio
+  srnIniciarArpegio();
+}
+
+// ============ SPRINT 8 - RADIO: ARPEGIO RÍTMICO ============
+function srnIniciarArpegio() {
+  if (srnArpInterval) clearInterval(srnArpInterval);
+  srnArpStep = 0;
+  srnArpInterval = setInterval(function() {
+    if (!srnPlaying || !srnAudioCtx || srnOscNodes.length === 0) return;
+    // Crear una nota corta de arpegio
+    var freqIdx = SRN_ARPEGGIO[srnArpStep % SRN_ARPEGGIO.length];
+    var freq = SRN_NOTAS[freqIdx];
+    var arpOsc = srnAudioCtx.createOscillator();
+    var arpGain = srnAudioCtx.createGain();
+    var arpFilter = srnAudioCtx.createBiquadFilter();
+    arpOsc.type = 'square';
+    arpOsc.frequency.value = freq * 2; // Octava alta
+    arpFilter.type = 'bandpass';
+    arpFilter.frequency.value = freq * 2;
+    arpFilter.Q.value = 5;
+    arpGain.gain.setValueAtTime(0.0, srnAudioCtx.currentTime);
+    arpGain.gain.linearRampToValueAtTime(0.05, srnAudioCtx.currentTime + 0.01);
+    arpGain.gain.exponentialRampToValueAtTime(0.001, srnAudioCtx.currentTime + 0.18);
+    arpOsc.connect(arpFilter);
+    arpFilter.connect(arpGain);
+    arpGain.connect(srnMusicGain);
+    arpOsc.start();
+    arpOsc.stop(srnAudioCtx.currentTime + 0.2);
+    srnArpStep++;
+  }, 280); // 280ms entre notas ~ 107 BPM
+}
+
+// ============ SPRINT 8 - RADIO: DETENER OSCILADORES ============
+function srnDetenerOsciladores() {
+  if (srnArpInterval) { clearInterval(srnArpInterval); srnArpInterval = null; }
+  for (var i = 0; i < srnOscNodes.length; i++) {
+    try {
+      srnOscNodes[i].osc.stop();
+      srnOscNodes[i].osc.disconnect();
+      srnOscNodes[i].gain.disconnect();
+    } catch (e) { /* ya detenido */ }
+  }
+  srnOscNodes = [];
+}
+
+// ============ SPRINT 8 - RADIO: TOGGLE PLAY/PAUSE ============
+function srnTogglePlay() {
+  if (!srnInitAudio()) return;
+
+  // Reanudar contexto si estaba suspendido (política de autoplay)
+  if (srnAudioCtx.state === 'suspended') {
+    srnAudioCtx.resume();
+  }
+
+  if (srnPlaying) {
+    // Pausar: fade out y detener osciladores
+    srnPlaying = false;
+    srnMusicGain.gain.setTargetAtTime(0, srnAudioCtx.currentTime, 0.3);
+    setTimeout(function() {
+      srnDetenerOsciladores();
+    }, 500);
+    document.getElementById('srn-play-btn').textContent = '▶ PLAY';
+    document.getElementById('srn-play-btn').classList.remove('active');
+    document.getElementById('srn-status-dot').classList.add('off');
+    document.getElementById('srn-status-left').textContent = 'SEÑAL: PAUSADA';
+    document.getElementById('srn-mode-label').textContent = 'STANDBY';
+    if (typeof agregarEvento === 'function') {
+      agregarEvento('◈ SRN: Transmisión de audio detenida', 'info');
+    }
+  } else {
+    // Iniciar reproducción
+    srnPlaying = true;
+    srnMusicGain.gain.setValueAtTime(0, srnAudioCtx.currentTime);
+    srnCrearSynthwave();
+    srnMusicGain.gain.setTargetAtTime(1.0, srnAudioCtx.currentTime, 0.5);
+    document.getElementById('srn-play-btn').textContent = '⏸ PAUSE';
+    document.getElementById('srn-play-btn').classList.add('active');
+    document.getElementById('srn-status-dot').classList.remove('off');
+    document.getElementById('srn-status-left').textContent = 'SEÑAL: EN AIRE';
+    document.getElementById('srn-mode-label').textContent = 'SYNTHWAVE';
+    srnDrawWaveform();
+    if (typeof agregarEvento === 'function') {
+      agregarEvento('◈ SRN: Transmisión FM 87.3 MHz activa — modo synthwave', 'info');
+    }
+  }
+}
+
+// ============ SPRINT 8 - RADIO: TOGGLE MUTE ============
+function srnToggleMute() {
+  if (!srnAudioCtx || !srnMasterGain) return;
+  srnMuted = !srnMuted;
+  var muteBtn = document.getElementById('srn-mute-btn');
+  if (srnMuted) {
+    srnMasterGain.gain.setTargetAtTime(0, srnAudioCtx.currentTime, 0.1);
+    if (muteBtn) { muteBtn.textContent = '🔊 UNMUTE'; muteBtn.classList.add('active'); }
+  } else {
+    srnMasterGain.gain.setTargetAtTime(srnVolume, srnAudioCtx.currentTime, 0.1);
+    if (muteBtn) { muteBtn.textContent = '🔇 MUTE'; muteBtn.classList.remove('active'); }
+  }
+}
+
+// ============ SPRINT 8 - RADIO: CONTROL DE VOLUMEN ============
+function srnSetVolume(val) {
+  srnVolume = parseFloat(val) / 100;
+  var pctEl = document.getElementById('srn-vol-pct');
+  if (pctEl) pctEl.textContent = Math.round(parseFloat(val)) + '%';
+  if (srnAudioCtx && srnMasterGain && !srnMuted && !srnDuckingActive) {
+    srnMasterGain.gain.setTargetAtTime(srnVolume, srnAudioCtx.currentTime, 0.05);
+  }
+}
+
+// ============ SPRINT 8 - RADIO: DUCKING ============
+// Baja el volumen de la música al 20% durante una transmisión importante
+function srnDucking(duracion) {
+  if (!srnAudioCtx || !srnMasterGain) return;
+  srnDuckingActive = true;
+  var volTarget = srnVolume * 0.20; // 20% del volumen actual
+  srnMasterGain.gain.setTargetAtTime(volTarget, srnAudioCtx.currentTime, 0.3);
+  if (srnDuckTimeout) clearTimeout(srnDuckTimeout);
+  srnDuckTimeout = setTimeout(function() {
+    // Restaurar volumen suavemente
+    if (!srnMuted) {
+      srnMasterGain.gain.setTargetAtTime(srnVolume, srnAudioCtx.currentTime, 0.8);
+    }
+    srnDuckingActive = false;
+  }, duracion);
+}
+
+// ============ SPRINT 8 - RADIO: REPRODUCIR ESTÁTICA (ruido blanco corto) ============
+function srnReproducirEstatica(duracion, volumen) {
+  if (!srnAudioCtx) return;
+  if (!srnNoiseBuffer) srnNoiseBuffer = srnCrearBufferRuido(2.0);
+  if (!srnNoiseBuffer) return;
+  var durMs = duracion || 500;
+  var vol = parseFloat(volumen) || 0.3;
+  var source = srnAudioCtx.createBufferSource();
+  var noiseGain = srnAudioCtx.createGain();
+  var noiseFilter = srnAudioCtx.createBiquadFilter();
+  source.buffer = srnNoiseBuffer;
+  source.loop = true;
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.value = 2000;
+  noiseFilter.Q.value = 0.5;
+  noiseGain.gain.setValueAtTime(0, srnAudioCtx.currentTime);
+  noiseGain.gain.linearRampToValueAtTime(vol, srnAudioCtx.currentTime + 0.05);
+  noiseGain.gain.setValueAtTime(vol, srnAudioCtx.currentTime + (durMs / 1000) - 0.1);
+  noiseGain.gain.linearRampToValueAtTime(0, srnAudioCtx.currentTime + durMs / 1000);
+  source.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(srnMasterGain);
+  source.start();
+  source.stop(srnAudioCtx.currentTime + durMs / 1000 + 0.1);
+}
+
+// ============ SPRINT 8 - RADIO: REPRODUCIR BEEP (tono de anuncio) ============
+function srnReproducirBeep() {
+  if (!srnAudioCtx) return;
+  var beep = srnAudioCtx.createOscillator();
+  var beepGain = srnAudioCtx.createGain();
+  beep.type = 'sine';
+  beep.frequency.value = 1000;
+  beepGain.gain.setValueAtTime(0, srnAudioCtx.currentTime);
+  beepGain.gain.linearRampToValueAtTime(0.15, srnAudioCtx.currentTime + 0.01);
+  beepGain.gain.setValueAtTime(0.15, srnAudioCtx.currentTime + 0.08);
+  beepGain.gain.linearRampToValueAtTime(0, srnAudioCtx.currentTime + 0.12);
+  beep.connect(beepGain);
+  beepGain.connect(srnMasterGain);
+  beep.start();
+  beep.stop(srnAudioCtx.currentTime + 0.15);
+  // Segundo beep
+  var beep2 = srnAudioCtx.createOscillator();
+  var beep2Gain = srnAudioCtx.createGain();
+  beep2.type = 'sine';
+  beep2.frequency.value = 1200;
+  beep2Gain.gain.setValueAtTime(0, srnAudioCtx.currentTime + 0.18);
+  beep2Gain.gain.linearRampToValueAtTime(0.15, srnAudioCtx.currentTime + 0.20);
+  beep2Gain.gain.setValueAtTime(0.15, srnAudioCtx.currentTime + 0.30);
+  beep2Gain.gain.linearRampToValueAtTime(0, srnAudioCtx.currentTime + 0.35);
+  beep2.connect(beep2Gain);
+  beep2Gain.connect(srnMasterGain);
+  beep2.start(srnAudioCtx.currentTime + 0.18);
+  beep2.stop(srnAudioCtx.currentTime + 0.4);
+}
+
+// ============ SPRINT 8 - RADIO: GENERAR BOLETÍN ECONÓMICO (Claude Haiku) ============
+function srnGenerarBoletin() {
+  if (srnBoletinCooldown) {
+    var cdEl = document.getElementById('srn-boletin-cd');
+    if (cdEl) cdEl.textContent = '⌛ En cooldown...';
+    return;
+  }
+
+  var apiKey = localStorage.getItem('ss_anthropic_key');
+  if (!apiKey) {
+    srnMostrarEnOutput('srn-boletin-output', '⚠ ERROR: Clave API no encontrada.\nConfigurá ss_anthropic_key en localStorage.', 'red');
+    return;
+  }
+
+  // Inicializar audio si no está activo (para ducking)
+  if (!srnAudioCtx) srnInitAudio();
+
+  // Ducking durante el boletín
+  if (srnPlaying) srnDucking(8000);
+
+  // Beep de inicio
+  if (srnAudioCtx) srnReproducirBeep();
+
+  srnMostrarEnOutput('srn-boletin-output', '▣ CONECTANDO CON CENTRAL... GENERANDO BOLETÍN...', 'green');
+
+  // Activar cooldown
+  srnBoletinCooldown = true;
+  srnIniciarCooldown('srn-boletin-cd', 15, function() { srnBoletinCooldown = false; });
+
+  // FIX (integración Claude): esperar el estado real de Firebase antes de
+  // armar el prompt (srnObtenerEstadoFirebase ahora retorna una Promise).
+  srnObtenerEstadoFirebase().then(function(estado) {
+    var prompt = 'Sos el locutor de "Sovereign Radio Network", una radio estatal satírica de un gobierno ficticio en crisis. ' +
+      'Generá UN boletín económico de máximo 2 líneas (tono paródico, dramático y sardónico). ' +
+      'Estado actual del gobierno:\n' +
+      '- Tesorería: $' + estado.tesoreria + '\n' +
+      '- Nivel de gobierno: ' + estado.nivel + '\n' +
+      '- Trimestre: ' + estado.trimestre + '\n' +
+      '- Monedas acumuladas: ' + estado.monedas + '\n' +
+      'Empezá con "BOLETÍN DE LAS [hora]:" seguido del contenido. Sin explicaciones adicionales.';
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 120,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var texto = '';
+      if (data && data.content && data.content[0] && data.content[0].text) {
+        texto = data.content[0].text.trim();
+      } else {
+        texto = '⚠ ERROR EN TRANSMISIÓN — SEÑAL PERDIDA';
+      }
+      srnMostrarEnOutput('srn-boletin-output', texto, 'green');
+      if (typeof agregarEvento === 'function') {
+        agregarEvento('◈ SRN Boletín transmitido: ' + texto.substring(0, 60) + '...', 'info');
+      }
+      // Estática al final del boletín
+      setTimeout(function() {
+        if (srnAudioCtx) srnReproducirEstatica(300, 0.15);
+      }, 4000);
+    })
+    .catch(function(e) {
+      srnMostrarEnOutput('srn-boletin-output', '⚠ FALLA DE TRANSMISIÓN: ' + e.message, 'red');
+      if (typeof agregarEvento === 'function') {
+        agregarEvento('◈ SRN: Error en boletín — ' + e.message, 'info');
+      }
+    });
+  });
+}
+
+// ============ SPRINT 8 - RADIO: SCANNER DE FRECUENCIAS CIVILES ============
+function srnEscanearFrecuencia() {
+  if (srnScannerCooldown) {
+    var cdEl = document.getElementById('srn-scanner-cd');
+    if (cdEl) cdEl.textContent = '⌛ En cooldown...';
+    return;
+  }
+
+  if (!srnAudioCtx) srnInitAudio();
+
+  // Estática de escaneo
+  if (srnAudioCtx) {
+    srnReproducirEstatica(400, 0.2);
+    setTimeout(function() { srnReproducirEstatica(200, 0.1); }, 500);
+  }
+
+  // Animación de escaneo en display
+  var outputEl = document.getElementById('srn-scanner-output');
+  if (outputEl) outputEl.innerHTML = '<span style="color:#333;">▒▒▒ ESCANEANDO... ▒▒▒</span>';
+
+  // Animar frecuencia mientras escanea
+  var freqOrig = srnCurrentFreq;
+  var freqScanInterval = setInterval(function() {
+    srnCurrentFreq = parseFloat((Math.random() * 30 + 87).toFixed(2));
+    srnActualizarDisplayFreq();
+  }, 80);
+
+  setTimeout(function() {
+    clearInterval(freqScanInterval);
+    // Restaurar frecuencia base
+    srnCurrentFreq = freqOrig;
+    srnActualizarDisplayFreq();
+
+    // Seleccionar mensaje aleatorio
+    var idx = Math.floor(Math.random() * SRN_MENSAJES_CIVILES.length);
+    var msg = SRN_MENSAJES_CIVILES[idx];
+    var freqCaptura = parseFloat((Math.random() * 30 + 87).toFixed(2));
+
+    srnMostrarEnOutput('srn-scanner-output',
+      '[' + freqCaptura.toFixed(2) + ' MHz] ' + msg, 'amber');
+
+    if (typeof agregarEvento === 'function') {
+      agregarEvento('◈ SRN Scanner: Interceptada frecuencia ' + freqCaptura + ' MHz', 'info');
+    }
+  }, 800);
+
+  // Cooldown del scanner
+  srnScannerCooldown = true;
+  srnIniciarCooldown('srn-scanner-cd', 8, function() { srnScannerCooldown = false; });
+}
+
+function srnLimpiarScanner() {
+  var outputEl = document.getElementById('srn-scanner-output');
+  if (outputEl) outputEl.innerHTML = '<span style="color:#333;">— SCANNER EN STANDBY —</span>';
+}
+
+// ============ SPRINT 8 - RADIO: NÚMEROS ESTACIÓN ============
+function srnGenerarNumeros() {
+  if (!srnAudioCtx) srnInitAudio();
+
+  // Estática corta de inicio
+  if (srnAudioCtx) srnReproducirEstatica(200, 0.15);
+
+  // Generar secuencia de números aleatoria (grupos de 2 dígitos)
+  var grupos = [];
+  for (var i = 0; i < 6; i++) {
+    grupos.push(String(Math.floor(Math.random() * 89) + 10));
+  }
+  var secuencia = grupos.slice(0, 3).join(' ') + ' — ' + grupos.slice(3).join(' ');
+
+  // Seleccionar frase críptica aleatoria
+  var frase = SRN_FRASES_CRIPTICAS[Math.floor(Math.random() * SRN_FRASES_CRIPTICAS.length)];
+
+  // Seleccionar hint de mercado aleatorio
+  var hint = SRN_MARKET_HINTS[Math.floor(Math.random() * SRN_MARKET_HINTS.length)];
+
+  // Animación de "transmisión"
+  var seqEl = document.getElementById('srn-numbers-seq');
+  var phraseEl = document.getElementById('srn-numbers-phrase');
+  var hintEl = document.getElementById('srn-numeros-hint');
+  if (!seqEl || !phraseEl) return;
+
+  seqEl.textContent = '.. .. ..';
+  phraseEl.textContent = 'DESCIFRADO EN PROGRESO...';
+  if (hintEl) hintEl.textContent = '';
+
+  // Revelar secuencia en 3 pasos
+  var pasoIdx = 0;
+  var pasos = [
+    grupos.slice(0, 2).join(' ') + ' .. — .. ..',
+    grupos.slice(0, 3).join(' ') + ' — ' + grupos.slice(3, 5).join(' ') + ' ..',
+    secuencia
+  ];
+
+  var revealInterval = setInterval(function() {
+    if (pasoIdx < pasos.length) {
+      seqEl.textContent = pasos[pasoIdx];
+      // Beep por cada número revelado
+      if (srnAudioCtx) {
+        var beepReveal = srnAudioCtx.createOscillator();
+        var gainReveal = srnAudioCtx.createGain();
+        beepReveal.type = 'sine';
+        beepReveal.frequency.value = 800 + (pasoIdx * 200);
+        gainReveal.gain.setValueAtTime(0.08, srnAudioCtx.currentTime);
+        gainReveal.gain.exponentialRampToValueAtTime(0.001, srnAudioCtx.currentTime + 0.06);
+        beepReveal.connect(gainReveal);
+        gainReveal.connect(srnMasterGain);
+        beepReveal.start();
+        beepReveal.stop(srnAudioCtx.currentTime + 0.07);
+      }
+      pasoIdx++;
+    } else {
+      clearInterval(revealInterval);
+      phraseEl.textContent = frase;
+      if (hintEl) {
+        hintEl.innerHTML = '<span style="color:' + hint.color + ';">' + hint.msg + '</span>';
+      }
+      // Estática final
+      if (srnAudioCtx) setTimeout(function() { srnReproducirEstatica(150, 0.1); }, 200);
+      if (typeof agregarEvento === 'function') {
+        agregarEvento('◈ SRN Números Estación: ' + secuencia + ' — ' + frase, 'info');
+      }
+    }
+  }, 400);
+}
+
+// ============ SPRINT 8 - RADIO: INTERFERENCIA TÁCTICA ============
+// Se activa cuando ocurre un evento de guerra
+function srnActivarInterferencia(motivo) {
+  if (!srnAudioCtx) srnInitAudio();
+
+  // Activar overlay visual
+  var overlay = document.getElementById('srn-interference-overlay');
+  if (overlay) overlay.classList.add('active');
+
+  // Distorsión del oscilador principal
+  if (srnPlaying && srnOscNodes.length > 0) {
+    // Detune brusco para efecto de interferencia
+    try {
+      for (var i = 0; i < srnOscNodes.length; i++) {
+        if (srnOscNodes[i] && srnOscNodes[i].osc) {
+          srnOscNodes[i].osc.detune.setValueAtTime(
+            (Math.random() * 200 - 100),
+            srnAudioCtx.currentTime
+          );
+        }
+      }
+    } catch (e) { /* osciladores ya detenidos */ }
+  }
+
+  // Estática intensa durante 3 segundos con variaciones
+  if (srnAudioCtx) {
+    srnReproducirEstatica(800, 0.5);
+    setTimeout(function() { srnReproducirEstatica(400, 0.3); }, 900);
+    setTimeout(function() { srnReproducirEstatica(600, 0.4); }, 1500);
+    setTimeout(function() { srnReproducirEstatica(300, 0.2); }, 2300);
+  }
+
+  // Animar frecuencia errática
+  var freqOrig = srnCurrentFreq;
+  var errCount = 0;
+  var errInterval = setInterval(function() {
+    errCount++;
+    srnCurrentFreq = parseFloat((Math.random() * 50 + 70).toFixed(2));
+    srnActualizarDisplayFreq();
+    if (errCount > 20) {
+      clearInterval(errInterval);
+      srnCurrentFreq = freqOrig;
+      srnActualizarDisplayFreq();
+      // Restaurar detune
+      if (srnPlaying && srnOscNodes.length > 0) {
+        try {
+          srnOscNodes[0] && srnOscNodes[0].osc.detune.setTargetAtTime(0, srnAudioCtx.currentTime, 0.2);
+          srnOscNodes[1] && srnOscNodes[1].osc.detune.setTargetAtTime(7, srnAudioCtx.currentTime, 0.2);
+          srnOscNodes[2] && srnOscNodes[2].osc.detune.setTargetAtTime(0, srnAudioCtx.currentTime, 0.2);
+          srnOscNodes[3] && srnOscNodes[3].osc.detune.setTargetAtTime(-5, srnAudioCtx.currentTime, 0.2);
+        } catch (e) { /* ignorar */ }
+      }
+    }
+  }, 150);
+
+  // Cambiar nivel de señal a bajo durante interferencia
+srnSignalLevel = 1;
+srnActualizarBarrasSenial();
+}
+
+// ============ SPRINT 8 - RADIO: ACTUALIZAR BARRAS DE SEÑAL ============
+function srnActualizarBarrasSenial() {
+  var bars = document.querySelectorAll('.srn-signal-bar');
+  if (!bars || bars.length === 0) return;
+  for (var i = 0; i < bars.length; i++) {
+    if (i < srnSignalLevel) {
+      bars[i].classList.add('lit');
+    } else {
+      bars[i].classList.remove('lit');
+    }
+  }
+}
+
+// ============ SPRINT 8 - RADIO: FUNCIONES AUXILIARES FALTANTES ============
+function srnActualizarDisplayFreq() {
+  var el = document.getElementById('srn-freq-num');
+  if (el) {
+    el.textContent = srnCurrentFreq.toFixed(2);
+  }
+}
+
+function srnMostrarEnOutput(id, texto, tipo) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var color = '#e6edf3';
+  if (tipo === 'green') color = '#238636';
+  else if (tipo === 'red') color = '#f85149';
+  else if (tipo === 'amber') color = '#e3b341';
+  else if (tipo === 'blue') color = '#58a6ff';
+  el.innerHTML = '<span style="color:' + color + ';">' + texto.replace(/\n/g, '<br>') + '</span>';
+}
+
+function srnIniciarCooldown(elementId, segundos, callback) {
+  var el = document.getElementById(elementId);
+  if (!el) return;
+  var restante = segundos;
+  el.textContent = '⌛ ' + restante + 's';
+  var timer = setInterval(function() {
+    restante--;
+    if (restante <= 0) {
+      clearInterval(timer);
+      el.textContent = '';
+      if (typeof callback === 'function') callback();
+    } else {
+      el.textContent = '⌛ ' + restante + 's';
+    }
+  }, 1000);
+}
+
+function srnObtenerEstadoFirebase() {
+  var estado = { tesoreria: 'DESCONOCIDO', nivel: '?', trimestre: '?', monedas: 'N/A' };
+  if (typeof dbRef === 'undefined' || !dbRef) {
+    return Promise.resolve(estado);
+  }
+  // FIX (integración Claude, Sprint 8): .once('value', callback) es async.
+  // La versión original retornaba 'estado' antes de que estos 4 callbacks
+  // corrieran, así que srnGenerarBoletin() siempre recibía los placeholders
+  // ('DESCONOCIDO','?','?','N/A') sin importar el estado real de la partida.
+  // Fix: usar la forma de Promise de .once('value') (sin callback) + Promise.all,
+  // y que el caller haga .then() en vez de leer el valor de retorno directo.
+  return Promise.all([
+    dbRef.child('partida/finanzas/tesoreria').once('value'),
+    dbRef.child('partida/estado/nivel_actual').once('value'),
+    dbRef.child('partida/tiempo/trimestre_actual').once('value'),
+    dbRef.child('partida/economia/monedas').once('value')
+  ]).then(function(snaps) {
+    estado.tesoreria = snaps[0].val() || 0;
+    estado.nivel = snaps[1].val() || 1;
+    estado.trimestre = snaps[2].val() || 1;
+    var monedas = snaps[3].val() || {};
+    var resumen = [];
+    var codes = ['EUR','GBP','CAD','JPY','RUB','CNY'];
+    for (var i = 0; i < codes.length; i++) {
+      if (monedas[codes[i]]) {
+        resumen.push(codes[i] + ':' + monedas[codes[i]].valor_relativo.toFixed(1));
+      }
+    }
+    estado.monedas = resumen.join(' ') || 'N/A';
+    return estado;
+  }).catch(function(e) {
+    return estado;
+  });
+}
+
+// Visualizador de onda (idle)
+function srnDrawWaveformIdle() {
+  if (!srnCanvasCtx) return;
+  var canvas = document.getElementById('srn-canvas');
+  if (!canvas) return;
+  var ctx = srnCanvasCtx;
+  var w = 340, h = 48;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0a0f16';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(35,134,54,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (var x = 0; x < w; x += 2) {
+    var y = 24 + Math.sin(x * 0.05 + Date.now() * 0.001) * 5;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function srnDrawWaveform() {
+  if (!srnCanvasCtx || !srnAnalyser) {
+    srnDrawWaveformIdle();
+    return;
+  }
+  var ctx = srnCanvasCtx;
+  var w = 340, h = 48;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0a0f16';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#238636';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  var data = new Uint8Array(srnAnalyser.frequencyBinCount);
+  srnAnalyser.getByteFrequencyData(data);
+  var step = Math.floor(data.length / w);
+  for (var x = 0; x < w; x++) {
+    var val = data[Math.min(x * step, data.length - 1)] / 255;
+    var y = 24 - val * 22;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  if (srnPlaying) {
+    requestAnimationFrame(srnDrawWaveform);
+  } else {
+    srnDrawWaveformIdle();
+  }
+}
+
+function srnAnimarSenial() {
+  setInterval(function() {
+    if (!srnPanelOpen) return;
+    var bars = document.querySelectorAll('.srn-signal-bar');
+    if (!bars) return;
+    for (var i = 0; i < bars.length; i++) {
+      if (i < srnSignalLevel) {
+        if (Math.random() > 0.7) {
+          bars[i].classList.remove('lit');
+          setTimeout(function() {
+            bars[i].classList.add('lit');
+          }, 100);
+        }
+      }
+    }
+  }, 2000);
+}
+
+function srnBindInterferenceEvents() {
+  if (typeof dbRef !== 'undefined' && dbRef) {
+    dbRef.child('partida/infortunios/eventosDisparados').on('value', function(snap) {
+      var eventos = snap.val() || {};
+      var guerra = eventos.us_inestabilidad || eventos.rub_colapso || eventos.rub_hegemon || eventos.cny_consolidacion;
+      if (guerra) {
+        srnActivarInterferencia('Evento geopolítico detectado');
+        if (typeof agregarEvento === 'function') {
+          agregarEvento('📻 SRN: Interferencia táctica activada por evento geopolítico.', 'info');
+        }
+      }
+    });
+  }
+}
+
+// Cerrar el script y el bloque
+</script>
+
 </body>
 </html>

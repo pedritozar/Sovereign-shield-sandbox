@@ -1,0 +1,974 @@
+<!-- ============ SPRINT 8 - ANIMACIONES BÉLICAS: INICIO BLOQUE QUIRÚRGICO ============ -->
+
+<!-- HTML: Botones en .map-controls -->
+<div id="sprint8-controles" style="
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:1000;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  pointer-events:all;
+">
+  <button id="btn-artilleria" onclick="iniciarBombardeoArtilleria()" style="
+    background:#1c2128;
+    color:#e3b341;
+    border:1px solid #e3b341;
+    padding:6px 10px;
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    cursor:pointer;
+    border-radius:3px;
+    text-align:left;
+    letter-spacing:0.5px;
+  ">⚡ ARTILLERÍA</button>
+  <button id="btn-frente" onclick="iniciarLineasFrente()" style="
+    background:#1c2128;
+    color:#f85149;
+    border:1px solid #f85149;
+    padding:6px 10px;
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    cursor:pointer;
+    border-radius:3px;
+    text-align:left;
+    letter-spacing:0.5px;
+  ">🔴 LÍNEA FRENTE</button>
+  <button id="btn-humo" onclick="iniciarHumo()" style="
+    background:#1c2128;
+    color:#8b949e;
+    border:1px solid #8b949e;
+    padding:6px 10px;
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    cursor:pointer;
+    border-radius:3px;
+    text-align:left;
+    letter-spacing:0.5px;
+  ">💨 HUMO</button>
+  <button id="btn-naval" onclick="iniciarCombateNaval()" style="
+    background:#1c2128;
+    color:#58a6ff;
+    border:1px solid #58a6ff;
+    padding:6px 10px;
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    cursor:pointer;
+    border-radius:3px;
+    text-align:left;
+    letter-spacing:0.5px;
+  ">⚓ NAVAL</button>
+  <button id="btn-aerea" onclick="iniciarDefensaAerea()" style="
+    background:#1c2128;
+    color:#238636;
+    border:1px solid #238636;
+    padding:6px 10px;
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    cursor:pointer;
+    border-radius:3px;
+    text-align:left;
+    letter-spacing:0.5px;
+  ">🚀 DEF. AÉREA</button>
+  <button id="btn-limpiar" onclick="limpiarAnimaciones()" style="
+    background:#1c2128;
+    color:#6e7681;
+    border:1px solid #30363d;
+    padding:6px 10px;
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    cursor:pointer;
+    border-radius:3px;
+    text-align:left;
+    letter-spacing:0.5px;
+  ">✖ LIMPIAR</button>
+</div>
+
+<!-- CSS: Animaciones bélicas -->
+<style>
+/* ============ SPRINT 8 - ANIMACIONES BÉLICAS: CSS ============ */
+
+/* Flash de explosión */
+@keyframes ss-explosion-ring {
+  0%   { transform: scale(0);   opacity: 1; }
+  60%  { transform: scale(1.4); opacity: 0.7; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+/* Pulso de impacto */
+@keyframes ss-impacto-pulso {
+  0%   { box-shadow: 0 0 0 0 rgba(248,81,73,0.9); }
+  70%  { box-shadow: 0 0 0 18px rgba(248,81,73,0); }
+  100% { box-shadow: 0 0 0 0 rgba(248,81,73,0); }
+}
+
+/* Flash blanco en impacto */
+@keyframes ss-flash-blanco {
+  0%   { opacity: 1; transform: scale(0.2); }
+  40%  { opacity: 0.8; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+/* Misil subiendo */
+@keyframes ss-misil-subida {
+  0%   { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Torpedo / naval */
+@keyframes ss-torpedo {
+  0%   { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* Parpadeo nodo táctico */
+@keyframes ss-nodo-parpadeo {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Canvas de animaciones sobre el mapa */
+#ss-canvas-belico {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 500;
+}
+
+/* Marcador de explosión DOM */
+.ss-explosion-marker {
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #e3b341 30%, #f85149 60%, transparent 100%);
+  animation: ss-explosion-ring 0.8s ease-out forwards;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Flash blanco DOM */
+.ss-flash-marker {
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+  animation: ss-flash-blanco 0.5s ease-out forwards;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Ícono barco naval */
+.ss-barco-marker {
+  font-size: 20px;
+  line-height: 1;
+  user-select: none;
+  text-shadow: 0 0 6px #58a6ff;
+}
+
+/* Ícono misil */
+.ss-misil-marker {
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+  text-shadow: 0 0 8px #238636;
+  animation: ss-misil-subida 1.5s ease-out forwards;
+}
+
+</style>
+
+<!-- JS: Módulo de animaciones bélicas -->
+<script>
+// ============ SPRINT 8 - ANIMACIONES BÉLICAS: MÓDULO PRINCIPAL ============
+
+// Variables globales del módulo (var para consistencia)
+var ss8Canvas = null;
+var ss8Ctx = null;
+var ss8AnimFrame = null;
+var ss8Particulas = [];
+var ss8ElementosDOM = [];
+var ss8CapasLeaflet = [];
+var ss8AnimActiva = null;
+var ss8LoopActivo = false;
+
+// ============ SPRINT 8 - INIT: Inicialización del canvas sobre el mapa ============
+function ss8IniciarCanvas() {
+  // Validar que Leaflet esté disponible
+  if (typeof L === 'undefined') {
+    agregarEvento('[SPRINT8] Leaflet no disponible — canvas abortado', 'info');
+    return false;
+  }
+
+  // Buscar contenedor del mapa
+  var contenedorMapa = document.getElementById('map');
+  if (!contenedorMapa) {
+    agregarEvento('[SPRINT8] Contenedor #map no encontrado', 'info');
+    return false;
+  }
+
+  // Si ya existe el canvas, reutilizarlo
+  if (ss8Canvas && document.getElementById('ss-canvas-belico')) {
+    return true;
+  }
+
+  // Crear canvas sobre el mapa
+  ss8Canvas = document.createElement('canvas');
+  ss8Canvas.id = 'ss-canvas-belico';
+  ss8Canvas.width  = contenedorMapa.offsetWidth  || 800;
+  ss8Canvas.height = contenedorMapa.offsetHeight || 600;
+  contenedorMapa.style.position = 'relative';
+  contenedorMapa.appendChild(ss8Canvas);
+  ss8Ctx = ss8Canvas.getContext('2d');
+
+  // Ajustar canvas al resize
+  window.addEventListener('resize', function() {
+    var c = document.getElementById('map');
+    if (c && ss8Canvas) {
+      ss8Canvas.width  = c.offsetWidth;
+      ss8Canvas.height = c.offsetHeight;
+    }
+  });
+
+  return true;
+}
+
+// ============ SPRINT 8 - UTILS: Convertir lat/lng a píxeles del canvas ============
+function ss8LatLngAPixel(lat, lng) {
+  if (typeof L === 'undefined' || !mapaObj) return { x: 0, y: 0 };
+  var punto = mapaObj.latLngToContainerPoint(L.latLng(lat, lng));
+  return { x: punto.x, y: punto.y };
+}
+
+// ============ SPRINT 8 - UTILS: Limpiar todas las animaciones activas ============
+function limpiarAnimaciones() {
+  // Detener loop
+  ss8LoopActivo = false;
+  if (ss8AnimFrame) {
+    cancelAnimationFrame(ss8AnimFrame);
+    ss8AnimFrame = null;
+  }
+
+  // Limpiar partículas
+  ss8Particulas = [];
+
+  // Limpiar canvas
+  if (ss8Ctx && ss8Canvas) {
+    ss8Ctx.clearRect(0, 0, ss8Canvas.width, ss8Canvas.height);
+  }
+
+  // Remover elementos DOM creados
+  for (var i = 0; i < ss8ElementosDOM.length; i++) {
+    if (ss8ElementosDOM[i] && ss8ElementosDOM[i].parentNode) {
+      ss8ElementosDOM[i].parentNode.removeChild(ss8ElementosDOM[i]);
+    }
+  }
+  ss8ElementosDOM = [];
+
+  // Remover capas Leaflet
+  for (var j = 0; j < ss8CapasLeaflet.length; j++) {
+    if (ss8CapasLeaflet[j] && mapaObj) {
+      try { mapaObj.removeLayer(ss8CapasLeaflet[j]); } catch(e) {}
+    }
+  }
+  ss8CapasLeaflet = [];
+
+  ss8AnimActiva = null;
+  agregarEvento('[SPRINT8] Animaciones limpiadas', 'info');
+}
+
+// ============ SPRINT 8 - LOOP: Motor de animación principal ============
+function ss8Loop() {
+  if (!ss8LoopActivo) return;
+  if (!ss8Ctx || !ss8Canvas) return;
+
+  // Limpiar frame
+  ss8Ctx.clearRect(0, 0, ss8Canvas.width, ss8Canvas.height);
+
+  // Actualizar y dibujar cada partícula según su tipo
+  var vivas = [];
+  for (var i = 0; i < ss8Particulas.length; i++) {
+    var p = ss8Particulas[i];
+    if (!p || p.muerta) continue;
+
+    p.tick = (p.tick || 0) + 1;
+
+    if (p.tipo === 'bala_artilleria')    { ss8DibujarBalaArtilleria(p); }
+    else if (p.tipo === 'humo')          { ss8DibujarHumo(p); }
+    else if (p.tipo === 'explosion')     { ss8DibujarExplosion(p); }
+    else if (p.tipo === 'torpedo')       { ss8DibujarTorpedo(p); }
+    else if (p.tipo === 'estela_naval')  { ss8DibujarEstelaNaval(p); }
+    else if (p.tipo === 'misil_linea')   { ss8DibujarMisilLinea(p); }
+    else if (p.tipo === 'frente')        { ss8DibujarLineasFrente(p); }
+
+    if (!p.muerta) vivas.push(p);
+  }
+  ss8Particulas = vivas;
+
+  ss8AnimFrame = requestAnimationFrame(ss8Loop);
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 1: BOMBARDEO DE ARTILLERÍA ============
+function iniciarBombardeoArtilleria() {
+  if (!ss8IniciarCanvas()) return;
+
+  // Coordenadas de origen y destino (sobre Patagonia argentina)
+  var origenLat  = -38.0, origenLng  = -63.0;
+  var destinoLat = -45.8, destinoLng = -67.5;
+
+  // Número de salvas
+  var numSalvas = 5;
+
+  agregarEvento('[SPRINT8] ⚡ Bombardeo de artillería iniciado — ' + numSalvas + ' salvas', 'gasto');
+
+  // Disparar salvas con delay
+  for (var s = 0; s < numSalvas; s++) {
+    (function(saInd) {
+      setTimeout(function() {
+        ss8LanzarSalva(
+          origenLat  + (Math.random() - 0.5) * 2,
+          origenLng  + (Math.random() - 0.5) * 2,
+          destinoLat + (Math.random() - 0.5) * 1.5,
+          destinoLng + (Math.random() - 0.5) * 1.5
+        );
+      }, saInd * 600);
+    })(s);
+  }
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8LanzarSalva(oLat, oLng, dLat, dLng) {
+  var pOrig  = ss8LatLngAPixel(oLat, oLng);
+  var pDest  = ss8LatLngAPixel(dLat, dLng);
+  var duracion = 60; // frames
+
+  // Crear partícula de bala (parábola)
+  var bala = {
+    tipo: 'bala_artilleria',
+    x0: pOrig.x, y0: pOrig.y,
+    x1: pDest.x, y1: pDest.y,
+    tick: 0,
+    duracion: duracion,
+    muerta: false,
+    // Control de parábola: punto más alto
+    ctrlX: (pOrig.x + pDest.x) / 2,
+    ctrlY: Math.min(pOrig.y, pDest.y) - 80 - Math.random() * 40,
+    oLat: oLat, oLng: oLng,
+    dLat: dLat, dLng: dLng,
+    humoGenerado: false
+  };
+  ss8Particulas.push(bala);
+
+  // Programar explosión al llegar
+  setTimeout(function() {
+    ss8CrearExplosionDOM(dLat, dLng);
+    ss8GenerarNubeHumo(dLat, dLng, 8);
+  }, parseFloat(duracion) * 16.67);
+}
+
+function ss8DibujarBalaArtilleria(p) {
+  // Recalcular posiciones (el mapa puede moverse)
+  var pOrig = ss8LatLngAPixel(p.oLat, p.oLng);
+  var pDest = ss8LatLngAPixel(p.dLat, p.dLng);
+
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  // Posición cuadrática de Bezier
+  var ctrlX = (pOrig.x + pDest.x) / 2;
+  var ctrlY = Math.min(pOrig.y, pDest.y) - 80;
+  var bx = (1 - t) * (1 - t) * pOrig.x + 2 * (1 - t) * t * ctrlX + t * t * pDest.x;
+  var by = (1 - t) * (1 - t) * pOrig.y + 2 * (1 - t) * t * ctrlY + t * t * pDest.y;
+
+  // Traza de puntos anteriores (estela)
+  var pasos = 8;
+  for (var k = 0; k < pasos; k++) {
+    var tAnterior = Math.max(0, t - k * 0.015);
+    var bxK = (1-tAnterior)*(1-tAnterior)*pOrig.x + 2*(1-tAnterior)*tAnterior*ctrlX + tAnterior*tAnterior*pDest.x;
+    var byK = (1-tAnterior)*(1-tAnterior)*pOrig.y + 2*(1-tAnterior)*tAnterior*ctrlY + tAnterior*tAnterior*pDest.y;
+    var alpha = parseFloat(1 - k / pasos) * 0.8;
+    var radio = parseFloat(3 - k * 0.3);
+
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(bxK, byK, Math.max(0.5, radio), 0, Math.PI * 2);
+    ss8Ctx.fillStyle = k === 0
+      ? 'rgba(255,200,50,' + alpha + ')'
+      : 'rgba(248,81,73,' + alpha + ')';
+    ss8Ctx.fill();
+  }
+
+  // Punto cabeza (amarillo brillante)
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(bx, by, 4, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#fff';
+  ss8Ctx.fill();
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(bx, by, 2, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#e3b341';
+  ss8Ctx.fill();
+}
+
+// Explosión en canvas
+function ss8DibujarExplosion(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pos = ss8LatLngAPixel(p.lat, p.lng);
+  var radioMax = parseFloat(p.radioMax);
+  var radio = radioMax * t;
+  var alpha = parseFloat(1 - t);
+
+  // Anillo exterior
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(pos.x, pos.y, radio, 0, Math.PI * 2);
+  ss8Ctx.strokeStyle = 'rgba(248,81,73,' + alpha + ')';
+  ss8Ctx.lineWidth = 3;
+  ss8Ctx.stroke();
+
+  // Anillo interior más brillante
+  var radio2 = radio * 0.5;
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(pos.x, pos.y, radio2, 0, Math.PI * 2);
+  ss8Ctx.strokeStyle = 'rgba(227,179,65,' + (alpha * 0.8) + ')';
+  ss8Ctx.lineWidth = 2;
+  ss8Ctx.stroke();
+
+  // Centro destello
+  if (t < 0.3) {
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(pos.x, pos.y, radio2 * 0.4, 0, Math.PI * 2);
+    ss8Ctx.fillStyle = 'rgba(255,255,255,' + (parseFloat(1 - t/0.3)) + ')';
+    ss8Ctx.fill();
+  }
+}
+
+// Explosión DOM (overlay Leaflet)
+function ss8CrearExplosionDOM(lat, lng) {
+  if (typeof L === 'undefined' || !mapaObj) return;
+
+  // Agregar círculo de explosión en canvas
+  ss8Particulas.push({
+    tipo: 'explosion',
+    lat: lat, lng: lng,
+    tick: 0,
+    duracion: 45,
+    radioMax: 40 + Math.random() * 20,
+    muerta: false
+  });
+
+  // Marcador DOM flash
+  var pos = mapaObj.latLngToContainerPoint(L.latLng(lat, lng));
+  var mapa = document.getElementById('map');
+  if (!mapa) return;
+
+  var flash = document.createElement('div');
+  flash.className = 'ss-flash-marker';
+  var tam = 60;
+  flash.style.cssText = [
+    'width:' + tam + 'px',
+    'height:' + tam + 'px',
+    'left:' + (pos.x - tam/2) + 'px',
+    'top:' + (pos.y - tam/2) + 'px',
+    'z-index:600'
+  ].join(';');
+  mapa.appendChild(flash);
+  ss8ElementosDOM.push(flash);
+
+  // Auto-remover después de la animación
+  setTimeout(function() {
+    if (flash.parentNode) flash.parentNode.removeChild(flash);
+  }, 600);
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 2: LÍNEAS DE FRENTE DINÁMICAS ============
+function iniciarLineasFrente() {
+  if (!ss8IniciarCanvas()) return;
+
+  // Índice de ruptura simulado (0 a 1)
+  var indiceRuptura = 0;
+  var maxTicks = 200;
+
+  agregarEvento('[SPRINT8] 🔴 Línea de frente activada — ruptura en progreso', 'info');
+
+  // Crear partícula de frente
+  var frente = {
+    tipo: 'frente',
+    tick: 0,
+    duracion: maxTicks,
+    muerta: false,
+    ruptura: 0,
+    // Puntos de la línea de frente (lat/lng)
+    puntos: [
+      { lat: -33.0, lng: -68.0 },
+      { lat: -35.5, lng: -66.0 },
+      { lat: -38.0, lng: -65.5 },
+      { lat: -40.5, lng: -64.0 },
+      { lat: -42.0, lng: -65.0 },
+      { lat: -44.0, lng: -65.5 },
+      { lat: -46.0, lng: -66.5 }
+    ]
+  };
+  ss8Particulas.push(frente);
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8DibujarLineasFrente(p) {
+  if (p.tick > p.duracion) { p.muerta = true; return; }
+
+  // Actualizar ruptura
+  p.ruptura = parseFloat(p.tick) / parseFloat(p.duracion);
+
+  var puntos = p.puntos;
+  if (!puntos || puntos.length < 2) return;
+
+  // Convertir a píxeles y aplicar desplazamiento por ruptura
+  var pixeles = [];
+  for (var i = 0; i < puntos.length; i++) {
+    var px = ss8LatLngAPixel(puntos[i].lat, puntos[i].lng);
+    // Desplazar hacia el este según ruptura (simulando avance/retroceso)
+    var despl = parseFloat(p.ruptura) * 15 * Math.sin(parseFloat(p.tick) * 0.05 + i);
+    pixeles.push({ x: px.x + despl, y: px.y });
+  }
+
+  // Línea principal de frente
+  ss8Ctx.beginPath();
+  ss8Ctx.moveTo(pixeles[0].x, pixeles[0].y);
+  for (var j = 1; j < pixeles.length; j++) {
+    ss8Ctx.lineTo(pixeles[j].x, pixeles[j].y);
+  }
+  ss8Ctx.strokeStyle = 'rgba(248,81,73,0.85)';
+  ss8Ctx.lineWidth = 2.5;
+  ss8Ctx.setLineDash([8, 4]);
+  ss8Ctx.stroke();
+  ss8Ctx.setLineDash([]);
+
+  // Muescas estilo "alambre de púas" sobre la línea
+  for (var k = 0; k < pixeles.length - 1; k++) {
+    var ax = pixeles[k].x, ay = pixeles[k].y;
+    var bx = pixeles[k+1].x, by = pixeles[k+1].y;
+    var dx = bx - ax, dy = by - ay;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    var pasos = Math.floor(dist / 12);
+    var nx = -dy / dist, ny = dx / dist; // normal
+
+    for (var m = 0; m <= pasos; m++) {
+      var tx = ax + (dx / dist) * m * 12;
+      var ty = ay + (dy / dist) * m * 12;
+      var lado = (m % 2 === 0) ? 1 : -1;
+      // Pequeña púa
+      ss8Ctx.beginPath();
+      ss8Ctx.moveTo(tx, ty);
+      ss8Ctx.lineTo(tx + nx * 7 * lado, ty + ny * 7 * lado);
+      ss8Ctx.strokeStyle = 'rgba(227,179,65,0.7)';
+      ss8Ctx.lineWidth = 1.5;
+      ss8Ctx.stroke();
+    }
+  }
+
+  // Nodos de control en vértices
+  for (var n = 0; n < pixeles.length; n++) {
+    var alpha = parseFloat(0.5 + 0.5 * Math.sin(parseFloat(p.tick) * 0.15 + n));
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(pixeles[n].x, pixeles[n].y, 5, 0, Math.PI * 2);
+    ss8Ctx.fillStyle = 'rgba(248,81,73,' + alpha + ')';
+    ss8Ctx.fill();
+    ss8Ctx.strokeStyle = '#fff';
+    ss8Ctx.lineWidth = 1;
+    ss8Ctx.stroke();
+  }
+
+  // Etiqueta de ruptura
+  var midX = pixeles[Math.floor(pixeles.length/2)].x;
+  var midY = pixeles[Math.floor(pixeles.length/2)].y - 12;
+  ss8Ctx.font = '10px "Courier New"';
+  ss8Ctx.fillStyle = '#e3b341';
+  ss8Ctx.fillText('RUPTURA: ' + Math.round(p.ruptura * 100) + '%', midX + 8, midY);
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 3: PARTÍCULAS DE HUMO ============
+function iniciarHumo() {
+  if (!ss8IniciarCanvas()) return;
+
+  // Zona de humo sobre Comodoro Rivadavia
+  var lat = -45.8, lng = -67.5;
+  agregarEvento('[SPRINT8] 💨 Columna de humo iniciada en zona Patagónica', 'info');
+
+  ss8GenerarNubeHumo(lat, lng, 20);
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8GenerarNubeHumo(lat, lng, cantidad) {
+  for (var i = 0; i < cantidad; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        ss8Particulas.push({
+          tipo: 'humo',
+          lat: lat,
+          lng: lng,
+          tick: 0,
+          duracion: 120 + Math.floor(Math.random() * 60),
+          muerta: false,
+          offsetX: (Math.random() - 0.5) * 20,
+          offsetY: (Math.random() - 0.5) * 10,
+          radio: 6 + Math.random() * 8,
+          velY: -(0.3 + Math.random() * 0.4),   // sube
+          velX: (Math.random() - 0.5) * 0.2,     // deriva lateral
+          expansion: 0.15 + Math.random() * 0.1,  // expansión radial
+          gris: Math.floor(Math.random() * 60 + 60) // variación de gris
+        });
+      }, idx * 80);
+    })(i);
+  }
+}
+
+function ss8DibujarHumo(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var base = ss8LatLngAPixel(p.lat, p.lng);
+  var x = base.x + parseFloat(p.offsetX) + parseFloat(p.velX) * parseFloat(p.tick);
+  var y = base.y + parseFloat(p.offsetY) + parseFloat(p.velY) * parseFloat(p.tick);
+  var radio = parseFloat(p.radio) + parseFloat(p.expansion) * parseFloat(p.tick);
+
+  // Opacidad: crece luego decrece
+  var alpha;
+  if (t < 0.2) {
+    alpha = t / 0.2 * 0.5;
+  } else {
+    alpha = parseFloat(0.5 * (1 - (t - 0.2) / 0.8));
+  }
+
+  var g = parseFloat(p.gris);
+  var grad = ss8Ctx.createRadialGradient(x, y, 0, x, y, radio);
+  grad.addColorStop(0, 'rgba(' + g + ',' + g + ',' + g + ',' + alpha + ')');
+  grad.addColorStop(0.6, 'rgba(' + Math.floor(g*0.8) + ',' + Math.floor(g*0.8) + ',' + Math.floor(g*0.8) + ',' + (alpha * 0.5) + ')');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, radio, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = grad;
+  ss8Ctx.fill();
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 4: COMBATE NAVAL ============
+function iniciarCombateNaval() {
+  if (!ss8IniciarCanvas()) return;
+
+  agregarEvento('[SPRINT8] ⚓ Combate naval iniciado — Atlántico Sur', 'gasto');
+
+  // Barco A: viene del este
+  var barcoA = {
+    lat: -46.0, lng: -60.0,
+    destLat: -46.0, destLng: -64.5,
+    tick: 0, duracion: 150, muerta: false,
+    id: 'A', emoji: '🚢'
+  };
+
+  // Barco B: viene del oeste
+  var barcoB = {
+    lat: -46.5, lng: -70.0,
+    destLat: -46.5, destLng: -65.5,
+    tick: 0, duracion: 150, muerta: false,
+    id: 'B', emoji: '⛵'
+  };
+
+  // Crear marcadores Leaflet de barcos
+  ss8CrearBarcoLeaflet(barcoA);
+  ss8CrearBarcoLeaflet(barcoB);
+
+  // Torpedos entre ellos
+  setTimeout(function() {
+    ss8LanzarTorpedo(-46.0, -64.5, -46.5, -65.5);
+    ss8LanzarTorpedo(-46.5, -65.5, -46.0, -64.5);
+    ss8CrearExplosionDOM(-46.2, -65.0);
+    ss8GenerarNubeHumo(-46.2, -65.0, 6);
+    agregarEvento('[SPRINT8] 💥 Impacto naval en coordenadas -46.2, -65.0', 'gasto');
+  }, 2500);
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8CrearBarcoLeaflet(barco) {
+  if (typeof L === 'undefined' || !mapaObj) return;
+
+  var icono = L.divIcon({
+    html: '<div class="ss-barco-marker">' + barco.emoji + '</div>',
+    className: '',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+
+  var marcador = L.marker([barco.lat, barco.lng], { icon: icono }).addTo(mapaObj);
+  ss8CapasLeaflet.push(marcador);
+
+  // Animar movimiento del barco
+  var pasos = 60;
+  var dLatDelta = (barco.destLat - barco.lat) / pasos;
+  var dLngDelta = (barco.destLng - barco.lng) / pasos;
+  var paso = 0;
+
+  var moverBarco = setInterval(function() {
+    paso++;
+    var newLat = parseFloat(barco.lat) + parseFloat(dLatDelta) * paso;
+    var newLng = parseFloat(barco.lng) + parseFloat(dLngDelta) * paso;
+    marcador.setLatLng([newLat, newLng]);
+
+    // Estela
+    ss8Particulas.push({
+      tipo: 'estela_naval',
+      lat: newLat, lng: newLng,
+      tick: 0, duracion: 30,
+      muerta: false,
+      radio: 4 + Math.random() * 3
+    });
+
+    if (paso >= pasos) clearInterval(moverBarco);
+  }, 50);
+}
+
+function ss8LanzarTorpedo(oLat, oLng, dLat, dLng) {
+  var duracion = 40;
+  ss8Particulas.push({
+    tipo: 'torpedo',
+    oLat: oLat, oLng: oLng,
+    dLat: dLat, dLng: dLng,
+    tick: 0, duracion: duracion,
+    muerta: false
+  });
+}
+
+function ss8DibujarTorpedo(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pO = ss8LatLngAPixel(p.oLat, p.oLng);
+  var pD = ss8LatLngAPixel(p.dLat, p.dLng);
+  var x = pO.x + (pD.x - pO.x) * t;
+  var y = pO.y + (pD.y - pO.y) * t;
+
+  // Burbuja de agua (torpedo)
+  for (var k = 0; k < 5; k++) {
+    var tAnterior = Math.max(0, t - k * 0.03);
+    var bx = pO.x + (pD.x - pO.x) * tAnterior;
+    var by = pO.y + (pD.y - pO.y) * tAnterior;
+    var alpha = parseFloat(1 - k * 0.18) * parseFloat(1 - t);
+
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(bx + (Math.random()-0.5)*3, by + (Math.random()-0.5)*3, 3 - k*0.4, 0, Math.PI*2);
+    ss8Ctx.fillStyle = 'rgba(88,166,255,' + alpha + ')';
+    ss8Ctx.fill();
+  }
+
+  // Cabeza del torpedo
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#fff';
+  ss8Ctx.fill();
+}
+
+function ss8DibujarEstelaNaval(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pos = ss8LatLngAPixel(p.lat, p.lng);
+  var alpha = parseFloat(0.5 * (1 - t));
+  var radio = parseFloat(p.radio) + t * 8;
+
+  ss8Ctx.beginPath();
+  ss8Ctx.ellipse(pos.x, pos.y, radio * 2, radio * 0.5, 0, 0, Math.PI * 2);
+  ss8Ctx.strokeStyle = 'rgba(88,166,255,' + alpha + ')';
+  ss8Ctx.lineWidth = 1;
+  ss8Ctx.stroke();
+}
+
+// ============ SPRINT 8 - ANIMACIÓN 5: DEFENSA AÉREA ============
+function iniciarDefensaAerea() {
+  if (!ss8IniciarCanvas()) return;
+
+  agregarEvento('[SPRINT8] 🚀 Sistema de defensa aérea activado', 'info');
+
+  // Objetivo: satélite/avión entrante desde el norte
+  var objLat = -33.0, objLng = -65.0;
+  var lanzLat = -45.8, lanzLng = -67.5; // desde Patagónica
+
+  // Crear ícono de objetivo Leaflet
+  if (typeof L !== 'undefined' && mapaObj) {
+    var iconoObj = L.divIcon({
+      html: '<div style="font-size:18px;filter:drop-shadow(0 0 4px #f85149)">✈️</div>',
+      className: '',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    var marcadorObj = L.marker([objLat, objLng], { icon: iconoObj }).addTo(mapaObj);
+    ss8CapasLeaflet.push(marcadorObj);
+
+    // Mover el objetivo hacia el sur (amenaza)
+    var pasoObj = 0;
+    var totalPasos = 80;
+    var moverObj = setInterval(function() {
+      pasoObj++;
+      var nuevaLat = parseFloat(objLat) + (parseFloat(-42.0) - parseFloat(objLat)) * (pasoObj / totalPasos);
+      marcadorObj.setLatLng([nuevaLat, objLng]);
+      if (pasoObj >= totalPasos / 2) {
+        // Interceptar a mitad de camino
+        clearInterval(moverObj);
+        var interceptLat = (parseFloat(objLat) + parseFloat(-42.0)) / 2;
+        ss8LanzarMisilAA(lanzLat, lanzLng, interceptLat, objLng);
+        setTimeout(function() {
+          mapaObj.removeLayer(marcadorObj);
+          ss8CrearExplosionDOM(interceptLat, objLng);
+          ss8GenerarNubeHumo(interceptLat, objLng, 10);
+          agregarEvento('[SPRINT8] 🎯 Objetivo neutralizado en lat:' + interceptLat.toFixed(1) + ' lng:' + objLng.toFixed(1), 'info');
+        }, 1500);
+      }
+    }, 60);
+  }
+
+  if (!ss8LoopActivo) {
+    ss8LoopActivo = true;
+    ss8Loop();
+  }
+}
+
+function ss8LanzarMisilAA(oLat, oLng, dLat, dLng) {
+  var duracion = 55;
+  ss8Particulas.push({
+    tipo: 'misil_linea',
+    oLat: oLat, oLng: oLng,
+    dLat: dLat, dLng: dLng,
+    tick: 0, duracion: duracion,
+    muerta: false
+  });
+
+  // Ícono de misil en mapa
+  if (typeof L !== 'undefined' && mapaObj) {
+    var iconoMisil = L.divIcon({
+      html: '<div class="ss-misil-marker">🚀</div>',
+      className: '',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    var marcadorMisil = L.marker([oLat, oLng], { icon: iconoMisil }).addTo(mapaObj);
+    ss8CapasLeaflet.push(marcadorMisil);
+
+    var pasoM = 0;
+    var totalM = 30;
+    var moverMisil = setInterval(function() {
+      pasoM++;
+      var mLat = parseFloat(oLat) + (parseFloat(dLat) - parseFloat(oLat)) * (pasoM / totalM);
+      var mLng = parseFloat(oLng) + (parseFloat(dLng) - parseFloat(oLng)) * (pasoM / totalM);
+      marcadorMisil.setLatLng([mLat, mLng]);
+      if (pasoM >= totalM) {
+        clearInterval(moverMisil);
+        setTimeout(function() {
+          try { mapaObj.removeLayer(marcadorMisil); } catch(e) {}
+        }, 200);
+      }
+    }, 50);
+  }
+}
+
+function ss8DibujarMisilLinea(p) {
+  var t = parseFloat(p.tick) / parseFloat(p.duracion);
+  if (t > 1) { p.muerta = true; return; }
+
+  var pO = ss8LatLngAPixel(p.oLat, p.oLng);
+  var pD = ss8LatLngAPixel(p.dLat, p.dLng);
+  var x = pO.x + (pD.x - pO.x) * t;
+  var y = pO.y + (pD.y - pO.y) * t;
+  var alpha = parseFloat(1 - t * 0.3);
+
+  // Estela del misil (línea blanca que se desvanece)
+  var estelaLon = 0.2;
+  var txE = Math.max(0, t - estelaLon);
+  var xE = pO.x + (pD.x - pO.x) * txE;
+  var yE = pO.y + (pD.y - pO.y) * txE;
+
+  ss8Ctx.beginPath();
+  ss8Ctx.moveTo(xE, yE);
+  ss8Ctx.lineTo(x, y);
+  var grad = ss8Ctx.createLinearGradient(xE, yE, x, y);
+  grad.addColorStop(0, 'rgba(255,255,255,0)');
+  grad.addColorStop(1, 'rgba(255,255,255,' + alpha + ')');
+  ss8Ctx.strokeStyle = grad;
+  ss8Ctx.lineWidth = 3;
+  ss8Ctx.stroke();
+
+  // Chispas verdes (propulsor)
+  for (var s = 0; s < 4; s++) {
+    ss8Ctx.beginPath();
+    ss8Ctx.arc(
+      xE + (Math.random() - 0.5) * 8,
+      yE + (Math.random() - 0.5) * 8,
+      1.5 + Math.random() * 1.5,
+      0, Math.PI * 2
+    );
+    ss8Ctx.fillStyle = 'rgba(35,134,54,' + (alpha * 0.7) + ')';
+    ss8Ctx.fill();
+  }
+
+  // Cabeza del misil
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#fff';
+  ss8Ctx.fill();
+  ss8Ctx.beginPath();
+  ss8Ctx.arc(x, y, 2, 0, Math.PI * 2);
+  ss8Ctx.fillStyle = '#238636';
+  ss8Ctx.fill();
+}
+
+// ============ SPRINT 8 - INTEGRACIÓN: Colocar controles dentro de .map-controls ============
+document.addEventListener('DOMContentLoaded', function() {
+  // Intentar mover los controles al contenedor existente .map-controls si existe
+  var mapControls = document.querySelector('.map-controls');
+  var sprint8Panel = document.getElementById('sprint8-controles');
+
+  if (mapControls && sprint8Panel) {
+    // Mover botones dentro del contenedor existente
+    sprint8Panel.style.position = 'relative';
+    sprint8Panel.style.top = 'auto';
+    sprint8Panel.style.right = 'auto';
+    mapControls.appendChild(sprint8Panel);
+  }
+
+  // Ajustar posición del canvas cuando el mapa se mueva
+  if (typeof L !== 'undefined' && typeof mapaObj !== 'undefined' && mapaObj) {
+    mapaObj.on('moveend zoomend', function() {
+      // El canvas es estático, las posiciones se recalculan en cada frame
+      // Solo refrescar si hay animación activa
+      if (ss8LoopActivo && ss8Particulas.length === 0) {
+        // No hacer nada, loop se auto-detiene
+      }
+    });
+  }
+
+  agregarEvento('[SPRINT8] Módulo de animaciones bélicas cargado', 'info');
+});
+
+// ============ SPRINT 8 - EXPOSICIÓN GLOBAL: Funciones accesibles ============
+// Exponer funciones necesarias al scope global (ya están en global por ser var en script raíz)
+window.iniciarBombardeoArtilleria = iniciarBombardeoArtilleria;
+window.iniciarLineasFrente        = iniciarLineasFrente;
+window.iniciarHumo                = iniciarHumo;
+window.iniciarCombateNaval        = iniciarCombateNaval;
+window.iniciarDefensaAerea        = iniciarDefensaAerea;
+window.limpiarAnimaciones         = limpiarAnimaciones;
+
+</script>
+
+<!-- ============ SPRINT 8 - ANIMACIONES BÉLICAS: FIN BLOQUE QUIRÚRGICO ============ -->
