@@ -3883,7 +3883,7 @@ const firebaseConfig = {
 
 // ============ VARIABLES GLOBALES ============
 let database, dbRef;
-let modeloActivo = 'claude-3-haiku-20240307';
+let modeloActivo = 'claude-haiku-4-5-20251001';
 let contextoFijado = '';
 let mapaInicializado = false;
 let mapaObj = null;
@@ -4822,23 +4822,26 @@ function actualizarUIArbolID(puntos, nivAutonomia, nivIntercepcion, nivBlindaje)
 
 // ============ RESET ============
 function resetPartida() {
-    if (confirm("⚠️ ¿RESETEAR PARTIDA A ESTADO INICIAL?\nSe perderán todos los avances.")) {
-        dbRef.child('partida').update({
-            'finanzas/tesoreria': 500000,
-            'finanzas/burn_rate_mensual': 0,
-            'estado/puntos_reputacion': 0,
-            'estado/nivel_actual': 1,
-            'estado/aprobacion_economista': false,
-            'estado/aprobacion_civil': false,
-            'tiempo/trimestre_actual': 1,
-            'tiempo/simulacion_pausada': true,
-            'tiempo/historico_ultimo_tick': Date.now()
+    if (confirm("⚠️ ¿BORRAR PARTIDA COMPLETA?\nEsto elimina TODO el progreso (Tesorería, Política, Tech Tree, Licitaciones, Contrabando, historial). No se puede deshacer.")) {
+        dbRef.child('partida').remove().then(function() {
+            return dbRef.child('partida').update({
+                'finanzas/tesoreria': 500000,
+                'finanzas/burn_rate_mensual': 0,
+                'estado/puntos_reputacion': 0,
+                'estado/nivel_actual': 1,
+                'estado/aprobacion_economista': false,
+                'estado/aprobacion_civil': false,
+                'tiempo/trimestre_actual': 1,
+                'tiempo/simulacion_pausada': true,
+                'tiempo/historico_ultimo_tick': Date.now()
+            });
         }).then(function() {
-            agregarEvento("🔴 RESET — USD 500,000 | Nivel 1 | Trimestre 1", "gasto");
             // SPRINT 2B - PATRULLAJE: limpiar intervalo al resetear
             if (intervalPatrulla) clearInterval(intervalPatrulla);
             // SPRINT 7 - MOTOR HISTÓRICO: detener el motor al resetear
             motorHistorico_detener();
+            // Reset completo de Firebase invalida el estado local — recargar es lo más seguro
+            location.reload();
         });
     }
 }
@@ -5520,7 +5523,7 @@ async function generarTitulares() {
                 'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-                model: 'claude-3-haiku-20240307',
+                model: 'claude-haiku-4-5-20251001',
                 max_tokens: 600,
                 messages: [{ role: 'user', content: prompt }]
             })
@@ -5802,7 +5805,7 @@ function generarLeyesConHaiku(tesoreria, nivel, trimestre) {
     fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: 'claude-3-haiku-20240307', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+        body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
     })
     .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
     .then(function(data) {
@@ -6035,7 +6038,7 @@ async function generarEventoPolitico() {
         var res = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-            body: JSON.stringify({ model: 'claude-3-haiku-20240307', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
+            body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
         });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         var data = await res.json();
@@ -6357,7 +6360,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (verTodoBtn) verTodoBtn.addEventListener('click', function() { mostrarHistorial(20); });
     setTimeout(function() { if (cargarNotasBtn) cargarNotasBtn.click(); }, 400);
     document.getElementById('modoHaikuBtn').addEventListener('click', function() {
-        modeloActivo = 'claude-3-haiku-20240307';
+        modeloActivo = 'claude-haiku-4-5-20251001';
         document.getElementById('modoHaikuBtn').style.background = 'var(--green)';
         document.getElementById('modoHaikuBtn').style.color = '#0d1117';
         document.getElementById('modoSonnetBtn').style.background = '#21262d';
@@ -7820,7 +7823,7 @@ function srnGenerarBoletin() {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 120,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -9091,7 +9094,7 @@ function tvGenerarGuion() {
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 160,
       messages: [{ role: 'user', content: prompt }]
     })

@@ -1,0 +1,234 @@
+SOVEREIGN SHIELD AEROESPACIAL — CHANGELOG (v3.6 → v3.6.3)
+═══════════════════════════════════════════════════════════
+
+v3.6 — SPRINT 8 COMPLETO (19-20/06/2026)
+─────────────────────────────────────────
+Los 6 módulos del Sprint 8 integrados en index.html (2715 → 9446 líneas):
+
+  1. Visor 3D (Three.js) — globo orbital, satélites propios/reales.
+  2. Animaciones Bélicas 2D — artillería, líneas de frente, humo,
+     naval, defensa aérea. Canvas overlay sobre Leaflet, cero API.
+  3. Radio Network — Web Audio synthwave, boletines vía Claude Haiku,
+     scanner de frecuencias, números estación, interferencia táctica.
+  4. Widget TV — avatar wireframe con lip-sync, 2 conductores
+     (Jordan/Doc por trimestre par-impar), guiones vía Haiku,
+     ElevenLabs/WebSpeech fallback.
+  5. Política & Tech Tree + Contrabando (Tab 7) — ciclo electoral de
+     16 trimestres, árbol tecnológico de 3 ramas excluyentes,
+     contrabando de chips (rutas Asia/Dubái).
+  6. Licitaciones & Espionaje Industrial (Tab 8) — gaceta de
+     licitaciones, contramedidas rivales con ciber-sabotaje automático
+     al 100%, eventos de espionaje aleatorios. Hook
+     avanzarTrimestreLicitaciones() enganchado en cerrarTrimestre() y
+     motorHistorico_procesarUnTrimestre().
+
+BUGS REALES encontrados y corregidos durante la integración (ninguno
+reportado por testing manual previo — todos detectados en auditoría
+pre-integración):
+  - Modelo Haiku mal escrito ('claude-haiku-20240307' sin el '-3-') en
+    Radio Network y Widget TV — rompía el fetch a la API.
+  - srnObtenerEstadoFirebase() (Radio) retornaba antes de que
+    resolvieran los .once('value') async — boletines siempre con
+    placeholders. Convertido a Promise.all().
+  - Paths de Firebase huérfanos en Widget TV (tesoreria/nivel/
+    trimestre/guerra en vez de partida/finanzas/tesoreria, etc.) — el
+    ticker nunca mostraba datos reales.
+  - renderizarTodo() llamada pero nunca definida en Política & Tech —
+    ReferenceError no capturado cada vez que Firebase no estaba
+    disponible al cargar.
+  - dbRef.ref( en vez de dbRef.child( en Política (2 ocurrencias) y
+    Licitaciones (31 ocurrencias).
+  - Colisiones de CSS sin prefijo: .panel y .log-entry (Política)
+    pisaban estilos usados en 73+ lugares del proyecto; .badge
+    (Licitaciones) pisaba los badges del header. Renombrados a
+    .pt-panel/.pt-log-entry/.lic-badge.
+  - :root{} redeclarado en 2 módulos (Radio, Política) con --orange en
+    valor distinto al del proyecto (#f0883e vs #e67e22) — se omitió el
+    :root del módulo, se agregaron solo las variables nuevas al :root
+    único existente.
+
+Regla 18 (listeners de Firebase): Radio Network los tenía en su propio
+DOMContentLoaded sin garantía de que dbRef existiera — movido a
+bindFirebaseListeners() real. TV y Licitaciones ya traían su propio
+guard/poll esperando dbRef, correcto desde el Reactor.
+
+Deploys: 3 commits separados (8bf0d44, 90b1fc3, commit de Licitaciones),
+todos verificados con git show --stat HEAD antes de cerrar (cero
+"delete mode" inesperado).
+
+NUEVO: MANIFIESTO_SOVEREIGN_SHIELD.md y CHECKLIST_REACTOR.md creados
+como documentos de proyecto separados — el primero es estado real
+consultable (paths, funciones, clases CSS, tabs en uso) para auditorías
+más baratas en tokens; el segundo es el set de reglas para pegarle al
+Reactor/DeepSeek ANTES de generar el próximo módulo.
+
+Sprint 8: 6/6 módulos (CERRADO).
+
+
+v3.6.1 — HOTFIX post Sprint 8 (20/06/2026 madrugada)
+─────────────────────────────────────────
+3 bugs reales de consola detectados en testing local (Safari +
+python3 -m http.server) y corregidos:
+
+  1. CORS 400 intermitente en Radio Network y Widget TV — faltaba el
+     header 'anthropic-dangerous-direct-browser-access': 'true' en 2 de
+     las 6 llamadas fetch a Anthropic (líneas ~7813 y ~9084). Agregado
+     en las 2 que faltaban.
+
+  2. TypeError bars[i].classList en srnAnimarSenial() (Radio Network,
+     línea ~8174) — closure bug clásico: 'var i' compartida entre todas
+     las callbacks de setTimeout dentro del loop. Fix: 'var i' → 'let i'
+     (scope de bloque).
+
+  3. PoliTech permanentemente en modo offline ("dbRef no disponible") —
+     el módulo capturaba _dbRef una sola vez en un IIFE al cargar,
+     antes de que initFirebaseWithRetry() asignara el dbRef real (hasta
+     3s de delay). Fix: _dbRef ahora es un Object.defineProperty con
+     getter que resuelve el valor real en cada lectura.
+
+Validación: node --check sobre los 11 bloques <script>, diff línea por
+línea confirma que solo se tocaron las 3 zonas exactas
+(9446 → 9449 líneas, +3).
+
+DEPLOY: commit 5e87378, pusheado a origin/main (20/06/2026 ~14:59).
+git show --stat HEAD confirmó 27 líneas tocadas en ambas copias
+(index.html raíz + sandbox sovergyn shield/index.html).
+
+INCIDENTE DURANTE EL DEPLOY: el 1er y 2do intento de descarga del
+index.html corregido llegaron TRUNCADOS (9446 → ~1007 y luego ~976
+líneas), generando 2 commits malos revertidos con git revert (747f200
+y su revert 188ba09). Se resolvió resubiendo el archivo al chat para
+confirmar líneas/bytes antes de reintentar — deploy limpio en 5e87378.
+
+LECCIÓN DE PROCESO: ANTES de mover un archivo grande (index.html) a la
+carpeta del repo, correr 'git diff --stat' primero. Si el número de
+líneas cambiadas es absurdamente alto (miles) en vez de decenas,
+DETENERSE — el archivo descargado está corrupto/truncado.
+
+
+v3.6.2 — TESTING + FIX RESET PARTIDA + ROTACIÓN DE KEYS (20/06/2026 tarde)
+─────────────────────────────────────────
+TESTING DEL HOTFIX v3.6.1 (confirmado por consola):
+  - Fix 1 (header CORS): confirmado. El error pasó de "400 Preflight" a
+    "401 invalid x-api-key" — preflight ya pasa bien, el 401 quedó
+    aislado como problema de credencial.
+  - Fix 3 (PoliTech _dbRef getter): confirmado. Consola mostró
+    "[PoliTech Evento] – Módulo cargado y sincronizado con Firebase"
+    sin warning de "dbRef no disponible".
+  - Fix 2 (bars[i].classList): no se observó el error durante el
+    testing. Pendiente una pasada más larga con Radio Network activo
+    para confirmar al 100%.
+
+BUG NUEVO encontrado y corregido — resetPartida() incompleto:
+  La función original (línea ~4824) hacía un dbRef.child('partida')
+  .update() de solo 8 campos puntuales (tesorería, burn rate, PR,
+  nivel, trimestre). No tocaba ningún path de los módulos del Sprint 8
+  (Política & Tech Tree, Licitaciones, Contrabando) — el botón dejaba
+  una partida "zombie": tesorería reseteada pero tech tree/licitaciones
+  viejos seguían vivos en Firebase.
+  Fix: dbRef.child('partida').remove() completo antes de reescribir los
+  8 campos mínimos, + location.reload() al final. Confirmado por grep
+  que TODOS los dbRef.child(...) del archivo cuelgan de un único nodo
+  raíz 'partida' — el remove() es seguro y completo.
+  Validación: node --check sin errores, diff confirma que solo se tocó
+  esa función (9449 → 9452 líneas, +3).
+  Probado en vivo: botón "RESET PARTIDA" → confirm() → reload →
+  Tesorería USD 500,000, Trimestre 1, Widget TV mostró "Q1".
+
+BUG DE UI encontrado, NO resuelto (no bloqueante):
+  El botón "RESET PARTIDA" (#resetBtn) queda visualmente tapado por los
+  paneles flotantes de Widget TV (#tv-pip-panel) y Radio Network, ambos
+  position:fixed z-index:9999 en la misma esquina inferior derecha
+  donde cae el footer (#resetBtn es el último ítem de un footer con
+  justify-content:flex-end). Workaround actual: cerrar los paneles de
+  TV/SRN con la ✕. Fix de CSS pendiente.
+
+INCIDENTE DE SEGURIDAD — API keys expuestas en el chat:
+  Durante el debug del "401 invalid x-api-key", capturas de pantalla de
+  Safari mostrando localStorage completo expusieron en el chat (texto
+  plano) tres API keys reales de Anthropic: ss_anthropic_key (Sovereign
+  Shield), reactor_api_key (Reactor Nuclear IA) y zcp_apikey (ZAR
+  Capital). Recomendación: revocar y regenerar las tres en
+  console.anthropic.com.
+  Causa raíz del 401 original: la key vieja seguía en localStorage pese
+  a un localStorage.clear() previo en consola — el modal de ingreso de
+  key (#apiModal) solo aparece si ss_anthropic_key es null. Se resolvió
+  borrando la fila manualmente desde Web Inspector → Almacenamiento →
+  Local Storage, recargando, y confirmando que el modal de ingreso de
+  key apareció correctamente.
+
+
+v3.6.3 — MIGRACIÓN MODELO HAIKU RETIRADO (20/06/2026 tarde-noche)
+─────────────────────────────────────────
+DESCUBRIMIENTO: tras resolver el 401 con la key nueva, apareció un 404
+("Error Haiku: model: claude-3-haiku-20240307") en vez del boletín/
+guion esperado. Investigación confirmó que Anthropic RETIRÓ
+claude-3-haiku-20240307 el 19-20/04/2026 — dos meses antes de esta
+sesión. El modelo "correcto" documentado hasta ahora en el Manifiesto y
+el Checklist (con el fix de la v3.6: agregar el '-3-' faltante) quedó
+obsoleto por una causa externa al proyecto, no por un bug de código.
+
+Esto es relevante para el Reactor/DeepSeek: cualquier módulo nuevo
+generado con el string viejo va a fallar igual, aunque esté "bien
+escrito" según la regla anterior (con el '-3-'). La regla del
+Checklist debe actualizarse: ya no alcanza con verificar el formato del
+string, hay que verificar que el modelo siga vigente.
+
+FIX: reemplazo del modelo en las 7 ocurrencias del archivo
+(modeloActivo inicial, botón modoHaikuBtn, y los 5 fetch directos de
+Radio/TV/Política) de 'claude-3-haiku-20240307' a
+'claude-haiku-4-5-20251001' (Claude Haiku 4.5, sucesor recomendado por
+Anthropic). Se verificó que el código no usa top_p junto con
+temperature (uno de los breaking changes típicos de la migración a
+Haiku 4.5), así que no hizo falta tocar nada más en las llamadas.
+El modo "Sonnet" del tutor de Academy (modoSonnetBtn → claude-sonnet-4-6)
+ya estaba vigente y no se tocó.
+
+Validación: node --check sobre los 11 bloques <script> sin errores,
+diff línea por línea confirma que SOLO cambiaron las 7 strings del
+modelo (9452 → 9452 líneas, mismo total — solo sustitución de texto,
+sin agregar/quitar líneas).
+
+Nota de costo: Haiku 4.5 es ~4x más caro por token que Haiku 3
+($1.00/$5.00 vs $0.25/$1.25 por millón de tokens input/output). Para el
+volumen de boletines/guiones cortos del juego el impacto en USD reales
+es bajo, pero queda anotado por si el consumo escala.
+
+DEPLOY: pendiente — archivo entregado a PEI con AMBOS fixes de la tarde
+(resetPartida() completo + migración de modelo) en un solo index.html,
+para deployar junto en un solo commit.
+
+NUEVO PENDIENTE: actualizar MANIFIESTO_SOVEREIGN_SHIELD.md y
+CHECKLIST_REACTOR.md para reemplazar toda referencia a
+claude-3-haiku-20240307 por claude-haiku-4-5-20251001, y agregar al
+Checklist una regla de "verificar vigencia del modelo" (no solo
+formato del string) antes de generar módulos nuevos.
+
+
+PENDIENTE REAL PARA PRÓXIMA SESIÓN
+═══════════════════════════════════════
+1. Commit + push del index.html con ambos fixes de v3.6.2/v3.6.3
+   (resetPartida completo + modelo Haiku 4.5) — correr 'git diff --stat'
+   de control antes de pushear.
+2. Confirmar en vivo que Radio/TV generan boletín y guion sin error,
+   con la key nueva + modelo nuevo ya andando juntos.
+3. Revocar y regenerar reactor_api_key y zcp_apikey (no solo
+   ss_anthropic_key) por la exposición incidental en capturas.
+4. git rm de archivos sueltos en la raíz de "sandbox sovergyn shield":
+   animaciones_belicas.html, radio_network.html,
+   licitaciones_espionaje.html, politica_tech_contrabando.html,
+   widget_tv.html (confirmar primero que están 100% integrados antes de
+   borrar).
+5. Fix de CSS para que #resetBtn (y el resto del footer) no quede
+   tapado por los paneles flotantes de TV/SRN.
+6. Actualizar MANIFIESTO_SOVEREIGN_SHIELD.md y CHECKLIST_REACTOR.md con
+   el modelo nuevo (claude-haiku-4-5-20251001) y la regla de verificar
+   vigencia de modelo.
+7. Subir este CHANGELOG unificado al repo.
+8. Seguir con Parche 2 (Modo Protector de Pantalla) — prompt y contexto
+   para DeepSeek ya armados, selectores reales confirmados:
+   #tv-pip-panel, #tv-avatar-canvas, #tv-ticker-wrap, #tv-ticker-text,
+   #tv-open-btn.
+9. Parche 3 (unificación de audio TV/SRN) sigue pendiente de que Claude
+   audite primero el código real de tv*/srn* antes de pedirle nada a
+   DeepSeek — no generar a ciegas.

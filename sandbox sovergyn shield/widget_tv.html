@@ -1,0 +1,1235 @@
+<!-- ============================================================ -->
+<!-- SPRINT 8 - TV: Widget TV Sovereign Shield                    -->
+<!-- Insertar antes del cierre </body> en index.html              -->
+<!-- ============================================================ -->
+
+<!-- ============ HTML: Panel PIP Flotante ============ -->
+<div id="tv-pip-panel" style="
+  display:none;
+  position:fixed;
+  bottom:90px;
+  right:18px;
+  width:280px;
+  background:#0d1117;
+  border:1.5px solid #238636;
+  border-radius:10px;
+  box-shadow:0 0 24px #238636aa, 0 2px 8px #000a;
+  z-index:9999;
+  font-family:'Courier New',monospace;
+  overflow:hidden;
+  transition:box-shadow 0.2s;
+">
+  <!-- Barra de título -->
+  <div id="tv-titlebar" style="
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#161b22;
+    padding:6px 10px;
+    border-bottom:1px solid #238636;
+    cursor:move;
+    user-select:none;
+  ">
+    <span id="tv-channel-label" style="color:#58a6ff;font-size:11px;font-weight:bold;letter-spacing:1px;">
+      📺 SS-TV · CANAL 1
+    </span>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button id="tv-btn-mute" title="Mute" onclick="tvToggleMute()" style="
+        background:none;border:1px solid #e3b341;color:#e3b341;
+        border-radius:4px;padding:1px 7px;font-size:11px;cursor:pointer;
+      ">🔊</button>
+      <button id="tv-btn-gen" title="Generar guión" onclick="tvGenerarGuion()" style="
+        background:none;border:1px solid #238636;color:#238636;
+        border-radius:4px;padding:1px 7px;font-size:11px;cursor:pointer;
+      ">▶</button>
+      <button onclick="tvCerrarPanel()" style="
+        background:none;border:1px solid #f85149;color:#f85149;
+        border-radius:4px;padding:1px 7px;font-size:11px;cursor:pointer;
+      ">✕</button>
+    </div>
+  </div>
+
+  <!-- Canvas avatar -->
+  <div style="position:relative;background:#000;text-align:center;padding:4px 0 0 0;">
+    <canvas id="tv-avatar-canvas" width="260" height="170"
+      style="display:block;margin:0 auto;border-bottom:1px solid #1a2a1a;">
+    </canvas>
+    <!-- Badge conductor -->
+    <div id="tv-conductor-badge" style="
+      position:absolute;bottom:6px;left:10px;
+      background:#0d1117cc;border:1px solid #238636;
+      color:#58a6ff;font-size:9px;padding:2px 7px;border-radius:10px;
+      letter-spacing:0.5px;
+    ">—</div>
+    <!-- Indicador ON AIR -->
+    <div id="tv-onair" style="
+      position:absolute;top:7px;right:10px;
+      background:#f85149;color:#fff;font-size:8px;
+      padding:2px 6px;border-radius:3px;letter-spacing:1px;
+      display:none;animation:tv-blink 1s infinite;
+    ">● ON AIR</div>
+  </div>
+
+  <!-- Subtítulo / ticker -->
+  <div style="background:#0d1117;padding:6px 10px 2px 10px;">
+    <div id="tv-ticker-wrap" style="overflow:hidden;white-space:nowrap;width:100%;position:relative;height:18px;">
+      <span id="tv-ticker-text" style="
+        color:#e3b341;font-size:10px;
+        display:inline-block;
+        animation:tv-ticker 18s linear infinite;
+        white-space:nowrap;
+      ">Inicializando SS-TV...</span>
+    </div>
+  </div>
+
+  <!-- Texto del guión / subtítulos -->
+  <div id="tv-script-box" style="
+    padding:8px 10px 6px 10px;
+    min-height:54px;
+    max-height:80px;
+    overflow-y:auto;
+    font-size:10px;
+    color:#e6edf3;
+    line-height:1.5;
+    border-top:1px solid #1a2a1a;
+    scrollbar-width:thin;
+    scrollbar-color:#238636 #0d1117;
+  ">Esperando transmisión...</div>
+
+  <!-- Barra de estado -->
+  <div style="
+    display:flex;justify-content:space-between;
+    padding:4px 10px;background:#161b22;
+    font-size:9px;color:#8b949e;border-top:1px solid #1a2a1a;
+  ">
+    <span id="tv-status-left">Q-auto</span>
+    <span id="tv-status-right">ElevenLabs: —</span>
+  </div>
+</div>
+
+<!-- ============ Botón para abrir la TV (se inserta en footer o header) ============ -->
+<button id="tv-open-btn" onclick="tvAbrirPanel()" title="Abrir SS-TV" style="
+  position:fixed;
+  bottom:14px;
+  right:18px;
+  background:#0d1117;
+  border:1.5px solid #238636;
+  color:#238636;
+  font-family:'Courier New',monospace;
+  font-size:13px;
+  padding:7px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:9998;
+  box-shadow:0 0 10px #23863655;
+  transition:all 0.2s;
+  letter-spacing:0.5px;
+">📺 SS-TV</button>
+
+<!-- ============ CSS: Animaciones TV ============ -->
+<style>
+/* SPRINT 8 - TV: Keyframes */
+
+@keyframes tv-blink {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.2; }
+}
+
+@keyframes tv-ticker {
+  0%   { transform: translateX(260px); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Efecto glitch sobre el panel completo */
+@keyframes tv-glitch-h {
+  0%   { clip-path: inset(0 0 98% 0); transform: skewX(0deg); }
+  20%  { clip-path: inset(30% 0 50% 0); transform: skewX(-4deg); }
+  40%  { clip-path: inset(60% 0 20% 0); transform: skewX(3deg); }
+  60%  { clip-path: inset(10% 0 80% 0); transform: skewX(-2deg); }
+  80%  { clip-path: inset(80% 0 5%  0); transform: skewX(2deg); }
+  100% { clip-path: inset(0 0 98% 0); transform: skewX(0deg); }
+}
+
+.tv-glitch-active {
+  animation: tv-glitch-h 0.35s steps(2) 3 !important;
+  filter: hue-rotate(90deg) brightness(1.4);
+}
+
+/* Canvas fósforo: fondo negro real */
+#tv-avatar-canvas {
+  image-rendering: pixelated;
+}
+
+/* Scrollbar guión */
+#tv-script-box::-webkit-scrollbar { width:4px; }
+#tv-script-box::-webkit-scrollbar-track { background:#0d1117; }
+#tv-script-box::-webkit-scrollbar-thumb { background:#238636; border-radius:2px; }
+
+/* Botón open hover */
+#tv-open-btn:hover {
+  background:#238636;
+  color:#0d1117;
+  box-shadow:0 0 18px #238636aa;
+}
+
+/* Responsivo mínimo */
+@media(max-width:420px){
+  #tv-pip-panel { width:98vw; right:1vw; }
+}
+</style>
+
+<!-- ============ JS: Módulo TV Completo ============ -->
+<script>
+// ============ SPRINT 8 - TV: Variables globales del módulo ============
+
+var TV = {
+  abierta:         false,
+  muted:           false,
+  volumen:         0.8,
+  conductor:       'jordan',   // 'jordan' | 'doc'
+  trimestre:       1,
+  guionActual:     '',
+  hablandoIndex:   0,
+  cooldownGuion:   false,
+  cooldownTimer:   null,
+  animFrameId:     null,
+  lipAmp:          0,
+  lipTarget:       0,
+  parpadeo:        0,
+  parpadeoDir:     1,
+  glitchActivo:    false,
+
+  // Web Audio para lip-sync
+  audioCtx:        null,
+  analyser:        null,
+  dataArray:       null,
+
+  // Speech
+  synth:           window.speechSynthesis || null,
+  utterance:       null,
+  voces:           [],
+
+  // ElevenLabs
+  elevenAudio:     null,
+
+  // Ticker
+  tickerItems:     [],
+  tickerIdx:       0,
+
+  // PIP drag
+  dragActive:      false,
+  dragOffX:        0,
+  dragOffY:        0,
+
+  // Firebase snapshot cache
+  fbCache: {
+    tesoreria:   0,
+    nivel:       1,
+    trimestre:   1,
+    eventos:     []
+  }
+};
+
+// ============ SPRINT 8 - TV: Inicialización principal ============
+
+function tvInit() {
+  // Restaurar persistencia
+  var abierta = localStorage.getItem('ss_tv_abierta');
+  TV.volumen  = parseFloat(localStorage.getItem('ss_tv_volumen') || '0.8');
+  TV.conductor = localStorage.getItem('ss_tv_ultimo_conductor') || 'jordan';
+
+  // Cargar voces
+  if (TV.synth) {
+    TV.voces = TV.synth.getVoices();
+    if (TV.synth.onvoiceschanged !== undefined) {
+      TV.synth.onvoiceschanged = function() {
+        TV.voces = TV.synth.getVoices();
+      };
+    }
+  }
+
+  // Arrancar canvas loop
+  tvStartCanvasLoop();
+
+  // Ticker inicial
+  TV.tickerItems = [
+    'SS-TV · Noticias en vivo · Sovereign Shield Broadcasting',
+    'Mercados monitoreados en tiempo real',
+    'Trimestre en curso · Actualización automática',
+    'Gillean Jordan · El Doc de la UBA · Conductores alternos'
+  ];
+  tvActualizarTicker();
+
+  // Drag&Drop del panel
+  tvInitDrag();
+
+  // Estado ElevenLabs
+  tvActualizarStatusBar();
+
+  // Verificar Firebase cache
+  tvBindFirebase();
+
+  // Si estaba abierta, reabrir
+  if (abierta === 'true') {
+    tvAbrirPanel();
+  }
+
+  // Actualizar conductor según trimestre ya cargado
+  tvActualizarConductorPorTrimestre();
+
+  // Arrancar ticker rotativo
+  setInterval(tvRotarTicker, 6000);
+
+  // Verificar trimestre cada 30s
+  setInterval(tvActualizarConductorPorTrimestre, 30000);
+
+  agregarEvento('📺 SS-TV inicializada correctamente', 'info');
+}
+
+// ============ SPRINT 8 - TV: Firebase binding ============
+
+function tvBindFirebase() {
+  // Solo si dbRef existe (definido globalmente en el proyecto)
+  if (typeof dbRef === 'undefined') return;
+
+  try {
+    // Escuchar tesorería
+    dbRef.child('tesoreria').on('value', function(snap) {
+      if (snap && snap.val() !== null) {
+        TV.fbCache.tesoreria = parseFloat(snap.val()) || 0;
+      }
+    });
+
+    // Escuchar nivel
+    dbRef.child('nivel').on('value', function(snap) {
+      if (snap && snap.val() !== null) {
+        TV.fbCache.nivel = parseFloat(snap.val()) || 1;
+      }
+    });
+
+    // Escuchar trimestre
+    dbRef.child('trimestre').on('value', function(snap) {
+      if (snap && snap.val() !== null) {
+        var q = parseFloat(snap.val()) || 1;
+        TV.fbCache.trimestre = q;
+        TV.trimestre = q;
+        tvActualizarConductorPorTrimestre();
+      }
+    });
+
+    // Escuchar eventos de guerra/infortunio para glitch
+    dbRef.child('guerra').on('value', function(snap) {
+      if (snap && snap.val()) {
+        tvDisparoGlitch();
+      }
+    });
+
+  } catch(e) {
+    agregarEvento('SS-TV: error binding Firebase — ' + e.message, 'info');
+  }
+}
+
+// ============ SPRINT 8 - TV: Control de panel ============
+
+function tvAbrirPanel() {
+  var panel = document.getElementById('tv-pip-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+  TV.abierta = true;
+  localStorage.setItem('ss_tv_abierta', 'true');
+
+  // Arrancar canvas si estaba pausado
+  tvStartCanvasLoop();
+
+  // Actualizar UI
+  tvActualizarBadgeConductor();
+  tvActualizarStatusBar();
+}
+
+function tvCerrarPanel() {
+  var panel = document.getElementById('tv-pip-panel');
+  if (!panel) return;
+  panel.style.display = 'none';
+  TV.abierta = false;
+  localStorage.setItem('ss_tv_abierta', 'false');
+
+  // Detener voz si está hablando
+  tvDetenerVoz();
+}
+
+// ============ SPRINT 8 - TV: Mute ============
+
+function tvToggleMute() {
+  TV.muted = !TV.muted;
+  var btn = document.getElementById('tv-btn-mute');
+  if (btn) btn.textContent = TV.muted ? '🔇' : '🔊';
+
+  if (TV.muted) {
+    tvDetenerVoz();
+  }
+
+  agregarEvento('SS-TV: ' + (TV.muted ? 'silenciada' : 'audio activado'), 'info');
+}
+
+// ============ SPRINT 8 - TV: Conductor por trimestre ============
+
+function tvActualizarConductorPorTrimestre() {
+  var q = TV.fbCache.trimestre || TV.trimestre || 1;
+  // Trimestres impares: Jordan, pares: El Doc
+  var nuevoConductor = (q % 2 !== 0) ? 'jordan' : 'doc';
+
+  if (nuevoConductor !== TV.conductor) {
+    TV.conductor = nuevoConductor;
+    localStorage.setItem('ss_tv_ultimo_conductor', TV.conductor);
+    tvDisparoGlitch();
+    agregarEvento('📺 SS-TV: cambio de conductor → ' + tvNombreConductor(), 'info');
+  }
+
+  // Actualizar label canal
+  var lbl = document.getElementById('tv-channel-label');
+  if (lbl) {
+    lbl.textContent = '📺 SS-TV · Q' + q;
+  }
+
+  tvActualizarBadgeConductor();
+  tvActualizarTicker();
+  tvActualizarStatusBar();
+}
+
+function tvNombreConductor() {
+  return TV.conductor === 'jordan' ? 'Gillean Jordan' : 'El Doc (UBA)';
+}
+
+function tvActualizarBadgeConductor() {
+  var badge = document.getElementById('tv-conductor-badge');
+  if (!badge) return;
+  badge.textContent = tvNombreConductor();
+  badge.style.color = TV.conductor === 'jordan' ? '#58a6ff' : '#e3b341';
+  badge.style.borderColor = TV.conductor === 'jordan' ? '#58a6ff' : '#e3b341';
+}
+
+// ============ SPRINT 8 - TV: Status bar ============
+
+function tvActualizarStatusBar() {
+  var el = document.getElementById('tv-status-right');
+  if (!el) return;
+  var key = localStorage.getItem('ss_elevenlabs_key');
+  el.textContent = 'ElevenLabs: ' + (key ? '✓' : 'WebSpeech');
+
+  var elL = document.getElementById('tv-status-left');
+  if (elL) elL.textContent = 'Q' + (TV.fbCache.trimestre || 1) + ' · ' + (TV.conductor === 'jordan' ? 'GJ' : 'DOC');
+}
+
+// ============ SPRINT 8 - TV: Ticker ============
+
+function tvActualizarTicker() {
+  var q = TV.fbCache.trimestre || 1;
+  var nombres = ['Gillean Jordan', 'El Doc (UBA)'];
+  TV.tickerItems = [
+    'SS-TV · Q' + q + ' · Conductor: ' + tvNombreConductor(),
+    'Tesorería actual: $' + (TV.fbCache.tesoreria || 0).toFixed(2),
+    'Nivel de operaciones: ' + (TV.fbCache.nivel || 1),
+    'Sovereign Shield Broadcasting · Noticias en vivo',
+    'Análisis económico · Trimestre ' + q
+  ];
+}
+
+function tvRotarTicker() {
+  TV.tickerIdx = (TV.tickerIdx + 1) % TV.tickerItems.length;
+  var span = document.getElementById('tv-ticker-text');
+  if (!span) return;
+  span.textContent = TV.tickerItems[TV.tickerIdx];
+  // Reiniciar animación
+  span.style.animation = 'none';
+  void span.offsetWidth; // reflow
+  span.style.animation = 'tv-ticker 18s linear infinite';
+}
+
+// ============ SPRINT 8 - TV: Glitch visual ============
+
+function tvDisparoGlitch() {
+  if (TV.glitchActivo) return;
+  TV.glitchActivo = true;
+  var panel = document.getElementById('tv-pip-panel');
+  var canvas = document.getElementById('tv-avatar-canvas');
+  if (panel) panel.classList.add('tv-glitch-active');
+  if (canvas) canvas.style.filter = 'hue-rotate(120deg) brightness(1.5) contrast(1.3)';
+
+  setTimeout(function() {
+    if (panel) panel.classList.remove('tv-glitch-active');
+    if (canvas) canvas.style.filter = '';
+    TV.glitchActivo = false;
+  }, 1100);
+}
+
+// ============ SPRINT 8 - TV: Canvas Avatar Wireframe / Fósforo ============
+
+function tvStartCanvasLoop() {
+  if (TV.animFrameId) cancelAnimationFrame(TV.animFrameId);
+  TV.parpadeo = 1;
+
+  function loop() {
+    tvDrawAvatar();
+    TV.animFrameId = requestAnimationFrame(loop);
+  }
+  TV.animFrameId = requestAnimationFrame(loop);
+}
+
+function tvDrawAvatar() {
+  var canvas = document.getElementById('tv-avatar-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width;   // 260
+  var H = canvas.height;  // 170
+  var t = Date.now() / 1000;
+
+  // Fondo negro
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, W, H);
+
+  // Color del conductor
+  var color = TV.conductor === 'jordan' ? '#00ff88' : '#ffaa00';
+  var colorSec = TV.conductor === 'jordan' ? '#58a6ff' : '#ff6633';
+
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+
+  var cx = W / 2;
+  var cy = H / 2 - 8;
+
+  // Parpadeo natural
+  TV.parpadeo += TV.parpadeoDir * 0.04;
+  if (TV.parpadeo > 1.2) TV.parpadeoDir = -1;
+  if (TV.parpadeo < 0) {
+    TV.parpadeo = 0;
+    TV.parpadeoDir = 1;
+  }
+
+  // Lip-sync suavizado
+  var lipAmp = 0;
+  if (TV.analyser && TV.dataArray) {
+    TV.analyser.getByteFrequencyData(TV.dataArray);
+    var sum = 0;
+    for (var i = 0; i < TV.dataArray.length; i++) sum += TV.dataArray[i];
+    lipAmp = (sum / TV.dataArray.length) / 255;
+  }
+  TV.lipAmp += (lipAmp - TV.lipAmp) * 0.25;
+
+  if (TV.conductor === 'jordan') {
+    tvDrawJordan(ctx, cx, cy, color, colorSec, t);
+  } else {
+    tvDrawDoc(ctx, cx, cy, color, colorSec, t);
+  }
+
+  // Efecto scanlines
+  ctx.shadowBlur = 0;
+  for (var y = 0; y < H; y += 4) {
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, y, W, 1);
+  }
+
+  // Ruido de fósforo
+  if (Math.random() < 0.08) {
+    for (var n = 0; n < 12; n++) {
+      var nx = Math.random() * W;
+      var ny = Math.random() * H;
+      ctx.fillStyle = 'rgba(0,255,136,0.08)';
+      ctx.fillRect(nx, ny, Math.random() * 3 + 1, 1);
+    }
+  }
+}
+
+// ============ SPRINT 8 - TV: Avatar Gillean Jordan (corporativo, simétrico) ============
+
+function tvDrawJordan(ctx, cx, cy, color, colorSec, t) {
+  var lipO = TV.lipAmp * 14 + 2;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 7;
+  ctx.shadowColor = color;
+
+  // Óvalo cara — líneas rectas simétricas (estilo Bloomberg/corporativo)
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 52, 66, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Línea horizontal central (estilo UI financiero)
+  ctx.beginPath();
+  ctx.moveTo(cx - 52, cy);
+  ctx.lineTo(cx + 52, cy);
+  ctx.strokeStyle = colorSec;
+  ctx.lineWidth = 0.4;
+  ctx.stroke();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+
+  // Ojo izquierdo — círculo preciso
+  tvDrawOjoJordan(ctx, cx - 20, cy - 14, color, colorSec, t);
+  // Ojo derecho
+  tvDrawOjoJordan(ctx, cx + 20, cy - 14, color, colorSec, t);
+
+  // Nariz — línea vertical minimalista
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx, cy + 18);
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  // Alas nasales (pequeñas líneas horizontales)
+  ctx.beginPath();
+  ctx.moveTo(cx - 7, cy + 18);
+  ctx.lineTo(cx + 7, cy + 18);
+  ctx.stroke();
+
+  // Boca — lip-sync con apertura vertical
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  // Labio superior
+  ctx.moveTo(cx - 18, cy + 30);
+  ctx.bezierCurveTo(cx - 9, cy + 28, cx + 9, cy + 28, cx + 18, cy + 30);
+  ctx.stroke();
+  // Labio inferior (se mueve con lipAmp)
+  ctx.beginPath();
+  ctx.moveTo(cx - 18, cy + 30);
+  ctx.bezierCurveTo(cx - 9, cy + 30 + lipO, cx + 9, cy + 30 + lipO, cx + 18, cy + 30);
+  ctx.stroke();
+
+  // Cuello
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy + 66);
+  ctx.lineTo(cx - 14, cy + 90);
+  ctx.moveTo(cx + 14, cy + 66);
+  ctx.lineTo(cx + 14, cy + 90);
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // Hombros (líneas rectas — corporativo)
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy + 90);
+  ctx.lineTo(cx - 70, cy + 110);
+  ctx.moveTo(cx + 14, cy + 90);
+  ctx.lineTo(cx + 70, cy + 110);
+  ctx.stroke();
+
+  // Corbata / traje
+  ctx.beginPath();
+  ctx.moveTo(cx - 6, cy + 88);
+  ctx.lineTo(cx, cy + 108);
+  ctx.lineTo(cx + 6, cy + 88);
+  ctx.strokeStyle = colorSec;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.strokeStyle = color;
+
+  // Parpado: si parpadeo bajo, cerrar ojo
+  if (TV.parpadeo < 0.15) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 26, cy - 14);
+    ctx.lineTo(cx - 14, cy - 14);
+    ctx.moveTo(cx + 14, cy - 14);
+    ctx.lineTo(cx + 26, cy - 14);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+  }
+}
+
+function tvDrawOjoJordan(ctx, ox, oy, color, colorSec, t) {
+  // Ojo cuadrado-circular (corporativo)
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.ellipse(ox, oy, 8, 7, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  // Pupila
+  ctx.beginPath();
+  ctx.arc(ox, oy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  // Brillo
+  ctx.beginPath();
+  ctx.arc(ox + 2, oy - 2, 1, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+}
+
+// ============ SPRINT 8 - TV: Avatar El Doc (desprolijo, caótico) ============
+
+function tvDrawDoc(ctx, cx, cy, color, colorSec, t) {
+  var lipO  = TV.lipAmp * 18 + 3;
+  var wobble = Math.sin(t * 2.3) * 2; // movimiento caótico
+  var wobble2 = Math.cos(t * 1.7) * 1.5;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 5;
+  ctx.shadowColor = color;
+
+  // Cara ovalada — más ancha, asimétrica
+  ctx.beginPath();
+  ctx.ellipse(cx + wobble * 0.3, cy, 58 + wobble, 68 + wobble2, 0.08, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Cabello desprolijo — líneas curvas aleatorias encima
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = colorSec;
+  for (var h = 0; h < 7; h++) {
+    var hx = cx - 40 + h * 13;
+    var hy = cy - 62;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy + 4);
+    ctx.bezierCurveTo(
+      hx + Math.sin(t + h) * 6, hy - 8 - h * 2,
+      hx + Math.cos(t * 0.7 + h) * 8, hy - 16,
+      hx + (h % 3 - 1) * 7, hy - 20 - (h % 2) * 5
+    );
+    ctx.stroke();
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+
+  // Ojo izquierdo — asimétrico
+  tvDrawOjoDoc(ctx, cx - 19 + wobble, cy - 12 + wobble2 * 0.5, color, t, false);
+  // Ojo derecho
+  tvDrawOjoDoc(ctx, cx + 22 + wobble, cy - 13 - wobble2 * 0.3, color, t, true);
+
+  // Nariz — curva caótica
+  ctx.beginPath();
+  ctx.moveTo(cx + wobble * 0.5, cy - 2);
+  ctx.bezierCurveTo(
+    cx + 8, cy + 8,
+    cx - 10, cy + 14,
+    cx + wobble2, cy + 20
+  );
+  ctx.lineWidth = 0.9;
+  ctx.stroke();
+
+  // Boca — asimétrica con lip-sync
+  ctx.lineWidth = 1.6;
+  // Comisura izquierda alta, derecha baja (caótico)
+  ctx.beginPath();
+  ctx.moveTo(cx - 20 + wobble, cy + 32);
+  ctx.bezierCurveTo(
+    cx - 6, cy + 29 - wobble2,
+    cx + 8, cy + 31 + wobble2,
+    cx + 20 + wobble, cy + 34
+  );
+  ctx.stroke();
+
+  // Apertura boca inferior
+  ctx.beginPath();
+  ctx.moveTo(cx - 20 + wobble, cy + 32);
+  ctx.bezierCurveTo(
+    cx - 6, cy + 32 + lipO * 0.8,
+    cx + 8, cy + 32 + lipO,
+    cx + 20 + wobble, cy + 34
+  );
+  ctx.strokeStyle = colorSec;
+  ctx.stroke();
+  ctx.strokeStyle = color;
+
+  // Bigote / barba leve — líneas breves
+  ctx.lineWidth = 0.7;
+  ctx.strokeStyle = colorSec;
+  for (var b = 0; b < 4; b++) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 22 + b * 12, cy + 37);
+    ctx.lineTo(cx - 18 + b * 12, cy + 42 + (b % 2) * 3);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = color;
+
+  // Cuello torcido
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 12 + wobble, cy + 66);
+  ctx.bezierCurveTo(cx - 15, cy + 78, cx - 10, cy + 84, cx - 13, cy + 90);
+  ctx.moveTo(cx + 16 + wobble, cy + 66);
+  ctx.bezierCurveTo(cx + 18, cy + 78, cx + 14, cy + 84, cx + 15, cy + 90);
+  ctx.stroke();
+
+  // Camisa informal (líneas desprolijas)
+  ctx.beginPath();
+  ctx.moveTo(cx - 13, cy + 90);
+  ctx.bezierCurveTo(cx - 55, cy + 102, cx - 68, cy + 112, cx - 72, cy + 118);
+  ctx.moveTo(cx + 15, cy + 90);
+  ctx.bezierCurveTo(cx + 52, cy + 102, cx + 66, cy + 112, cx + 70, cy + 118);
+  ctx.stroke();
+
+  // Parpadeo caótico
+  if (TV.parpadeo < 0.2) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 26 + wobble, cy - 12);
+    ctx.lineTo(cx - 13 + wobble, cy - 12);
+    ctx.moveTo(cx + 14 + wobble, cy - 13);
+    ctx.lineTo(cx + 28 + wobble, cy - 13);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+  }
+}
+
+function tvDrawOjoDoc(ctx, ox, oy, color, t, derecho) {
+  // Ojo algo irregular
+  var wobble = Math.sin(t * 1.2 + (derecho ? 1 : 0)) * 1;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.ellipse(ox, oy, 9 + wobble, 7, derecho ? 0.15 : -0.1, 0, Math.PI * 2);
+  ctx.stroke();
+  // Pupila excéntrica
+  ctx.beginPath();
+  ctx.arc(ox + wobble * 0.5, oy, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  // Brillo
+  ctx.beginPath();
+  ctx.arc(ox + wobble * 0.5 + 1.5, oy - 1.5, 1, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+}
+
+// ============ SPRINT 8 - TV: Web Audio API para lip-sync ============
+
+function tvIniciarAudioCtx() {
+  if (TV.audioCtx) return;
+  try {
+    TV.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    TV.analyser = TV.audioCtx.createAnalyser();
+    TV.analyser.fftSize = 64;
+    TV.dataArray = new Uint8Array(TV.analyser.frequencyBinCount);
+  } catch(e) {
+    agregarEvento('SS-TV: AudioContext no disponible', 'info');
+  }
+}
+
+function tvConectarFuenteAudio(sourceNode) {
+  if (!TV.analyser) return;
+  try {
+    sourceNode.connect(TV.analyser);
+    TV.analyser.connect(TV.audioCtx.destination);
+  } catch(e) {}
+}
+
+// ============ SPRINT 8 - TV: Generación de guión con Claude Haiku ============
+
+function tvGenerarGuion() {
+  if (TV.cooldownGuion) {
+    agregarEvento('📺 SS-TV: cooldown activo (15s), esperá', 'info');
+    return;
+  }
+
+  var apiKey = localStorage.getItem('ss_anthropic_key');
+  if (!apiKey) {
+    // Sin key: usar guión predeterminado
+    tvUsarGuionFallback();
+    return;
+  }
+
+  // Activar cooldown 15s
+  TV.cooldownGuion = true;
+  var btnGen = document.getElementById('tv-btn-gen');
+  if (btnGen) {
+    btnGen.textContent = '⏳';
+    btnGen.disabled = true;
+  }
+
+  TV.cooldownTimer = setTimeout(function() {
+    TV.cooldownGuion = false;
+    if (btnGen) {
+      btnGen.textContent = '▶';
+      btnGen.disabled = false;
+    }
+  }, 15000);
+
+  // Contexto Firebase
+  var ctx = tvArmarContexto();
+
+  // Prompt según conductor
+  var prompt = '';
+  if (TV.conductor === 'jordan') {
+    prompt = 'Sos Gillean Jordan, conductora de Bloomberg estilo. ' +
+      'Reportá en español, tono serio y financiero, máximo 3 oraciones. ' +
+      'Datos actuales: ' + ctx + ' ' +
+      'Hablá de tesorería, nivel operativo y tendencias del trimestre.';
+  } else {
+    prompt = 'Sos El Doc, profesor de economía de la UBA, satírico y académico. ' +
+      'Comentá en español con jerga argentina (laburo, guita, quilombo, etc), ' +
+      'máximo 3 oraciones con humor ácido. ' +
+      'Datos actuales: ' + ctx + ' ' +
+      'Opiná sobre la tesorería y el nivel con ironía porteña.';
+  }
+
+  // Mostrar ON AIR
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'block';
+
+  agregarEvento('📺 SS-TV: generando guión Haiku...', 'info');
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-20240307',
+      max_tokens: 160,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    var texto = '';
+    if (data && data.content && data.content[0] && data.content[0].text) {
+      texto = data.content[0].text;
+    } else if (data && data.error) {
+      texto = 'Error Haiku: ' + (data.error.message || 'desconocido');
+    }
+
+    if (!texto) texto = tvGuionFallbackTexto();
+    TV.guionActual = texto;
+    tvMostrarGuion(texto);
+    tvHablar(texto);
+  })
+  .catch(function(err) {
+    agregarEvento('SS-TV: error Haiku — ' + err.message, 'info');
+    tvUsarGuionFallback();
+  });
+}
+
+function tvArmarContexto() {
+  var q  = TV.fbCache.trimestre || 1;
+  var t  = parseFloat(TV.fbCache.tesoreria) || 0;
+  var n  = parseFloat(TV.fbCache.nivel) || 1;
+  return 'Trimestre Q' + q + ', Tesorería $' + t.toFixed(2) + ', Nivel ' + n + '.';
+}
+
+function tvGuionFallbackTexto() {
+  if (TV.conductor === 'jordan') {
+    var frases = [
+      'Los mercados muestran estabilidad en el sector operativo. La tesorería mantiene niveles dentro del rango esperado para el trimestre.',
+      'Sovereign Shield reporta actividad sostenida. Los indicadores financieros del cuarto trimestre sugieren consolidación.',
+      'Desde la sala de operaciones, confirmamos que los fondos están asegurados. El nivel operativo es consistente con la proyección anual.'
+    ];
+    return frases[Math.floor(Math.random() * frases.length)];
+  } else {
+    var frases2 = [
+      'Mirá, con la guita que hay en tesorería, vamos bien, pero no hay que dormirse. El nivel operativo no está para tirar manteca al techo, che.',
+      'Acá entre nos, el trimestre va más o menos. La plata alcanza, pero el quilombo organizativo le pega al rendimiento. Así estamos.',
+      'Compañeros, el análisis macroeconómico indica que hay que apretarse el cinturón, pero tampoco es para ponerse en modo crisis. Aguanten, eh.'
+    ];
+    return frases2[Math.floor(Math.random() * frases2.length)];
+  }
+}
+
+function tvUsarGuionFallback() {
+  var texto = tvGuionFallbackTexto();
+  TV.guionActual = texto;
+  tvMostrarGuion(texto);
+  tvHablar(texto);
+}
+
+function tvMostrarGuion(texto) {
+  var box = document.getElementById('tv-script-box');
+  if (box) {
+    box.textContent = texto;
+    box.scrollTop = 0;
+  }
+}
+
+// ============ SPRINT 8 - TV: Motor de Voz ============
+
+function tvHablar(texto) {
+  if (TV.muted) return;
+
+  var key11 = localStorage.getItem('ss_elevenlabs_key');
+
+  if (key11) {
+    tvHablarElevenLabs(texto, key11);
+  } else {
+    tvHablarWebSpeech(texto);
+  }
+}
+
+function tvHablarWebSpeech(texto) {
+  if (!TV.synth) return;
+  TV.synth.cancel();
+
+  TV.utterance = new SpeechSynthesisUtterance(texto);
+  TV.utterance.lang = 'es-ES';
+  TV.utterance.rate = TV.conductor === 'jordan' ? 0.92 : 1.05;
+  TV.utterance.pitch = TV.conductor === 'jordan' ? 1.1 : 0.85;
+  TV.utterance.volume = TV.muted ? 0 : TV.volumen;
+
+  // Elegir voz en español si existe
+  var vozEsp = null;
+  for (var i = 0; i < TV.voces.length; i++) {
+    if (TV.voces[i].lang && TV.voces[i].lang.indexOf('es') !== -1) {
+      vozEsp = TV.voces[i];
+      break;
+    }
+  }
+  if (vozEsp) TV.utterance.voice = vozEsp;
+
+  // Simular lip-sync con evento boundary
+  TV.utterance.onboundary = function(e) {
+    TV.lipAmp = 0.5 + Math.random() * 0.5;
+    setTimeout(function() { TV.lipAmp = 0.1; }, 180);
+  };
+
+  TV.utterance.onend = function() {
+    TV.lipAmp = 0;
+    var onair = document.getElementById('tv-onair');
+    if (onair) onair.style.display = 'none';
+    agregarEvento('📺 SS-TV: transmisión finalizada', 'info');
+  };
+
+  TV.utterance.onerror = function(e) {
+    TV.lipAmp = 0;
+    agregarEvento('SS-TV WebSpeech error: ' + e.error, 'info');
+  };
+
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'block';
+
+  TV.synth.speak(TV.utterance);
+}
+
+function tvHablarElevenLabs(texto, apiKey) {
+  // Voice IDs: usar predeterminadas de ElevenLabs
+  // Jordan: Rachel (voz neutral profesional) — Doc: Adam (voz masculina)
+  var voiceId = TV.conductor === 'jordan' ? 'EXAVITQu4vr4xnSDxMaL' : 'pNInz6obpgDQGcFmaJgB';
+  var stability = TV.conductor === 'jordan' ? 0.8 : 0.5;
+  var similarity = TV.conductor === 'jordan' ? 0.75 : 0.6;
+
+  tvIniciarAudioCtx();
+
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'block';
+
+  fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId + '/stream', {
+    method: 'POST',
+    headers: {
+      'Accept': 'audio/mpeg',
+      'Content-Type': 'application/json',
+      'xi-api-key': apiKey
+    },
+    body: JSON.stringify({
+      text: texto,
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: stability,
+        similarity_boost: similarity,
+        style: 0.0,
+        use_speaker_boost: true
+      }
+    })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('ElevenLabs HTTP ' + res.status);
+    return res.arrayBuffer();
+  })
+  .then(function(arrayBuffer) {
+    if (!TV.audioCtx) tvIniciarAudioCtx();
+    return TV.audioCtx.decodeAudioData(arrayBuffer);
+  })
+  .then(function(audioBuffer) {
+    var source = TV.audioCtx.createBufferSource();
+    source.buffer = audioBuffer;
+
+    // Ganancia para volumen
+    var gainNode = TV.audioCtx.createGain();
+    gainNode.gain.value = TV.muted ? 0 : TV.volumen;
+
+    source.connect(gainNode);
+    gainNode.connect(TV.audioCtx.destination);
+
+    // Conectar analyser para lip-sync
+    if (TV.analyser) {
+      source.connect(TV.analyser);
+    }
+
+    source.onended = function() {
+      TV.lipAmp = 0;
+      if (onair) onair.style.display = 'none';
+      agregarEvento('📺 SS-TV: audio ElevenLabs finalizado', 'info');
+    };
+
+    // Simular lip-sync periódico mientras el audio corre
+    var lipInterval = setInterval(function() {
+      if (TV.dataArray && TV.analyser) {
+        TV.analyser.getByteFrequencyData(TV.dataArray);
+      } else {
+        // Fallback: oscilación simulada
+        TV.lipAmp = 0.3 + Math.random() * 0.7;
+      }
+    }, 80);
+
+    source.onended = function() {
+      clearInterval(lipInterval);
+      TV.lipAmp = 0;
+      if (onair) onair.style.display = 'none';
+      agregarEvento('📺 SS-TV: transmisión ElevenLabs finalizada', 'info');
+    };
+
+    source.start(0);
+    agregarEvento('📺 SS-TV: transmitiendo vía ElevenLabs', 'info');
+  })
+  .catch(function(err) {
+    agregarEvento('SS-TV ElevenLabs error: ' + err.message + ' — fallback WebSpeech', 'info');
+    tvHablarWebSpeech(texto);
+  });
+}
+
+function tvDetenerVoz() {
+  if (TV.synth) TV.synth.cancel();
+  if (TV.elevenAudio) {
+    try { TV.elevenAudio.pause(); } catch(e) {}
+  }
+  TV.lipAmp = 0;
+
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'none';
+}
+
+// ============ SPRINT 8 - TV: Drag & Drop del panel PIP ============
+
+function tvInitDrag() {
+  var panel    = document.getElementById('tv-pip-panel');
+  var titlebar = document.getElementById('tv-titlebar');
+  if (!panel || !titlebar) return;
+
+  titlebar.addEventListener('mousedown', function(e) {
+    TV.dragActive = true;
+    var rect = panel.getBoundingClientRect();
+    TV.dragOffX = e.clientX - rect.left;
+    TV.dragOffY = e.clientY - rect.top;
+    panel.style.transition = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!TV.dragActive) return;
+    var x = e.clientX - TV.dragOffX;
+    var y = e.clientY - TV.dragOffY;
+    var maxX = window.innerWidth  - panel.offsetWidth;
+    var maxY = window.innerHeight - panel.offsetHeight;
+    x = Math.max(0, Math.min(x, maxX));
+    y = Math.max(0, Math.min(y, maxY));
+    panel.style.right  = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.left   = x + 'px';
+    panel.style.top    = y + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    TV.dragActive = false;
+  });
+
+  // Touch support básico
+  titlebar.addEventListener('touchstart', function(e) {
+    TV.dragActive = true;
+    var touch = e.touches[0];
+    var rect = panel.getBoundingClientRect();
+    TV.dragOffX = touch.clientX - rect.left;
+    TV.dragOffY = touch.clientY - rect.top;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!TV.dragActive) return;
+    var touch = e.touches[0];
+    var x = touch.clientX - TV.dragOffX;
+    var y = touch.clientY - TV.dragOffY;
+    var maxX = window.innerWidth  - panel.offsetWidth;
+    var maxY = window.innerHeight - panel.offsetHeight;
+    x = Math.max(0, Math.min(x, maxX));
+    y = Math.max(0, Math.min(y, maxY));
+    panel.style.right  = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.left   = x + 'px';
+    panel.style.top    = y + 'px';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', function() {
+    TV.dragActive = false;
+  });
+}
+
+// ============ SPRINT 8 - TV: API pública para disparar glitch desde otros módulos ============
+
+function tvNotificarGlitch(motivo) {
+  tvDisparoGlitch();
+  // Actualizar ticker con el motivo
+  if (motivo) {
+    var span = document.getElementById('tv-ticker-text');
+    if (span) {
+      span.textContent = '⚠ ALERTA SS-TV: ' + motivo;
+      span.style.animation = 'none';
+      void span.offsetWidth;
+      span.style.animation = 'tv-ticker 14s linear infinite';
+    }
+  }
+  // Generar nuevo guión si hay API key
+  if (!TV.cooldownGuion && TV.abierta) {
+    setTimeout(tvGenerarGuion, 1200);
+  }
+}
+
+// ============ SPRINT 8 - TV: Iniciar cuando el DOM esté listo ============
+
+(function() {
+  // Esperar a que el DOM esté completamente disponible
+  // y que Firebase (dbRef) esté inicializado
+  var tvInitAttempts = 0;
+  var tvInitMax = 20;
+
+  function tvTryInit() {
+    tvInitAttempts++;
+    // Verificar que elementos críticos existan
+    var panel = document.getElementById('tv-pip-panel');
+    var canvas = document.getElementById('tv-avatar-canvas');
+
+    if (!panel || !canvas) {
+      if (tvInitAttempts < tvInitMax) {
+        setTimeout(tvTryInit, 300);
+      } else {
+        console.warn('SS-TV: no se pudo inicializar — elementos HTML no encontrados');
+      }
+      return;
+    }
+
+    // Firebase puede no estar listo aún
+    if (typeof dbRef === 'undefined') {
+      if (tvInitAttempts < tvInitMax) {
+        setTimeout(tvTryInit, 300);
+      } else {
+        // Iniciar igual sin Firebase
+        tvInit();
+      }
+      return;
+    }
+
+    tvInit();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(tvTryInit, 400);
+    });
+  } else {
+    setTimeout(tvTryInit, 400);
+  }
+})();
+
+// ============ SPRINT 8 - TV: Fin del módulo ============
+</script>
