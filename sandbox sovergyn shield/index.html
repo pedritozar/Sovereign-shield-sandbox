@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0d1117;--green:#238636;--blue:#58a6ff;--txt:#e6edf3;--red:#f85149;--orange:#e67e22}
+        :root{--bg:#0d1117;--green:#238636;--blue:#58a6ff;--txt:#e6edf3;--red:#f85149;--orange:#e67e22;--panel:#161b22;--border:#30363d;--yellow:#d29922;--purple:#8b949e;--green-bright:#3fb950}
         body{background:var(--bg);color:var(--txt);font-family:'Courier New',monospace;font-size:14px;padding:14px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
         .header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--green);padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap;gap:8px}
         .logo{font-size:1.1rem;font-weight:bold;letter-spacing:2px;color:var(--green)}
@@ -651,6 +651,561 @@
 .srn-signal-bar:nth-child(3) { height: 10px; }
 .srn-signal-bar:nth-child(4) { height: 13px; }
 .srn-signal-bar:nth-child(5) { height: 16px; }
+/* ============ VARIABLES Y RESET ============ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+/* ============ CONTENEDOR PRINCIPAL ============ */
+#modulo-politica-tech {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ============ HEADER ============ */
+.mod-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--green);
+  margin-bottom: 16px;
+  border-radius: 6px 6px 0 0;
+}
+
+.mod-header h2 {
+  color: var(--green-bright);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.mod-header .estado-ciclo {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--purple);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulso 1.5s infinite;
+  margin-right: 6px;
+}
+
+@keyframes pulso {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ============ GRID DE SECCIONES ============ */
+.mod-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+  .mod-grid { grid-template-columns: 1fr; }
+}
+
+/* ============ PANELES ============ */
+.pt-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.panel-titulo {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-titulo.politica { background: rgba(88,166,255,0.08); color: var(--blue); }
+.panel-titulo.tech     { background: rgba(35,134,54,0.08);  color: var(--green-bright); }
+.panel-titulo.contra   { background: rgba(248,81,73,0.08);  color: var(--red); }
+
+.panel-body { padding: 12px; }
+
+/* ============ CICLO ELECTORAL ============ */
+.ciclo-barra {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px;
+  margin: 8px 0;
+}
+
+.ciclo-celda {
+  height: 20px;
+  border-radius: 2px;
+  background: var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.ciclo-celda.activo {
+  background: var(--blue);
+  box-shadow: 0 0 6px var(--blue);
+}
+
+.ciclo-celda.halcon-prev { background: rgba(248,81,73,0.5); }
+.ciclo-celda.paloma-prev { background: rgba(88,166,255,0.5); }
+
+.ciclo-num {
+  font-size: 10px;
+  text-align: center;
+  color: var(--purple);
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  margin: 6px 0;
+}
+
+.modo-tag.halcon {
+  background: rgba(248,81,73,0.15);
+  border: 1px solid var(--red);
+  color: var(--red);
+}
+
+.modo-tag.paloma {
+  background: rgba(88,166,255,0.15);
+  border: 1px solid var(--blue);
+  color: var(--blue);
+}
+
+/* ============ BOTONES DE POLÍTICA ============ */
+.btn-grupo {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-pol {
+  flex: 1;
+  min-width: 80px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-pol:hover { border-color: var(--blue); color: var(--blue); }
+
+.btn-pol.halcon-btn:hover,
+.btn-pol.halcon-btn.activo {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(248,81,73,0.1);
+}
+
+.btn-pol.paloma-btn:hover,
+.btn-pol.paloma-btn.activo {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(88,166,255,0.1);
+}
+
+.btn-pol.avanzar-btn {
+  border-color: var(--green);
+  color: var(--green-bright);
+  background: rgba(35,134,54,0.1);
+}
+
+.btn-pol.avanzar-btn:hover {
+  background: rgba(35,134,54,0.25);
+}
+
+/* ============ EFECTOS DISPLAY ============ */
+.efectos-lista {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.efecto-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.efecto-item .icono-efecto { font-size: 10px; }
+.efecto-positivo { color: var(--green-bright); }
+.efecto-negativo { color: var(--red); }
+.efecto-neutro   { color: var(--purple); }
+
+/* ============ BURN RATE BADGE ============ */
+.burn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.burn-badge.positivo { background: rgba(35,134,54,0.2); border: 1px solid var(--green); color: var(--green-bright); }
+.burn-badge.negativo { background: rgba(248,81,73,0.2); border: 1px solid var(--red); color: var(--red); }
+.burn-badge.neutro   { background: rgba(139,148,158,0.2); border: 1px solid var(--purple); color: var(--purple); }
+
+/* ============ ÁRBOL TECNOLÓGICO ============ */
+.tech-rama {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tech-rama:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.tech-rama-titulo {
+  font-size: 10px;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.tech-opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.tech-opcion {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.tech-opcion .tech-nombre {
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.tech-opcion .tech-desc {
+  font-size: 10px;
+  color: var(--purple);
+  line-height: 1.4;
+}
+
+.tech-opcion:hover {
+  border-color: var(--green-bright);
+  background: rgba(35,134,54,0.08);
+}
+
+.tech-opcion.seleccionado {
+  border-color: var(--green-bright);
+  background: rgba(35,134,54,0.15);
+  box-shadow: 0 0 8px rgba(63,185,80,0.3);
+}
+
+.tech-opcion.seleccionado .tech-nombre { color: var(--green-bright); }
+
+.tech-opcion.bloqueado {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: var(--border);
+}
+
+.tech-opcion.bloqueado:hover {
+  border-color: var(--border);
+  background: var(--bg);
+}
+
+.vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--yellow);
+  padding: 0 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tech-opciones-wrapper {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.vs-label {
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--yellow);
+  text-align: center;
+  padding: 0 4px;
+}
+
+/* ============ CONTRABANDO ============ */
+.ruta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: var(--bg);
+  transition: all 0.2s;
+}
+
+.ruta-item.activa {
+  border-color: var(--orange);
+  background: rgba(240,136,62,0.08);
+}
+
+.ruta-item.bloqueada {
+  border-color: var(--red);
+  background: rgba(248,81,73,0.06);
+  opacity: 0.7;
+}
+
+.ruta-info { flex: 1; }
+.ruta-nombre { font-size: 11px; font-weight: bold; color: var(--txt); }
+.ruta-desc   { font-size: 10px; color: var(--purple); margin-top: 2px; }
+
+.ruta-toggle {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.ruta-toggle:hover { border-color: var(--orange); color: var(--orange); }
+.ruta-toggle.activo { border-color: var(--orange); color: var(--orange); background: rgba(240,136,62,0.1); }
+
+/* ============ PANEL DE BENEFICIOS ============ */
+.beneficios-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(240,136,62,0.08);
+  border: 1px solid rgba(240,136,62,0.3);
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.beneficios-valor {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--orange);
+  font-family: 'Courier New', monospace;
+}
+
+.beneficios-label {
+  font-size: 10px;
+  color: var(--purple);
+  text-transform: uppercase;
+}
+
+/* ============ BLOQUEO ALERTA ============ */
+.bloqueo-alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(248,81,73,0.12);
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--red);
+}
+
+.bloqueo-alerta.oculto { display: none; }
+
+/* ============ BOTONES ACCIÓN CONTRABANDO ============ */
+.contra-acciones {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.btn-contra {
+  flex: 1;
+  padding: 7px;
+  border-radius: 4px;
+  border: 1px solid;
+  background: transparent;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-contra.activar {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.btn-contra.activar:hover { background: rgba(240,136,62,0.15); }
+
+.btn-contra.bloquear {
+  border-color: var(--red);
+  color: var(--red);
+}
+.btn-contra.bloquear:hover { background: rgba(248,81,73,0.15); }
+
+.btn-contra.desbloquear {
+  border-color: var(--green);
+  color: var(--green-bright);
+}
+.btn-contra.desbloquear:hover { background: rgba(35,134,54,0.15); }
+
+/* ============ FILA INFERIOR: RESUMEN ============ */
+.resumen-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 700px) {
+  .resumen-row { grid-template-columns: 1fr 1fr; }
+}
+
+.resumen-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.resumen-card .rc-val {
+  font-size: 22px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.resumen-card .rc-lbl {
+  font-size: 10px;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============ LOG MINI ============ */
+.log-mini {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.log-mini-header {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.log-mini-body {
+  padding: 8px 12px;
+  max-height: 120px;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.log-mini-body::-webkit-scrollbar { width: 4px; }
+.log-mini-body::-webkit-scrollbar-track { background: var(--bg); }
+.log-mini-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.pt-log-entry { color: var(--purple); }
+.pt-log-entry span { color: var(--green-bright); }
+.pt-log-entry.warn span { color: var(--yellow); }
+.pt-log-entry.danger span { color: var(--red); }
+.pt-log-entry.info span { color: var(--blue); }
+
+/* ============ ANIMACIONES ============ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: fadeIn 0.3s ease; }
+
+.pulse-green {
+  animation: pulsoGreen 0.5s ease;
+}
+
+@keyframes pulsoGreen {
+  0%   { box-shadow: 0 0 0 rgba(63,185,80,0); }
+  50%  { box-shadow: 0 0 14px rgba(63,185,80,0.6); }
+  100% { box-shadow: 0 0 0 rgba(63,185,80,0); }
+}
+
     </style>
 </head>
 <body>
@@ -689,6 +1244,7 @@
     <button class="tab-btn" data-tab="tab4">📋 BITÁCORA</button>
     <button class="tab-btn" data-tab="tab5">📰 PRENSA</button>
     <button class="tab-btn" data-tab="tab6">⚖️ LEYES & CONTRATOS</button>
+    <button class="tab-btn" data-tab="tab7">⚖️ POLÍTICA & TECH</button>
 </div>
 
 <!-- TAB 1: TESORERÍA -->
@@ -1131,6 +1687,968 @@
             <p style="color:#8b949e;font-size:12px">Sin eventos políticos recientes.</p>
         </div>
     </div>
+</div>
+
+<div id="tab7" class="tab-content">
+<!-- ============ MÓDULO COMPLETO ============ -->
+<div id="modulo-politica-tech">
+
+  <!-- HEADER -->
+  <div class="mod-header">
+    <span class="status-dot"></span>
+    <h2>⚡ Política &amp; Tech Tree</h2>
+    <div class="estado-ciclo">
+      CICLO: <span id="lbl-ciclo-actual">Q1</span> /
+      MODO: <span id="lbl-modo-actual">—</span> |
+      BURN MODIFICADOR: <span id="lbl-burn-mod">0</span>%
+    </div>
+  </div>
+
+  <!-- GRID PRINCIPAL: 3 COLUMNAS -->
+  <div class="mod-grid">
+
+    <!-- ============================
+         PANEL 1: CICLO ELECTORAL
+    ============================= -->
+    <div class="pt-panel">
+      <div class="panel-titulo politica">🗳️ Ciclo Electoral (16Q)</div>
+      <div class="panel-body">
+
+        <!-- Numeración -->
+        <div class="ciclo-num">
+          <span>Q1</span>
+          <span>Q8</span>
+          <span>Q16</span>
+        </div>
+
+        <!-- Barra de 16 celdas -->
+        <div class="ciclo-barra" id="ciclo-barra">
+          <!-- Generado por JS -->
+        </div>
+
+        <!-- Modo actual -->
+        <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+          <div class="modo-tag" id="modo-tag">— Sin definir —</div>
+          <div class="burn-badge neutro" id="burn-badge">±0% Burn</div>
+        </div>
+
+        <!-- Efectos activos -->
+        <div class="efectos-lista" id="efectos-lista">
+          <div class="efecto-item efecto-neutro">
+            <span class="icono-efecto">○</span>
+            <span>Seleccioná modo para ver efectos</span>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="btn-grupo">
+          <button class="btn-pol halcon-btn" id="btn-halcon" onclick="seleccionarModo('halcon')">
+            🦅 Halcones
+          </button>
+          <button class="btn-pol paloma-btn" id="btn-paloma" onclick="seleccionarModo('paloma')">
+            🕊️ Palomas
+          </button>
+        </div>
+        <div class="btn-grupo">
+          <button class="btn-pol avanzar-btn" onclick="avanzarCiclo()">
+            ▶ Avanzar Trimestre
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================
+         PANEL 2: TECH TREE
+    ============================= -->
+    <div class="pt-panel">
+      <div class="panel-titulo tech">🔬 Árbol Tecnológico</div>
+      <div class="panel-body">
+
+        <!-- Rama 1: Aéreo -->
+        <div class="tech-rama">
+          <div class="tech-rama-titulo">✈ Plataforma Aérea</div>
+          <div class="tech-opciones-wrapper">
+            <div class="tech-opcion" id="tech-reaper"
+                 onclick="seleccionarTech('reaper_stealth', 'sukhoi_pesado')">
+              <div class="tech-nombre">🛸 Reaper Stealth</div>
+              <div class="tech-desc">UAV furtivo USA. +30% ISR, contratos OTAN.</div>
+            </div>
+            <div class="vs-label">VS</div>
+            <div class="tech-opcion" id="tech-sukhoi"
+                 onclick="seleccionarTech('sukhoi_pesado', 'reaper_stealth')">
+              <div class="tech-nombre">🛩 Sukhoi Pesado</div>
+              <div class="tech-desc">Caza ruso. +40% potencia fuego, mercados no-OTAN.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rama 2: Guiado -->
+        <div class="tech-rama">
+          <div class="tech-rama-titulo">🎯 Sistemas de Guiado</div>
+          <div class="tech-opciones-wrapper">
+            <div class="tech-opcion" id="tech-sensores-usa"
+                 onclick="seleccionarTech('sensores_usa', 'misiles_rusos')">
+              <div class="tech-nombre">📡 Sensores USA</div>
+              <div class="tech-desc">AESA+GPS. +25% precisión, subsidio DARPA.</div>
+            </div>
+            <div class="vs-label">VS</div>
+            <div class="tech-opcion" id="tech-misiles-rusos"
+                 onclick="seleccionarTech('misiles_rusos', 'sensores_usa')">
+              <div class="tech-nombre">🚀 Misiles Rusos</div>
+              <div class="tech-desc">Kh-101 serie. +35% alcance, acceso Eurasia.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rama 3: Lanzamiento -->
+        <div class="tech-rama">
+          <div class="tech-rama-titulo">🛰 Propulsión &amp; Lanzamiento</div>
+          <div class="tech-opciones-wrapper">
+            <div class="tech-opcion" id="tech-cohetes"
+                 onclick="seleccionarTech('cohetes_recuperables', 'hipersonicos')">
+              <div class="tech-nombre">♻️ Cohetes Recup.</div>
+              <div class="tech-desc">SpaceX-style. -40% costo órbita, contratos civiles.</div>
+            </div>
+            <div class="vs-label">VS</div>
+            <div class="tech-opcion" id="tech-hipersonicos"
+                 onclick="seleccionarTech('hipersonicos', 'cohetes_recuperables')">
+              <div class="tech-nombre">⚡ Hipersónicos</div>
+              <div class="tech-desc">Mach 8+. Imposible interceptar, +50% disuasión.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================
+         PANEL 3: CONTRABANDO CHIPS
+    ============================= -->
+    <div class="pt-panel">
+      <div class="panel-titulo contra">🕵 Contrabando de Chips</div>
+      <div class="panel-body">
+
+        <!-- Ruta Asia -->
+        <div class="ruta-item" id="ruta-asia-item">
+          <div class="ruta-info">
+            <div class="ruta-nombre">🌏 Ruta Asia Directa</div>
+            <div class="ruta-desc">TSMC → Shenzhen → puerto oculto. Alta capacidad, riesgo medio.</div>
+          </div>
+          <button class="ruta-toggle" id="btn-ruta-asia" onclick="toggleRuta('asia')">
+            ACTIVAR
+          </button>
+        </div>
+
+        <!-- Ruta Dubai -->
+        <div class="ruta-item" id="ruta-dubai-item">
+          <div class="ruta-info">
+            <div class="ruta-nombre">🏙 Ruta Dubái Hub</div>
+            <div class="ruta-desc">Triangulación JAFZA. Menor volumen, mayor encubrimiento.</div>
+          </div>
+          <button class="ruta-toggle" id="btn-ruta-dubai" onclick="toggleRuta('dubai')">
+            ACTIVAR
+          </button>
+        </div>
+
+        <!-- Alerta bloqueo -->
+        <div class="bloqueo-alerta oculto" id="bloqueo-alerta">
+          ⚠ RUTAS BLOQUEADAS — Operación comprometida
+        </div>
+
+        <!-- Beneficios acumulados -->
+        <div class="beneficios-display">
+          <div>
+            <div class="beneficios-label">Beneficios Acum.</div>
+            <div class="beneficios-valor" id="beneficios-val">$0M</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="beneficios-label">Estado</div>
+            <div id="contra-estado" style="font-size:11px; color: var(--purple);">Inactivo</div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="contra-acciones">
+          <button class="btn-contra activar" onclick="generarBeneficio()">
+            💰 Cobrar Beneficio
+          </button>
+          <button class="btn-contra bloquear" onclick="toggleBloqueo(true)">
+            🔒 Bloquear
+          </button>
+          <button class="btn-contra desbloquear" onclick="toggleBloqueo(false)">
+            🔓 Desbloquear
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- fin mod-grid -->
+
+  <!-- ============================
+       FILA: RESUMEN GENERAL
+  ============================= -->
+  <div class="resumen-row">
+
+    <div class="resumen-card">
+      <div class="rc-val" id="rc-ciclo" style="color: var(--blue);">1</div>
+      <div class="rc-lbl">Trimestre Actual</div>
+    </div>
+
+    <div class="resumen-card">
+      <div class="rc-val" id="rc-tech-activas" style="color: var(--green-bright);">0/3</div>
+      <div class="rc-lbl">Techs Activas</div>
+    </div>
+
+    <div class="resumen-card">
+      <div class="rc-val" id="rc-rutas" style="color: var(--orange);">0</div>
+      <div class="rc-lbl">Rutas Activas</div>
+    </div>
+
+    <div class="resumen-card">
+      <div class="rc-val" id="rc-burn-total" style="color: var(--red);">0%</div>
+      <div class="rc-lbl">Mod. Burn Rate</div>
+    </div>
+
+  </div>
+
+  <!-- ============================
+       LOG MINI MÓDULO
+  ============================= -->
+  <div class="log-mini">
+    <div class="log-mini-header">
+      <span>📋 Log Político-Tecnológico</span>
+      <span id="log-count">0 eventos</span>
+    </div>
+    <div class="log-mini-body" id="log-mini-body">
+      <div class="pt-log-entry"><span>[INIT]</span> Módulo Política &amp; Tech cargado.</div>
+    </div>
+  </div>
+
+</div><!-- fin modulo-politica-tech -->
+
+<script>
+// ============ ESTADO LOCAL ============
+var estadoLocal = {
+  ciclo: 1,
+  modoActual: '',         // 'halcon' | 'paloma'
+  bonificacionBurnRate: 0,
+  techs: {
+    reaper_stealth: false,
+    sukhoi_pesado: false,
+    sensores_usa: false,
+    misiles_rusos: false,
+    cohetes_recuperables: false,
+    hipersonicos: false
+  },
+  contra: {
+    rutaAsia: false,
+    rutaDubai: false,
+    bloqueado: false,
+    beneficios: 0
+  }
+};
+
+// Contador de logs
+var logContador = 1;
+
+// ============ REFERENCIAS FIREBASE ============
+// Usamos las variables globales dbRef del contexto host
+// Si no existen (modo standalone), creamos stubs seguros
+var _dbRef, _agregarEvento;
+
+(function inicializarRefs() {
+  // Verificar si estamos en entorno host con Firebase
+  if (typeof dbRef !== 'undefined') {
+    _dbRef = dbRef;
+  } else {
+    // Stub para modo standalone sin Firebase
+    _dbRef = null;
+    console.warn('[PoliTech] dbRef no disponible — modo offline');
+  }
+
+  if (typeof agregarEvento === 'function') {
+    _agregarEvento = agregarEvento;
+  } else {
+    // Stub: log en consola
+    _agregarEvento = function(msg) {
+      console.log('[PoliTech Evento]', msg);
+    };
+  }
+})();
+
+// ============ FUNCIÓN: ESCRITURA FIREBASE SEGURA ============
+function escribirFirebase(ruta, valor, descripcion) {
+  if (!_dbRef) {
+    logMiniAdd('warn', '[FB-OFF] ' + descripcion + ' → ' + JSON.stringify(valor));
+    return;
+  }
+  try {
+    // Usamos SDK v9 compat — .ref() y .set()
+    var ref = _dbRef.child ? _dbRef.child(ruta) : null;
+    if (!ref) {
+      // Intentar con firebase.database().ref() si dbRef es la app
+      if (typeof firebase !== 'undefined' && firebase.database) {
+        ref = firebase.database().ref(ruta);
+      } else {
+        logMiniAdd('warn', '[FB-ERR] No se pudo obtener ref para: ' + ruta);
+        return;
+      }
+    }
+    ref.set(valor)
+      .then(function() {
+        logMiniAdd('info', '[FB-OK] ' + descripcion);
+      })
+      .catch(function(e) {
+        logMiniAdd('danger', '[FB-ERR] ' + ruta + ': ' + e.message);
+      });
+  } catch (e) {
+    logMiniAdd('danger', '[FB-EXC] ' + e.message);
+  }
+}
+
+// ============ FUNCIÓN: LECTURA INICIAL FIREBASE ============
+function cargarEstadoFirebase() {
+  if (!_dbRef) {
+    logMiniAdd('warn', '[INIT] Sin Firebase — usando estado local por defecto');
+    // FIX (integración Claude): renderizarTodo() no estaba definida en
+    // ningún lado del módulo (bug del Reactor) — causaba un
+    // "ReferenceError: renderizarTodo is not defined" no capturado cada vez
+    // que Firebase no estaba disponible. Se reemplaza por las 4 funciones
+    // de render reales (mismas que usa inicializarPoliticaTech()).
+    renderizarCiclo();
+    renderizarTechTree();
+    renderizarContrabando();
+    renderizarResumen();
+    return;
+  }
+
+  var obtenerRef = function(ruta) {
+    try {
+      if (_dbRef.child) return _dbRef.child(ruta);
+      if (typeof firebase !== 'undefined' && firebase.database) {
+        return firebase.database().ref(ruta);
+      }
+    } catch(e) {}
+    return null;
+  };
+
+  // Cargar política
+  var refPolitica = obtenerRef('partida/politica');
+  if (refPolitica) {
+    refPolitica.once('value', function(snap) {
+      var data = snap.val();
+      if (data) {
+        estadoLocal.ciclo            = Number(data.ciclo_electoral)    || 1;
+        estadoLocal.modoActual       = String(data.halcon_paloma)      || '';
+        estadoLocal.bonificacionBurnRate = Number(data.bonificacion_burn_rate) || 0;
+      }
+      renderizarCiclo();
+      renderizarResumen();
+    });
+  }
+
+  // Cargar tecnología
+  var refTech = obtenerRef('partida/tecnologia');
+  if (refTech) {
+    refTech.once('value', function(snap) {
+      var data = snap.val();
+      if (data) {
+        estadoLocal.techs.reaper_stealth       = !!data.rama_reaper;
+        estadoLocal.techs.sukhoi_pesado        = !!data.rama_sukhoi;
+        estadoLocal.techs.sensores_usa         = !!data.rama_sensores_usa;
+        estadoLocal.techs.misiles_rusos        = !!data.rama_misiles_rusos;
+        estadoLocal.techs.cohetes_recuperables = !!data.rama_cohetes_recuperables;
+        estadoLocal.techs.hipersonicos         = !!data.rama_hipersonicos;
+      }
+      renderizarTechTree();
+      renderizarResumen();
+    });
+  }
+
+  // Cargar contrabando
+  var refContra = obtenerRef('partida/contrabando');
+  if (refContra) {
+    refContra.once('value', function(snap) {
+      var data = snap.val();
+      if (data) {
+        estadoLocal.contra.rutaAsia  = !!data.ruta_asia;
+        estadoLocal.contra.rutaDubai = !!data.ruta_dubai;
+        estadoLocal.contra.bloqueado = !!data.bloqueado;
+        estadoLocal.contra.beneficios = Number(data.beneficios) || 0;
+      }
+      renderizarContrabando();
+      renderizarResumen();
+    });
+  }
+}
+
+// ============ FUNCIÓN: LOG MINI ============
+function logMiniAdd(tipo, mensaje) {
+  var body = document.getElementById('log-mini-body');
+  if (!body) return;
+
+  var ts = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  var div = document.createElement('div');
+  div.className = 'pt-log-entry fade-in ' + (tipo || '');
+  div.innerHTML = '<span>[' + ts + ']</span> ' + mensaje;
+
+  // Insertar al principio
+  body.insertBefore(div, body.firstChild);
+
+  // Limitar a 50 entradas
+  while (body.children.length > 50) {
+    body.removeChild(body.lastChild);
+  }
+
+  logContador++;
+  var lc = document.getElementById('log-count');
+  if (lc) lc.textContent = logContador + ' eventos';
+}
+
+// ============ FUNCIÓN: RENDERIZAR CICLO ELECTORAL ============
+function renderizarCiclo() {
+  var barra = document.getElementById('ciclo-barra');
+  if (!barra) return;
+
+  barra.innerHTML = '';
+  for (var i = 1; i <= 16; i++) {
+    var celda = document.createElement('div');
+    celda.className = 'ciclo-celda';
+    celda.title = 'Q' + i;
+
+    if (i === estadoLocal.ciclo) {
+      celda.classList.add('activo');
+    } else if (i < estadoLocal.ciclo) {
+      // Historico: alternar cada 4 trimestres
+      var bloque = Math.ceil(i / 4);
+      celda.classList.add(bloque % 2 === 0 ? 'paloma-prev' : 'halcon-prev');
+    }
+
+    // Click para saltar (solo para testing — en prod comentar)
+    (function(num) {
+      celda.onclick = function() { saltarCiclo(num); };
+    })(i);
+
+    barra.appendChild(celda);
+  }
+
+  // Actualizar labels
+  var lblCiclo = document.getElementById('lbl-ciclo-actual');
+  if (lblCiclo) lblCiclo.textContent = 'Q' + estadoLocal.ciclo;
+
+  var lblModo = document.getElementById('lbl-modo-actual');
+  if (lblModo) lblModo.textContent = estadoLocal.modoActual ? estadoLocal.modoActual.toUpperCase() : '—';
+
+  var lblBurn = document.getElementById('lbl-burn-mod');
+  if (lblBurn) {
+    var signo = estadoLocal.bonificacionBurnRate >= 0 ? '+' : '';
+    lblBurn.textContent = signo + estadoLocal.bonificacionBurnRate;
+  }
+
+  // Actualizar modo tag
+  actualizarModoTag();
+
+  // Actualizar botones activos
+  var btnH = document.getElementById('btn-halcon');
+  var btnP = document.getElementById('btn-paloma');
+  if (btnH) {
+    btnH.className = 'btn-pol halcon-btn' + (estadoLocal.modoActual === 'halcon' ? ' activo' : '');
+  }
+  if (btnP) {
+    btnP.className = 'btn-pol paloma-btn' + (estadoLocal.modoActual === 'paloma' ? ' activo' : '');
+  }
+}
+
+// ============ FUNCIÓN: ACTUALIZAR MODO TAG ============
+function actualizarModoTag() {
+  var tag = document.getElementById('modo-tag');
+  var badge = document.getElementById('burn-badge');
+  var efectos = document.getElementById('efectos-lista');
+  if (!tag || !badge || !efectos) return;
+
+  if (estadoLocal.modoActual === 'halcon') {
+    tag.className = 'modo-tag halcon';
+    tag.innerHTML = '🦅 Gobierno Halcón';
+
+    badge.className = 'burn-badge negativo';
+    badge.textContent = '-15% Burn Rate';
+    estadoLocal.bonificacionBurnRate = -15;
+
+    efectos.innerHTML =
+      '<div class="efecto-item efecto-positivo"><span class="icono-efecto">↑</span><span>+40% contratos defensa sector privado</span></div>' +
+      '<div class="efecto-item efecto-positivo"><span class="icono-efecto">↑</span><span>+25% acceso mercados no-OTAN</span></div>' +
+      '<div class="efecto-item efecto-negativo"><span class="icono-efecto">↓</span><span>-30% subsidios tecnológicos civiles</span></div>' +
+      '<div class="efecto-item efecto-negativo"><span class="icono-efecto">↓</span><span>Riesgo conflicto +20% → burn rate</span></div>';
+
+  } else if (estadoLocal.modoActual === 'paloma') {
+    tag.className = 'modo-tag paloma';
+    tag.innerHTML = '🕊️ Gobierno Paloma';
+
+    badge.className = 'burn-badge positivo';
+    badge.textContent = '+10% Burn Rate';
+    estadoLocal.bonificacionBurnRate = 10;
+
+    efectos.innerHTML =
+      '<div class="efecto-item efecto-positivo"><span class="icono-efecto">↑</span><span>+35% contratos OTAN / alianzas</span></div>' +
+      '<div class="efecto-item efecto-positivo"><span class="icono-efecto">↑</span><span>+20% subsidios I+D internacionales</span></div>' +
+      '<div class="efecto-item efecto-negativo"><span class="icono-efecto">↓</span><span>-25% contratos militares ofensivos</span></div>' +
+      '<div class="efecto-item efecto-neutro"><span class="icono-efecto">○</span><span>Contrabando: mayor exposición legal</span></div>';
+
+  } else {
+    tag.className = 'modo-tag';
+    tag.style.background = 'rgba(139,148,158,0.1)';
+    tag.style.border = '1px solid var(--border)';
+    tag.style.color = 'var(--purple)';
+    tag.textContent = '— Sin gobierno definido —';
+
+    badge.className = 'burn-badge neutro';
+    badge.textContent = '±0% Burn';
+    estadoLocal.bonificacionBurnRate = 0;
+
+    efectos.innerHTML =
+      '<div class="efecto-item efecto-neutro"><span class="icono-efecto">○</span><span>Seleccioná modo para ver efectos</span></div>';
+  }
+
+  // Actualizar label burn rate header
+  var lblBurn = document.getElementById('lbl-burn-mod');
+  if (lblBurn) {
+    var signo = estadoLocal.bonificacionBurnRate >= 0 ? '+' : '';
+    lblBurn.textContent = signo + estadoLocal.bonificacionBurnRate;
+  }
+}
+
+// ============ FUNCIÓN: SELECCIONAR MODO ============
+function seleccionarModo(modo) {
+  if (!modo || (modo !== 'halcon' && modo !== 'paloma')) return;
+
+  var modoAnterior = estadoLocal.modoActual;
+  estadoLocal.modoActual = modo;
+
+  // Calcular bonificación
+  var bonif = modo === 'halcon' ? -15 : 10;
+  estadoLocal.bonificacionBurnRate = bonif;
+
+  // Guardar en Firebase
+  escribirFirebase('partida/politica/halcon_paloma', modo,
+    'Modo político → ' + modo.toUpperCase());
+  escribirFirebase('partida/politica/bonificacion_burn_rate', bonif,
+    'Bonificación burn rate → ' + bonif + '%');
+
+  // Registrar en bitácora global si está disponible
+  if (_agregarEvento) {
+    var msgBitacora = '[POLÍTICA] Q' + estadoLocal.ciclo + ' → Gobierno ' +
+      (modo === 'halcon' ? 'HALCÓN 🦅' : 'PALOMA 🕊️') +
+      ' | Burn rate: ' + (bonif >= 0 ? '+' : '') + bonif + '%';
+    _agregarEvento(msgBitacora);
+  }
+
+  // Log mini
+  logMiniAdd(
+    modo === 'halcon' ? 'danger' : 'info',
+    'Modo ' + modo.toUpperCase() + ' activado Q' + estadoLocal.ciclo +
+    ' | burn: ' + (bonif >= 0 ? '+' : '') + bonif + '%'
+  );
+
+  // Re-renderizar
+  renderizarCiclo();
+  renderizarResumen();
+
+  // Pulso visual
+  var tag = document.getElementById('modo-tag');
+  if (tag) {
+    tag.classList.remove('pulse-green');
+    void tag.offsetWidth; // reflow para reiniciar animación
+    tag.classList.add('pulse-green');
+  }
+}
+
+// ============ FUNCIÓN: AVANZAR CICLO ============
+function avanzarCiclo() {
+  if (estadoLocal.ciclo >= 16) {
+    logMiniAdd('warn', 'CICLO COMPLETADO — 16 trimestres finalizados');
+    if (_agregarEvento) {
+      _agregarEvento('[POLÍTICA] Ciclo electoral de 16 trimestres COMPLETADO');
+    }
+    return;
+  }
+
+  estadoLocal.ciclo = Number(estadoLocal.ciclo) + 1;
+
+  // Cada 4 trimestres = elecciones → alternar modo sugerido
+  var esEleccion = estadoLocal.ciclo % 4 === 1;
+  if (esEleccion && estadoLocal.ciclo > 1) {
+    logMiniAdd('warn',
+      '🗳️ ELECCIONES Q' + estadoLocal.ciclo + ' — Cambio de gobierno posible');
+    if (_agregarEvento) {
+      _agregarEvento('[POLÍTICA] ELECCIONES en Q' + estadoLocal.ciclo +
+        ' — Definir nuevo gobierno (Halcón/Paloma)');
+    }
+  }
+
+  // Firebase
+  escribirFirebase('partida/politica/ciclo_electoral', estadoLocal.ciclo,
+    'Ciclo avanzado → Q' + estadoLocal.ciclo);
+
+  // Log
+  logMiniAdd('', 'Trimestre avanzado → Q' + estadoLocal.ciclo +
+    (esEleccion ? ' ⚡ [ELECCIONES]' : ''));
+
+  if (_agregarEvento && !esEleccion) {
+    _agregarEvento('[POLÍTICA] Avance de trimestre → Q' + estadoLocal.ciclo);
+  }
+
+  renderizarCiclo();
+  renderizarResumen();
+}
+
+// ============ FUNCIÓN: SALTAR A CICLO (DEBUG) ============
+function saltarCiclo(num) {
+  num = Number(num);
+  if (num < 1 || num > 16) return;
+  estadoLocal.ciclo = num;
+  escribirFirebase('partida/politica/ciclo_electoral', num,
+    'Ciclo seteado manualmente → Q' + num);
+  logMiniAdd('', 'Ciclo seteado a Q' + num);
+  renderizarCiclo();
+  renderizarResumen();
+}
+
+// ============ FUNCIÓN: SELECCIONAR TECH ============
+function seleccionarTech(techElegida, techExcluida) {
+  // Verificar que no esté bloqueada (la opuesta ya seleccionada)
+  if (estadoLocal.techs[techExcluida]) {
+    logMiniAdd('danger',
+      '⛔ ' + techElegida + ' bloqueada — ' + techExcluida + ' ya activa');
+    return;
+  }
+
+  // Toggle: si ya estaba activa, desactivar
+  var estadoAnterior = estadoLocal.techs[techElegida];
+  estadoLocal.techs[techElegida] = !estadoAnterior;
+
+  // Mapear a nodo Firebase
+  var mapaFirebase = {
+    'reaper_stealth':       'partida/tecnologia/rama_reaper',
+    'sukhoi_pesado':        'partida/tecnologia/rama_sukhoi',
+    'sensores_usa':         'partida/tecnologia/rama_sensores_usa',
+    'misiles_rusos':        'partida/tecnologia/rama_misiles_rusos',
+    'cohetes_recuperables': 'partida/tecnologia/rama_cohetes_recuperables',
+    'hipersonicos':         'partida/tecnologia/rama_hipersonicos'
+  };
+
+  var ruta = mapaFirebase[techElegida];
+  if (ruta) {
+    escribirFirebase(ruta, estadoLocal.techs[techElegida],
+      'Tech ' + techElegida + ' → ' + estadoLocal.techs[techElegida]);
+  }
+
+  // Log y bitácora
+  var accion = estadoLocal.techs[techElegida] ? 'ACTIVADA' : 'DESACTIVADA';
+  logMiniAdd(
+    estadoLocal.techs[techElegida] ? '' : 'warn',
+    '🔬 Tech [' + techElegida.replace(/_/g, ' ').toUpperCase() + '] ' + accion
+  );
+
+  if (_agregarEvento) {
+    _agregarEvento('[TECH] ' + techElegida.replace(/_/g, ' ').toUpperCase() +
+      ' → ' + accion + ' (Q' + estadoLocal.ciclo + ')');
+  }
+
+  renderizarTechTree();
+  renderizarResumen();
+}
+
+// ============ FUNCIÓN: RENDERIZAR TECH TREE ============
+function renderizarTechTree() {
+  // Rama 1: Reaper vs Sukhoi
+  actualizarTechOpcion('tech-reaper',
+    estadoLocal.techs.reaper_stealth,
+    estadoLocal.techs.sukhoi_pesado);
+  actualizarTechOpcion('tech-sukhoi',
+    estadoLocal.techs.sukhoi_pesado,
+    estadoLocal.techs.reaper_stealth);
+
+  // Rama 2: Sensores USA vs Misiles Rusos
+  actualizarTechOpcion('tech-sensores-usa',
+    estadoLocal.techs.sensores_usa,
+    estadoLocal.techs.misiles_rusos);
+  actualizarTechOpcion('tech-misiles-rusos',
+    estadoLocal.techs.misiles_rusos,
+    estadoLocal.techs.sensores_usa);
+
+  // Rama 3: Cohetes vs Hipersónicos
+  actualizarTechOpcion('tech-cohetes',
+    estadoLocal.techs.cohetes_recuperables,
+    estadoLocal.techs.hipersonicos);
+  actualizarTechOpcion('tech-hipersonicos',
+    estadoLocal.techs.hipersonicos,
+    estadoLocal.techs.cohetes_recuperables);
+}
+
+// ============ FUNCIÓN: ACTUALIZAR ESTADO VISUAL TECH ============
+function actualizarTechOpcion(id, seleccionado, competidorActivo) {
+  var el = document.getElementById(id);
+  if (!el) return;
+
+  el.className = 'tech-opcion';
+  if (seleccionado) {
+    el.classList.add('seleccionado');
+  } else if (competidorActivo) {
+    el.classList.add('bloqueado');
+  }
+}
+
+// ============ FUNCIÓN: TOGGLE RUTA CONTRABANDO ============
+function toggleRuta(ruta) {
+  if (estadoLocal.contra.bloqueado) {
+    logMiniAdd('danger', '⛔ Rutas bloqueadas — operación imposible');
+    return;
+  }
+
+  if (ruta === 'asia') {
+    estadoLocal.contra.rutaAsia = !estadoLocal.contra.rutaAsia;
+    escribirFirebase('partida/contrabando/ruta_asia',
+      estadoLocal.contra.rutaAsia,
+      'Ruta Asia → ' + estadoLocal.contra.rutaAsia);
+    logMiniAdd(
+      estadoLocal.contra.rutaAsia ? '' : 'warn',
+      '🌏 Ruta Asia ' + (estadoLocal.contra.rutaAsia ? 'ACTIVADA' : 'DESACTIVADA')
+    );
+    if (_agregarEvento) {
+      _agregarEvento('[CONTRABANDO] Ruta Asia → ' +
+        (estadoLocal.contra.rutaAsia ? 'ACTIVA' : 'INACTIVA'));
+    }
+  } else if (ruta === 'dubai') {
+    estadoLocal.contra.rutaDubai = !estadoLocal.contra.rutaDubai;
+    escribirFirebase('partida/contrabando/ruta_dubai',
+      estadoLocal.contra.rutaDubai,
+      'Ruta Dubái → ' + estadoLocal.contra.rutaDubai);
+    logMiniAdd(
+      estadoLocal.contra.rutaDubai ? '' : 'warn',
+      '🏙️ Ruta Dubái ' + (estadoLocal.contra.rutaDubai ? 'ACTIVADA' : 'DESACTIVADA')
+    );
+    if (_agregarEvento) {
+      _agregarEvento('[CONTRABANDO] Ruta Dubái → ' +
+        (estadoLocal.contra.rutaDubai ? 'ACTIVA' : 'INACTIVA'));
+    }
+  }
+
+  renderizarContrabando();
+  renderizarResumen();
+}
+
+// ============ FUNCIÓN: TOGGLE BLOQUEO ============
+function toggleBloqueo(bloquear) {
+  estadoLocal.contra.bloqueado = !!bloquear;
+
+  escribirFirebase('partida/contrabando/bloqueado',
+    estadoLocal.contra.bloqueado,
+    'Contrabando bloqueo → ' + estadoLocal.contra.bloqueado);
+
+  if (bloquear) {
+    // Al bloquear, desactivar rutas
+    estadoLocal.contra.rutaAsia  = false;
+    estadoLocal.contra.rutaDubai = false;
+    escribirFirebase('partida/contrabando/ruta_asia',  false, 'Ruta Asia → false (bloqueo)');
+    escribirFirebase('partida/contrabando/ruta_dubai', false, 'Ruta Dubái → false (bloqueo)');
+
+    logMiniAdd('danger', '🔒 TODAS LAS RUTAS BLOQUEADAS — Operación comprometida');
+    if (_agregarEvento) {
+      _agregarEvento('[CONTRABANDO] ⚠ BLOQUEO TOTAL — Rutas Asia y Dubái cerradas');
+    }
+  } else {
+    logMiniAdd('', '🔓 Bloqueo levantado — rutas disponibles');
+    if (_agregarEvento) {
+      _agregarEvento('[CONTRABANDO] Bloqueo levantado — operaciones pueden reanudarse');
+    }
+  }
+
+  renderizarContrabando();
+  renderizarResumen();
+}
+
+// ============ FUNCIÓN: GENERAR BENEFICIO ============
+function generarBeneficio() {
+  if (estadoLocal.contra.bloqueado) {
+    logMiniAdd('danger', '⛔ No se puede cobrar — rutas bloqueadas');
+    return;
+  }
+
+  var rutasActivas = 0;
+  if (estadoLocal.contra.rutaAsia)  rutasActivas++;
+  if (estadoLocal.contra.rutaDubai) rutasActivas++;
+
+  if (rutasActivas === 0) {
+    logMiniAdd('warn', '⚠ Activá al menos una ruta para cobrar beneficio');
+    return;
+  }
+
+  // Cálculo: base $15M por ruta, modificado por modo político
+  var base = 15 * rutasActivas;
+  var modificador = estadoLocal.modoActual === 'paloma' ? 0.7 : 1.0;
+  // Palomas: mayor exposición = menor ganancia neta
+  var ganancia = Math.round(parseFloat(base) * parseFloat(modificador));
+
+  estadoLocal.contra.beneficios = parseFloat(estadoLocal.contra.beneficios) + parseFloat(ganancia);
+
+  escribirFirebase('partida/contrabando/beneficios',
+    estadoLocal.contra.beneficios,
+    'Beneficio cobrado: +$' + ganancia + 'M → total $' + estadoLocal.contra.beneficios + 'M');
+
+  logMiniAdd('',
+    '💰 Beneficio cobrado: +$' + ganancia + 'M | Total: $' + estadoLocal.contra.beneficios + 'M');
+
+  if (_agregarEvento) {
+    _agregarEvento('[CONTRABANDO] Cobro: +$' + ganancia + 'M | Acumulado: $' +
+      estadoLocal.contra.beneficios + 'M | Rutas activas: ' + rutasActivas);
+  }
+
+  // Evento aleatorio: 15% de chance de detección
+  var deteccion = Math.random();
+  if (deteccion < 0.15) {
+    setTimeout(function() {
+      estadoLocal.contra.bloqueado = true;
+      escribirFirebase('partida/contrabando/bloqueado', true,
+        'Detección automática — bloqueo activado');
+      logMiniAdd('danger',
+        '🚨 DETECCIÓN! Agencias regulatorias activaron bloqueo automático');
+      if (_agregarEvento) {
+        _agregarEvento('[CONTRABANDO] 🚨 DETECCIÓN por agencias — rutas BLOQUEADAS automáticamente');
+      }
+      renderizarContrabando();
+    }, 800);
+  }
+
+  renderizarContrabando();
+  renderizarResumen();
+
+  // Animación en beneficios
+  var bv = document.getElementById('beneficios-val');
+  if (bv) {
+    bv.classList.remove('pulse-green');
+    void bv.offsetWidth;
+    bv.classList.add('pulse-green');
+  }
+}
+
+// ============ FUNCIÓN: RENDERIZAR CONTRABANDO ============
+function renderizarContrabando() {
+  // Ruta Asia
+  var rutaAsiaItem = document.getElementById('ruta-asia-item');
+  var btnAsia = document.getElementById('btn-ruta-asia');
+  if (rutaAsiaItem && btnAsia) {
+    rutaAsiaItem.className = 'ruta-item' +
+      (estadoLocal.contra.bloqueado ? ' bloqueada' :
+       (estadoLocal.contra.rutaAsia ? ' activa' : ''));
+    btnAsia.className = 'ruta-toggle' + (estadoLocal.contra.rutaAsia ? ' activo' : '');
+    btnAsia.textContent = estadoLocal.contra.rutaAsia ? 'ACTIVA ✓' : 'ACTIVAR';
+  }
+
+  // Ruta Dubai
+  var rutaDubaiItem = document.getElementById('ruta-dubai-item');
+  var btnDubai = document.getElementById('btn-ruta-dubai');
+  if (rutaDubaiItem && btnDubai) {
+    rutaDubaiItem.className = 'ruta-item' +
+      (estadoLocal.contra.bloqueado ? ' bloqueada' :
+       (estadoLocal.contra.rutaDubai ? ' activa' : ''));
+    btnDubai.className = 'ruta-toggle' + (estadoLocal.contra.rutaDubai ? ' activo' : '');
+    btnDubai.textContent = estadoLocal.contra.rutaDubai ? 'ACTIVA ✓' : 'ACTIVAR';
+  }
+
+  // Alerta bloqueo
+  var alerta = document.getElementById('bloqueo-alerta');
+  if (alerta) {
+    alerta.className = 'bloqueo-alerta' +
+      (estadoLocal.contra.bloqueado ? ' fade-in' : ' oculto');
+  }
+
+  // Beneficios
+  var bv = document.getElementById('beneficios-val');
+  if (bv) bv.textContent = '$' + Number(estadoLocal.contra.beneficios) + 'M';
+
+  // Estado
+  var ce = document.getElementById('contra-estado');
+  if (ce) {
+    if (estadoLocal.contra.bloqueado) {
+      ce.textContent = '🔒 BLOQUEADO';
+      ce.style.color = 'var(--red)';
+    } else if (estadoLocal.contra.rutaAsia || estadoLocal.contra.rutaDubai) {
+      var num = (estadoLocal.contra.rutaAsia ? 1 : 0) +
+                (estadoLocal.contra.rutaDubai ? 1 : 0);
+      ce.textContent = '🟢 ACTIVO (' + num + ' ruta' + (num > 1 ? 's' : '') + ')';
+      ce.style.color = 'var(--green)';
+    } else {
+      ce.textContent = '⏸ INACTIVO';
+      ce.style.color = 'var(--purple)';
+    }
+  }
+}
+
+// ============ FUNCIÓN: RENDERIZAR RESUMEN ============
+function renderizarResumen() {
+  // Trimestre actual
+  var rcCiclo = document.getElementById('rc-ciclo');
+  if (rcCiclo) rcCiclo.textContent = estadoLocal.ciclo;
+
+  // Techs activas
+  var techsActivas = 0;
+  for (var key in estadoLocal.techs) {
+    if (estadoLocal.techs[key]) techsActivas++;
+  }
+  var rcTech = document.getElementById('rc-tech-activas');
+  if (rcTech) rcTech.textContent = techsActivas + '/3';
+
+  // Rutas activas
+  var rutasActivas = (estadoLocal.contra.rutaAsia ? 1 : 0) +
+                     (estadoLocal.contra.rutaDubai ? 1 : 0);
+  var rcRutas = document.getElementById('rc-rutas');
+  if (rcRutas) rcRutas.textContent = rutasActivas;
+
+  // Burn total
+  var burnMod = estadoLocal.bonificacionBurnRate || 0;
+  var rcBurn = document.getElementById('rc-burn-total');
+  if (rcBurn) {
+    var signo = burnMod >= 0 ? '+' : '';
+    rcBurn.textContent = signo + burnMod + '%';
+    rcBurn.style.color = burnMod < 0 ? 'var(--green-bright)' :
+                        burnMod > 0 ? 'var(--red)' : 'var(--purple)';
+  }
+}
+
+// ============ FUNCIÓN: INICIALIZAR MÓDULO ============
+function inicializarPoliticaTech() {
+  // Cargar estado desde Firebase
+  cargarEstadoFirebase();
+
+  // Si hay modo guardado, actualizar efectos
+  if (estadoLocal.modoActual) {
+    actualizarModoTag();
+  }
+
+  // Renderizar todo
+  renderizarCiclo();
+  renderizarTechTree();
+  renderizarContrabando();
+  renderizarResumen();
+
+  // Log de inicio
+  logMiniAdd('', 'Módulo Política & Tech Tree inicializado correctamente');
+  if (typeof _agregarEvento === 'function') {
+    _agregarEvento('[POLITICA] Módulo cargado y sincronizado con Firebase');
+  }
+}
+
+// ============ INICIO AUTOMÁTICO ============
+// Ejecutar al cargar la página
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', inicializarPoliticaTech);
+} else {
+  inicializarPoliticaTech();
+}
+</script>
+
 </div>
 
 <!-- FOOTER -->
@@ -5465,6 +6983,1242 @@ function srnBindInterferenceEvents() {
 }
 
 // Cerrar el script y el bloque
+</script>
+
+<!-- ============================================================ -->
+<!-- SPRINT 8 - TV: Widget TV Sovereign Shield                    -->
+<!-- Insertar antes del cierre </body> en index.html              -->
+<!-- ============================================================ -->
+
+<!-- ============ HTML: Panel PIP Flotante ============ -->
+<div id="tv-pip-panel" style="
+  display:none;
+  position:fixed;
+  bottom:90px;
+  right:18px;
+  width:280px;
+  background:#0d1117;
+  border:1.5px solid #238636;
+  border-radius:10px;
+  box-shadow:0 0 24px #238636aa, 0 2px 8px #000a;
+  z-index:9999;
+  font-family:'Courier New',monospace;
+  overflow:hidden;
+  transition:box-shadow 0.2s;
+">
+  <!-- Barra de título -->
+  <div id="tv-titlebar" style="
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#161b22;
+    padding:6px 10px;
+    border-bottom:1px solid #238636;
+    cursor:move;
+    user-select:none;
+  ">
+    <span id="tv-channel-label" style="color:#58a6ff;font-size:11px;font-weight:bold;letter-spacing:1px;">
+      📺 SS-TV · CANAL 1
+    </span>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button id="tv-btn-mute" title="Mute" onclick="tvToggleMute()" style="
+        background:none;border:1px solid #e3b341;color:#e3b341;
+        border-radius:4px;padding:1px 7px;font-size:11px;cursor:pointer;
+      ">🔊</button>
+      <button id="tv-btn-gen" title="Generar guión" onclick="tvGenerarGuion()" style="
+        background:none;border:1px solid #238636;color:#238636;
+        border-radius:4px;padding:1px 7px;font-size:11px;cursor:pointer;
+      ">▶</button>
+      <button onclick="tvCerrarPanel()" style="
+        background:none;border:1px solid #f85149;color:#f85149;
+        border-radius:4px;padding:1px 7px;font-size:11px;cursor:pointer;
+      ">✕</button>
+    </div>
+  </div>
+
+  <!-- Canvas avatar -->
+  <div style="position:relative;background:#000;text-align:center;padding:4px 0 0 0;">
+    <canvas id="tv-avatar-canvas" width="260" height="170"
+      style="display:block;margin:0 auto;border-bottom:1px solid #1a2a1a;">
+    </canvas>
+    <!-- Badge conductor -->
+    <div id="tv-conductor-badge" style="
+      position:absolute;bottom:6px;left:10px;
+      background:#0d1117cc;border:1px solid #238636;
+      color:#58a6ff;font-size:9px;padding:2px 7px;border-radius:10px;
+      letter-spacing:0.5px;
+    ">—</div>
+    <!-- Indicador ON AIR -->
+    <div id="tv-onair" style="
+      position:absolute;top:7px;right:10px;
+      background:#f85149;color:#fff;font-size:8px;
+      padding:2px 6px;border-radius:3px;letter-spacing:1px;
+      display:none;animation:tv-blink 1s infinite;
+    ">● ON AIR</div>
+  </div>
+
+  <!-- Subtítulo / ticker -->
+  <div style="background:#0d1117;padding:6px 10px 2px 10px;">
+    <div id="tv-ticker-wrap" style="overflow:hidden;white-space:nowrap;width:100%;position:relative;height:18px;">
+      <span id="tv-ticker-text" style="
+        color:#e3b341;font-size:10px;
+        display:inline-block;
+        animation:tv-ticker 18s linear infinite;
+        white-space:nowrap;
+      ">Inicializando SS-TV...</span>
+    </div>
+  </div>
+
+  <!-- Texto del guión / subtítulos -->
+  <div id="tv-script-box" style="
+    padding:8px 10px 6px 10px;
+    min-height:54px;
+    max-height:80px;
+    overflow-y:auto;
+    font-size:10px;
+    color:#e6edf3;
+    line-height:1.5;
+    border-top:1px solid #1a2a1a;
+    scrollbar-width:thin;
+    scrollbar-color:#238636 #0d1117;
+  ">Esperando transmisión...</div>
+
+  <!-- Barra de estado -->
+  <div style="
+    display:flex;justify-content:space-between;
+    padding:4px 10px;background:#161b22;
+    font-size:9px;color:#8b949e;border-top:1px solid #1a2a1a;
+  ">
+    <span id="tv-status-left">Q-auto</span>
+    <span id="tv-status-right">ElevenLabs: —</span>
+  </div>
+</div>
+
+<!-- ============ Botón para abrir la TV (se inserta en footer o header) ============ -->
+<button id="tv-open-btn" onclick="tvAbrirPanel()" title="Abrir SS-TV" style="
+  position:fixed;
+  bottom:14px;
+  right:80px;
+  background:#0d1117;
+  border:1.5px solid #238636;
+  color:#238636;
+  font-family:'Courier New',monospace;
+  font-size:13px;
+  padding:7px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:9998;
+  box-shadow:0 0 10px #23863655;
+  transition:all 0.2s;
+  letter-spacing:0.5px;
+">📺 SS-TV</button>
+
+<!-- ============ CSS: Animaciones TV ============ -->
+<style>
+/* SPRINT 8 - TV: Keyframes */
+
+@keyframes tv-blink {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.2; }
+}
+
+@keyframes tv-ticker {
+  0%   { transform: translateX(260px); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Efecto glitch sobre el panel completo */
+@keyframes tv-glitch-h {
+  0%   { clip-path: inset(0 0 98% 0); transform: skewX(0deg); }
+  20%  { clip-path: inset(30% 0 50% 0); transform: skewX(-4deg); }
+  40%  { clip-path: inset(60% 0 20% 0); transform: skewX(3deg); }
+  60%  { clip-path: inset(10% 0 80% 0); transform: skewX(-2deg); }
+  80%  { clip-path: inset(80% 0 5%  0); transform: skewX(2deg); }
+  100% { clip-path: inset(0 0 98% 0); transform: skewX(0deg); }
+}
+
+.tv-glitch-active {
+  animation: tv-glitch-h 0.35s steps(2) 3 !important;
+  filter: hue-rotate(90deg) brightness(1.4);
+}
+
+/* Canvas fósforo: fondo negro real */
+#tv-avatar-canvas {
+  image-rendering: pixelated;
+}
+
+/* Scrollbar guión */
+#tv-script-box::-webkit-scrollbar { width:4px; }
+#tv-script-box::-webkit-scrollbar-track { background:#0d1117; }
+#tv-script-box::-webkit-scrollbar-thumb { background:#238636; border-radius:2px; }
+
+/* Botón open hover */
+#tv-open-btn:hover {
+  background:#238636;
+  color:#0d1117;
+  box-shadow:0 0 18px #238636aa;
+}
+
+/* Responsivo mínimo */
+@media(max-width:420px){
+  #tv-pip-panel { width:98vw; right:1vw; }
+}
+</style>
+
+<!-- ============ JS: Módulo TV Completo ============ -->
+<script>
+// ============ SPRINT 8 - TV: Variables globales del módulo ============
+
+var TV = {
+  abierta:         false,
+  muted:           false,
+  volumen:         0.8,
+  conductor:       'jordan',   // 'jordan' | 'doc'
+  trimestre:       1,
+  guionActual:     '',
+  hablandoIndex:   0,
+  cooldownGuion:   false,
+  cooldownTimer:   null,
+  animFrameId:     null,
+  lipAmp:          0,
+  lipTarget:       0,
+  parpadeo:        0,
+  parpadeoDir:     1,
+  glitchActivo:    false,
+
+  // Web Audio para lip-sync
+  audioCtx:        null,
+  analyser:        null,
+  dataArray:       null,
+
+  // Speech
+  synth:           window.speechSynthesis || null,
+  utterance:       null,
+  voces:           [],
+
+  // ElevenLabs
+  elevenAudio:     null,
+
+  // Ticker
+  tickerItems:     [],
+  tickerIdx:       0,
+
+  // PIP drag
+  dragActive:      false,
+  dragOffX:        0,
+  dragOffY:        0,
+
+  // Firebase snapshot cache
+  fbCache: {
+    tesoreria:   0,
+    nivel:       1,
+    trimestre:   1,
+    eventos:     []
+  }
+};
+
+// ============ SPRINT 8 - TV: Inicialización principal ============
+
+function tvInit() {
+  // Restaurar persistencia
+  var abierta = localStorage.getItem('ss_tv_abierta');
+  TV.volumen  = parseFloat(localStorage.getItem('ss_tv_volumen') || '0.8');
+  TV.conductor = localStorage.getItem('ss_tv_ultimo_conductor') || 'jordan';
+
+  // Cargar voces
+  if (TV.synth) {
+    TV.voces = TV.synth.getVoices();
+    if (TV.synth.onvoiceschanged !== undefined) {
+      TV.synth.onvoiceschanged = function() {
+        TV.voces = TV.synth.getVoices();
+      };
+    }
+  }
+
+  // Arrancar canvas loop
+  tvStartCanvasLoop();
+
+  // Ticker inicial
+  TV.tickerItems = [
+    'SS-TV · Noticias en vivo · Sovereign Shield Broadcasting',
+    'Mercados monitoreados en tiempo real',
+    'Trimestre en curso · Actualización automática',
+    'Gillean Jordan · El Doc de la UBA · Conductores alternos'
+  ];
+  tvActualizarTicker();
+
+  // Drag&Drop del panel
+  tvInitDrag();
+
+  // Estado ElevenLabs
+  tvActualizarStatusBar();
+
+  // Verificar Firebase cache
+  tvBindFirebase();
+
+  // Si estaba abierta, reabrir
+  if (abierta === 'true') {
+    tvAbrirPanel();
+  }
+
+  // Actualizar conductor según trimestre ya cargado
+  tvActualizarConductorPorTrimestre();
+
+  // Arrancar ticker rotativo
+  setInterval(tvRotarTicker, 6000);
+
+  // Verificar trimestre cada 30s
+  setInterval(tvActualizarConductorPorTrimestre, 30000);
+
+  agregarEvento('📺 SS-TV inicializada correctamente', 'info');
+}
+
+// ============ SPRINT 8 - TV: Firebase binding ============
+
+function tvBindFirebase() {
+  // Solo si dbRef existe (definido globalmente en el proyecto)
+  if (typeof dbRef === 'undefined') return;
+
+  try {
+    // Escuchar tesorería
+    dbRef.child('partida/finanzas/tesoreria').on('value', function(snap) {
+      if (snap && snap.val() !== null) {
+        TV.fbCache.tesoreria = parseFloat(snap.val()) || 0;
+      }
+    });
+
+    // Escuchar nivel
+    dbRef.child('partida/estado/nivel_actual').on('value', function(snap) {
+      if (snap && snap.val() !== null) {
+        TV.fbCache.nivel = parseFloat(snap.val()) || 1;
+      }
+    });
+
+    // Escuchar trimestre
+    dbRef.child('partida/tiempo/trimestre_actual').on('value', function(snap) {
+      if (snap && snap.val() !== null) {
+        var q = parseFloat(snap.val()) || 1;
+        TV.fbCache.trimestre = q;
+        TV.trimestre = q;
+        tvActualizarConductorPorTrimestre();
+      }
+    });
+
+    // Escuchar eventos de guerra/infortunio para glitch
+    dbRef.child('partida/infortunios/eventosDisparados').on('value', function(snap) {
+      var eventos = snap.val() || {};
+      var hayGuerra = eventos.us_inestabilidad || eventos.rub_colapso || eventos.rub_hegemon || eventos.cny_consolidacion;
+      if (hayGuerra) tvDisparoGlitch();
+    });
+
+  } catch(e) {
+    agregarEvento('SS-TV: error binding Firebase — ' + e.message, 'info');
+  }
+}
+
+// ============ SPRINT 8 - TV: Control de panel ============
+
+function tvAbrirPanel() {
+  var panel = document.getElementById('tv-pip-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+  TV.abierta = true;
+  localStorage.setItem('ss_tv_abierta', 'true');
+
+  // Arrancar canvas si estaba pausado
+  tvStartCanvasLoop();
+
+  // Actualizar UI
+  tvActualizarBadgeConductor();
+  tvActualizarStatusBar();
+}
+
+function tvCerrarPanel() {
+  var panel = document.getElementById('tv-pip-panel');
+  if (!panel) return;
+  panel.style.display = 'none';
+  TV.abierta = false;
+  localStorage.setItem('ss_tv_abierta', 'false');
+
+  // Detener voz si está hablando
+  tvDetenerVoz();
+}
+
+// ============ SPRINT 8 - TV: Mute ============
+
+function tvToggleMute() {
+  TV.muted = !TV.muted;
+  var btn = document.getElementById('tv-btn-mute');
+  if (btn) btn.textContent = TV.muted ? '🔇' : '🔊';
+
+  if (TV.muted) {
+    tvDetenerVoz();
+  }
+
+  agregarEvento('SS-TV: ' + (TV.muted ? 'silenciada' : 'audio activado'), 'info');
+}
+
+// ============ SPRINT 8 - TV: Conductor por trimestre ============
+
+function tvActualizarConductorPorTrimestre() {
+  var q = TV.fbCache.trimestre || TV.trimestre || 1;
+  // Trimestres impares: Jordan, pares: El Doc
+  var nuevoConductor = (q % 2 !== 0) ? 'jordan' : 'doc';
+
+  if (nuevoConductor !== TV.conductor) {
+    TV.conductor = nuevoConductor;
+    localStorage.setItem('ss_tv_ultimo_conductor', TV.conductor);
+    tvDisparoGlitch();
+    agregarEvento('📺 SS-TV: cambio de conductor → ' + tvNombreConductor(), 'info');
+  }
+
+  // Actualizar label canal
+  var lbl = document.getElementById('tv-channel-label');
+  if (lbl) {
+    lbl.textContent = '📺 SS-TV · Q' + q;
+  }
+
+  tvActualizarBadgeConductor();
+  tvActualizarTicker();
+  tvActualizarStatusBar();
+}
+
+function tvNombreConductor() {
+  return TV.conductor === 'jordan' ? 'Gillean Jordan' : 'El Doc (UBA)';
+}
+
+function tvActualizarBadgeConductor() {
+  var badge = document.getElementById('tv-conductor-badge');
+  if (!badge) return;
+  badge.textContent = tvNombreConductor();
+  badge.style.color = TV.conductor === 'jordan' ? '#58a6ff' : '#e3b341';
+  badge.style.borderColor = TV.conductor === 'jordan' ? '#58a6ff' : '#e3b341';
+}
+
+// ============ SPRINT 8 - TV: Status bar ============
+
+function tvActualizarStatusBar() {
+  var el = document.getElementById('tv-status-right');
+  if (!el) return;
+  var key = localStorage.getItem('ss_elevenlabs_key');
+  el.textContent = 'ElevenLabs: ' + (key ? '✓' : 'WebSpeech');
+
+  var elL = document.getElementById('tv-status-left');
+  if (elL) elL.textContent = 'Q' + (TV.fbCache.trimestre || 1) + ' · ' + (TV.conductor === 'jordan' ? 'GJ' : 'DOC');
+}
+
+// ============ SPRINT 8 - TV: Ticker ============
+
+function tvActualizarTicker() {
+  var q = TV.fbCache.trimestre || 1;
+  var nombres = ['Gillean Jordan', 'El Doc (UBA)'];
+  TV.tickerItems = [
+    'SS-TV · Q' + q + ' · Conductor: ' + tvNombreConductor(),
+    'Tesorería actual: $' + (TV.fbCache.tesoreria || 0).toFixed(2),
+    'Nivel de operaciones: ' + (TV.fbCache.nivel || 1),
+    'Sovereign Shield Broadcasting · Noticias en vivo',
+    'Análisis económico · Trimestre ' + q
+  ];
+}
+
+function tvRotarTicker() {
+  TV.tickerIdx = (TV.tickerIdx + 1) % TV.tickerItems.length;
+  var span = document.getElementById('tv-ticker-text');
+  if (!span) return;
+  span.textContent = TV.tickerItems[TV.tickerIdx];
+  // Reiniciar animación
+  span.style.animation = 'none';
+  void span.offsetWidth; // reflow
+  span.style.animation = 'tv-ticker 18s linear infinite';
+}
+
+// ============ SPRINT 8 - TV: Glitch visual ============
+
+function tvDisparoGlitch() {
+  if (TV.glitchActivo) return;
+  TV.glitchActivo = true;
+  var panel = document.getElementById('tv-pip-panel');
+  var canvas = document.getElementById('tv-avatar-canvas');
+  if (panel) panel.classList.add('tv-glitch-active');
+  if (canvas) canvas.style.filter = 'hue-rotate(120deg) brightness(1.5) contrast(1.3)';
+
+  setTimeout(function() {
+    if (panel) panel.classList.remove('tv-glitch-active');
+    if (canvas) canvas.style.filter = '';
+    TV.glitchActivo = false;
+  }, 1100);
+}
+
+// ============ SPRINT 8 - TV: Canvas Avatar Wireframe / Fósforo ============
+
+function tvStartCanvasLoop() {
+  if (TV.animFrameId) cancelAnimationFrame(TV.animFrameId);
+  TV.parpadeo = 1;
+
+  function loop() {
+    tvDrawAvatar();
+    TV.animFrameId = requestAnimationFrame(loop);
+  }
+  TV.animFrameId = requestAnimationFrame(loop);
+}
+
+function tvDrawAvatar() {
+  var canvas = document.getElementById('tv-avatar-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width;   // 260
+  var H = canvas.height;  // 170
+  var t = Date.now() / 1000;
+
+  // Fondo negro
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, W, H);
+
+  // Color del conductor
+  var color = TV.conductor === 'jordan' ? '#00ff88' : '#ffaa00';
+  var colorSec = TV.conductor === 'jordan' ? '#58a6ff' : '#ff6633';
+
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+
+  var cx = W / 2;
+  var cy = H / 2 - 8;
+
+  // Parpadeo natural
+  TV.parpadeo += TV.parpadeoDir * 0.04;
+  if (TV.parpadeo > 1.2) TV.parpadeoDir = -1;
+  if (TV.parpadeo < 0) {
+    TV.parpadeo = 0;
+    TV.parpadeoDir = 1;
+  }
+
+  // Lip-sync suavizado
+  var lipAmp = 0;
+  if (TV.analyser && TV.dataArray) {
+    TV.analyser.getByteFrequencyData(TV.dataArray);
+    var sum = 0;
+    for (var i = 0; i < TV.dataArray.length; i++) sum += TV.dataArray[i];
+    lipAmp = (sum / TV.dataArray.length) / 255;
+  }
+  TV.lipAmp += (lipAmp - TV.lipAmp) * 0.25;
+
+  if (TV.conductor === 'jordan') {
+    tvDrawJordan(ctx, cx, cy, color, colorSec, t);
+  } else {
+    tvDrawDoc(ctx, cx, cy, color, colorSec, t);
+  }
+
+  // Efecto scanlines
+  ctx.shadowBlur = 0;
+  for (var y = 0; y < H; y += 4) {
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, y, W, 1);
+  }
+
+  // Ruido de fósforo
+  if (Math.random() < 0.08) {
+    for (var n = 0; n < 12; n++) {
+      var nx = Math.random() * W;
+      var ny = Math.random() * H;
+      ctx.fillStyle = 'rgba(0,255,136,0.08)';
+      ctx.fillRect(nx, ny, Math.random() * 3 + 1, 1);
+    }
+  }
+}
+
+// ============ SPRINT 8 - TV: Avatar Gillean Jordan (corporativo, simétrico) ============
+
+function tvDrawJordan(ctx, cx, cy, color, colorSec, t) {
+  var lipO = TV.lipAmp * 14 + 2;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 7;
+  ctx.shadowColor = color;
+
+  // Óvalo cara — líneas rectas simétricas (estilo Bloomberg/corporativo)
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 52, 66, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Línea horizontal central (estilo UI financiero)
+  ctx.beginPath();
+  ctx.moveTo(cx - 52, cy);
+  ctx.lineTo(cx + 52, cy);
+  ctx.strokeStyle = colorSec;
+  ctx.lineWidth = 0.4;
+  ctx.stroke();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+
+  // Ojo izquierdo — círculo preciso
+  tvDrawOjoJordan(ctx, cx - 20, cy - 14, color, colorSec, t);
+  // Ojo derecho
+  tvDrawOjoJordan(ctx, cx + 20, cy - 14, color, colorSec, t);
+
+  // Nariz — línea vertical minimalista
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx, cy + 18);
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  // Alas nasales (pequeñas líneas horizontales)
+  ctx.beginPath();
+  ctx.moveTo(cx - 7, cy + 18);
+  ctx.lineTo(cx + 7, cy + 18);
+  ctx.stroke();
+
+  // Boca — lip-sync con apertura vertical
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  // Labio superior
+  ctx.moveTo(cx - 18, cy + 30);
+  ctx.bezierCurveTo(cx - 9, cy + 28, cx + 9, cy + 28, cx + 18, cy + 30);
+  ctx.stroke();
+  // Labio inferior (se mueve con lipAmp)
+  ctx.beginPath();
+  ctx.moveTo(cx - 18, cy + 30);
+  ctx.bezierCurveTo(cx - 9, cy + 30 + lipO, cx + 9, cy + 30 + lipO, cx + 18, cy + 30);
+  ctx.stroke();
+
+  // Cuello
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy + 66);
+  ctx.lineTo(cx - 14, cy + 90);
+  ctx.moveTo(cx + 14, cy + 66);
+  ctx.lineTo(cx + 14, cy + 90);
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // Hombros (líneas rectas — corporativo)
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy + 90);
+  ctx.lineTo(cx - 70, cy + 110);
+  ctx.moveTo(cx + 14, cy + 90);
+  ctx.lineTo(cx + 70, cy + 110);
+  ctx.stroke();
+
+  // Corbata / traje
+  ctx.beginPath();
+  ctx.moveTo(cx - 6, cy + 88);
+  ctx.lineTo(cx, cy + 108);
+  ctx.lineTo(cx + 6, cy + 88);
+  ctx.strokeStyle = colorSec;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.strokeStyle = color;
+
+  // Parpado: si parpadeo bajo, cerrar ojo
+  if (TV.parpadeo < 0.15) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 26, cy - 14);
+    ctx.lineTo(cx - 14, cy - 14);
+    ctx.moveTo(cx + 14, cy - 14);
+    ctx.lineTo(cx + 26, cy - 14);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+  }
+}
+
+function tvDrawOjoJordan(ctx, ox, oy, color, colorSec, t) {
+  // Ojo cuadrado-circular (corporativo)
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.ellipse(ox, oy, 8, 7, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  // Pupila
+  ctx.beginPath();
+  ctx.arc(ox, oy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  // Brillo
+  ctx.beginPath();
+  ctx.arc(ox + 2, oy - 2, 1, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+}
+
+// ============ SPRINT 8 - TV: Avatar El Doc (desprolijo, caótico) ============
+
+function tvDrawDoc(ctx, cx, cy, color, colorSec, t) {
+  var lipO  = TV.lipAmp * 18 + 3;
+  var wobble = Math.sin(t * 2.3) * 2; // movimiento caótico
+  var wobble2 = Math.cos(t * 1.7) * 1.5;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 5;
+  ctx.shadowColor = color;
+
+  // Cara ovalada — más ancha, asimétrica
+  ctx.beginPath();
+  ctx.ellipse(cx + wobble * 0.3, cy, 58 + wobble, 68 + wobble2, 0.08, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Cabello desprolijo — líneas curvas aleatorias encima
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = colorSec;
+  for (var h = 0; h < 7; h++) {
+    var hx = cx - 40 + h * 13;
+    var hy = cy - 62;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy + 4);
+    ctx.bezierCurveTo(
+      hx + Math.sin(t + h) * 6, hy - 8 - h * 2,
+      hx + Math.cos(t * 0.7 + h) * 8, hy - 16,
+      hx + (h % 3 - 1) * 7, hy - 20 - (h % 2) * 5
+    );
+    ctx.stroke();
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+
+  // Ojo izquierdo — asimétrico
+  tvDrawOjoDoc(ctx, cx - 19 + wobble, cy - 12 + wobble2 * 0.5, color, t, false);
+  // Ojo derecho
+  tvDrawOjoDoc(ctx, cx + 22 + wobble, cy - 13 - wobble2 * 0.3, color, t, true);
+
+  // Nariz — curva caótica
+  ctx.beginPath();
+  ctx.moveTo(cx + wobble * 0.5, cy - 2);
+  ctx.bezierCurveTo(
+    cx + 8, cy + 8,
+    cx - 10, cy + 14,
+    cx + wobble2, cy + 20
+  );
+  ctx.lineWidth = 0.9;
+  ctx.stroke();
+
+  // Boca — asimétrica con lip-sync
+  ctx.lineWidth = 1.6;
+  // Comisura izquierda alta, derecha baja (caótico)
+  ctx.beginPath();
+  ctx.moveTo(cx - 20 + wobble, cy + 32);
+  ctx.bezierCurveTo(
+    cx - 6, cy + 29 - wobble2,
+    cx + 8, cy + 31 + wobble2,
+    cx + 20 + wobble, cy + 34
+  );
+  ctx.stroke();
+
+  // Apertura boca inferior
+  ctx.beginPath();
+  ctx.moveTo(cx - 20 + wobble, cy + 32);
+  ctx.bezierCurveTo(
+    cx - 6, cy + 32 + lipO * 0.8,
+    cx + 8, cy + 32 + lipO,
+    cx + 20 + wobble, cy + 34
+  );
+  ctx.strokeStyle = colorSec;
+  ctx.stroke();
+  ctx.strokeStyle = color;
+
+  // Bigote / barba leve — líneas breves
+  ctx.lineWidth = 0.7;
+  ctx.strokeStyle = colorSec;
+  for (var b = 0; b < 4; b++) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 22 + b * 12, cy + 37);
+    ctx.lineTo(cx - 18 + b * 12, cy + 42 + (b % 2) * 3);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = color;
+
+  // Cuello torcido
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 12 + wobble, cy + 66);
+  ctx.bezierCurveTo(cx - 15, cy + 78, cx - 10, cy + 84, cx - 13, cy + 90);
+  ctx.moveTo(cx + 16 + wobble, cy + 66);
+  ctx.bezierCurveTo(cx + 18, cy + 78, cx + 14, cy + 84, cx + 15, cy + 90);
+  ctx.stroke();
+
+  // Camisa informal (líneas desprolijas)
+  ctx.beginPath();
+  ctx.moveTo(cx - 13, cy + 90);
+  ctx.bezierCurveTo(cx - 55, cy + 102, cx - 68, cy + 112, cx - 72, cy + 118);
+  ctx.moveTo(cx + 15, cy + 90);
+  ctx.bezierCurveTo(cx + 52, cy + 102, cx + 66, cy + 112, cx + 70, cy + 118);
+  ctx.stroke();
+
+  // Parpadeo caótico
+  if (TV.parpadeo < 0.2) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 26 + wobble, cy - 12);
+    ctx.lineTo(cx - 13 + wobble, cy - 12);
+    ctx.moveTo(cx + 14 + wobble, cy - 13);
+    ctx.lineTo(cx + 28 + wobble, cy - 13);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+  }
+}
+
+function tvDrawOjoDoc(ctx, ox, oy, color, t, derecho) {
+  // Ojo algo irregular
+  var wobble = Math.sin(t * 1.2 + (derecho ? 1 : 0)) * 1;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.ellipse(ox, oy, 9 + wobble, 7, derecho ? 0.15 : -0.1, 0, Math.PI * 2);
+  ctx.stroke();
+  // Pupila excéntrica
+  ctx.beginPath();
+  ctx.arc(ox + wobble * 0.5, oy, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  // Brillo
+  ctx.beginPath();
+  ctx.arc(ox + wobble * 0.5 + 1.5, oy - 1.5, 1, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+}
+
+// ============ SPRINT 8 - TV: Web Audio API para lip-sync ============
+
+function tvIniciarAudioCtx() {
+  if (TV.audioCtx) return;
+  try {
+    TV.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    TV.analyser = TV.audioCtx.createAnalyser();
+    TV.analyser.fftSize = 64;
+    TV.dataArray = new Uint8Array(TV.analyser.frequencyBinCount);
+  } catch(e) {
+    agregarEvento('SS-TV: AudioContext no disponible', 'info');
+  }
+}
+
+function tvConectarFuenteAudio(sourceNode) {
+  if (!TV.analyser) return;
+  try {
+    sourceNode.connect(TV.analyser);
+    TV.analyser.connect(TV.audioCtx.destination);
+  } catch(e) {}
+}
+
+// ============ SPRINT 8 - TV: Generación de guión con Claude Haiku ============
+
+function tvGenerarGuion() {
+  if (TV.cooldownGuion) {
+    agregarEvento('📺 SS-TV: cooldown activo (15s), esperá', 'info');
+    return;
+  }
+
+  var apiKey = localStorage.getItem('ss_anthropic_key');
+  if (!apiKey) {
+    // Sin key: usar guión predeterminado
+    tvUsarGuionFallback();
+    return;
+  }
+
+  // Activar cooldown 15s
+  TV.cooldownGuion = true;
+  var btnGen = document.getElementById('tv-btn-gen');
+  if (btnGen) {
+    btnGen.textContent = '⏳';
+    btnGen.disabled = true;
+  }
+
+  TV.cooldownTimer = setTimeout(function() {
+    TV.cooldownGuion = false;
+    if (btnGen) {
+      btnGen.textContent = '▶';
+      btnGen.disabled = false;
+    }
+  }, 15000);
+
+  // Contexto Firebase
+  var ctx = tvArmarContexto();
+
+  // Prompt según conductor
+  var prompt = '';
+  if (TV.conductor === 'jordan') {
+    prompt = 'Sos Gillean Jordan, conductora de Bloomberg estilo. ' +
+      'Reportá en español, tono serio y financiero, máximo 3 oraciones. ' +
+      'Datos actuales: ' + ctx + ' ' +
+      'Hablá de tesorería, nivel operativo y tendencias del trimestre.';
+  } else {
+    prompt = 'Sos El Doc, profesor de economía de la UBA, satírico y académico. ' +
+      'Comentá en español con jerga argentina (laburo, guita, quilombo, etc), ' +
+      'máximo 3 oraciones con humor ácido. ' +
+      'Datos actuales: ' + ctx + ' ' +
+      'Opiná sobre la tesorería y el nivel con ironía porteña.';
+  }
+
+  // Mostrar ON AIR
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'block';
+
+  agregarEvento('📺 SS-TV: generando guión Haiku...', 'info');
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 160,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    var texto = '';
+    if (data && data.content && data.content[0] && data.content[0].text) {
+      texto = data.content[0].text;
+    } else if (data && data.error) {
+      texto = 'Error Haiku: ' + (data.error.message || 'desconocido');
+    }
+
+    if (!texto) texto = tvGuionFallbackTexto();
+    TV.guionActual = texto;
+    tvMostrarGuion(texto);
+    tvHablar(texto);
+  })
+  .catch(function(err) {
+    agregarEvento('SS-TV: error Haiku — ' + err.message, 'info');
+    tvUsarGuionFallback();
+  });
+}
+
+function tvArmarContexto() {
+  var q  = TV.fbCache.trimestre || 1;
+  var t  = parseFloat(TV.fbCache.tesoreria) || 0;
+  var n  = parseFloat(TV.fbCache.nivel) || 1;
+  return 'Trimestre Q' + q + ', Tesorería $' + t.toFixed(2) + ', Nivel ' + n + '.';
+}
+
+function tvGuionFallbackTexto() {
+  if (TV.conductor === 'jordan') {
+    var frases = [
+      'Los mercados muestran estabilidad en el sector operativo. La tesorería mantiene niveles dentro del rango esperado para el trimestre.',
+      'Sovereign Shield reporta actividad sostenida. Los indicadores financieros del cuarto trimestre sugieren consolidación.',
+      'Desde la sala de operaciones, confirmamos que los fondos están asegurados. El nivel operativo es consistente con la proyección anual.'
+    ];
+    return frases[Math.floor(Math.random() * frases.length)];
+  } else {
+    var frases2 = [
+      'Mirá, con la guita que hay en tesorería, vamos bien, pero no hay que dormirse. El nivel operativo no está para tirar manteca al techo, che.',
+      'Acá entre nos, el trimestre va más o menos. La plata alcanza, pero el quilombo organizativo le pega al rendimiento. Así estamos.',
+      'Compañeros, el análisis macroeconómico indica que hay que apretarse el cinturón, pero tampoco es para ponerse en modo crisis. Aguanten, eh.'
+    ];
+    return frases2[Math.floor(Math.random() * frases2.length)];
+  }
+}
+
+function tvUsarGuionFallback() {
+  var texto = tvGuionFallbackTexto();
+  TV.guionActual = texto;
+  tvMostrarGuion(texto);
+  tvHablar(texto);
+}
+
+function tvMostrarGuion(texto) {
+  var box = document.getElementById('tv-script-box');
+  if (box) {
+    box.textContent = texto;
+    box.scrollTop = 0;
+  }
+}
+
+// ============ SPRINT 8 - TV: Motor de Voz ============
+
+function tvHablar(texto) {
+  if (TV.muted) return;
+
+  var key11 = localStorage.getItem('ss_elevenlabs_key');
+
+  if (key11) {
+    tvHablarElevenLabs(texto, key11);
+  } else {
+    tvHablarWebSpeech(texto);
+  }
+}
+
+function tvHablarWebSpeech(texto) {
+  if (!TV.synth) return;
+  TV.synth.cancel();
+
+  TV.utterance = new SpeechSynthesisUtterance(texto);
+  TV.utterance.lang = 'es-ES';
+  TV.utterance.rate = TV.conductor === 'jordan' ? 0.92 : 1.05;
+  TV.utterance.pitch = TV.conductor === 'jordan' ? 1.1 : 0.85;
+  TV.utterance.volume = TV.muted ? 0 : TV.volumen;
+
+  // Elegir voz en español si existe
+  var vozEsp = null;
+  for (var i = 0; i < TV.voces.length; i++) {
+    if (TV.voces[i].lang && TV.voces[i].lang.indexOf('es') !== -1) {
+      vozEsp = TV.voces[i];
+      break;
+    }
+  }
+  if (vozEsp) TV.utterance.voice = vozEsp;
+
+  // Simular lip-sync con evento boundary
+  TV.utterance.onboundary = function(e) {
+    TV.lipAmp = 0.5 + Math.random() * 0.5;
+    setTimeout(function() { TV.lipAmp = 0.1; }, 180);
+  };
+
+  TV.utterance.onend = function() {
+    TV.lipAmp = 0;
+    var onair = document.getElementById('tv-onair');
+    if (onair) onair.style.display = 'none';
+    agregarEvento('📺 SS-TV: transmisión finalizada', 'info');
+  };
+
+  TV.utterance.onerror = function(e) {
+    TV.lipAmp = 0;
+    agregarEvento('SS-TV WebSpeech error: ' + e.error, 'info');
+  };
+
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'block';
+
+  TV.synth.speak(TV.utterance);
+}
+
+function tvHablarElevenLabs(texto, apiKey) {
+  // Voice IDs: usar predeterminadas de ElevenLabs
+  // Jordan: Rachel (voz neutral profesional) — Doc: Adam (voz masculina)
+  var voiceId = TV.conductor === 'jordan' ? 'EXAVITQu4vr4xnSDxMaL' : 'pNInz6obpgDQGcFmaJgB';
+  var stability = TV.conductor === 'jordan' ? 0.8 : 0.5;
+  var similarity = TV.conductor === 'jordan' ? 0.75 : 0.6;
+
+  tvIniciarAudioCtx();
+
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'block';
+
+  fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId + '/stream', {
+    method: 'POST',
+    headers: {
+      'Accept': 'audio/mpeg',
+      'Content-Type': 'application/json',
+      'xi-api-key': apiKey
+    },
+    body: JSON.stringify({
+      text: texto,
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: stability,
+        similarity_boost: similarity,
+        style: 0.0,
+        use_speaker_boost: true
+      }
+    })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('ElevenLabs HTTP ' + res.status);
+    return res.arrayBuffer();
+  })
+  .then(function(arrayBuffer) {
+    if (!TV.audioCtx) tvIniciarAudioCtx();
+    return TV.audioCtx.decodeAudioData(arrayBuffer);
+  })
+  .then(function(audioBuffer) {
+    var source = TV.audioCtx.createBufferSource();
+    source.buffer = audioBuffer;
+
+    // Ganancia para volumen
+    var gainNode = TV.audioCtx.createGain();
+    gainNode.gain.value = TV.muted ? 0 : TV.volumen;
+
+    source.connect(gainNode);
+    gainNode.connect(TV.audioCtx.destination);
+
+    // Conectar analyser para lip-sync
+    if (TV.analyser) {
+      source.connect(TV.analyser);
+    }
+
+    source.onended = function() {
+      TV.lipAmp = 0;
+      if (onair) onair.style.display = 'none';
+      agregarEvento('📺 SS-TV: audio ElevenLabs finalizado', 'info');
+    };
+
+    // Simular lip-sync periódico mientras el audio corre
+    var lipInterval = setInterval(function() {
+      if (TV.dataArray && TV.analyser) {
+        TV.analyser.getByteFrequencyData(TV.dataArray);
+      } else {
+        // Fallback: oscilación simulada
+        TV.lipAmp = 0.3 + Math.random() * 0.7;
+      }
+    }, 80);
+
+    source.onended = function() {
+      clearInterval(lipInterval);
+      TV.lipAmp = 0;
+      if (onair) onair.style.display = 'none';
+      agregarEvento('📺 SS-TV: transmisión ElevenLabs finalizada', 'info');
+    };
+
+    source.start(0);
+    agregarEvento('📺 SS-TV: transmitiendo vía ElevenLabs', 'info');
+  })
+  .catch(function(err) {
+    agregarEvento('SS-TV ElevenLabs error: ' + err.message + ' — fallback WebSpeech', 'info');
+    tvHablarWebSpeech(texto);
+  });
+}
+
+function tvDetenerVoz() {
+  if (TV.synth) TV.synth.cancel();
+  if (TV.elevenAudio) {
+    try { TV.elevenAudio.pause(); } catch(e) {}
+  }
+  TV.lipAmp = 0;
+
+  var onair = document.getElementById('tv-onair');
+  if (onair) onair.style.display = 'none';
+}
+
+// ============ SPRINT 8 - TV: Drag & Drop del panel PIP ============
+
+function tvInitDrag() {
+  var panel    = document.getElementById('tv-pip-panel');
+  var titlebar = document.getElementById('tv-titlebar');
+  if (!panel || !titlebar) return;
+
+  titlebar.addEventListener('mousedown', function(e) {
+    TV.dragActive = true;
+    var rect = panel.getBoundingClientRect();
+    TV.dragOffX = e.clientX - rect.left;
+    TV.dragOffY = e.clientY - rect.top;
+    panel.style.transition = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!TV.dragActive) return;
+    var x = e.clientX - TV.dragOffX;
+    var y = e.clientY - TV.dragOffY;
+    var maxX = window.innerWidth  - panel.offsetWidth;
+    var maxY = window.innerHeight - panel.offsetHeight;
+    x = Math.max(0, Math.min(x, maxX));
+    y = Math.max(0, Math.min(y, maxY));
+    panel.style.right  = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.left   = x + 'px';
+    panel.style.top    = y + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    TV.dragActive = false;
+  });
+
+  // Touch support básico
+  titlebar.addEventListener('touchstart', function(e) {
+    TV.dragActive = true;
+    var touch = e.touches[0];
+    var rect = panel.getBoundingClientRect();
+    TV.dragOffX = touch.clientX - rect.left;
+    TV.dragOffY = touch.clientY - rect.top;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!TV.dragActive) return;
+    var touch = e.touches[0];
+    var x = touch.clientX - TV.dragOffX;
+    var y = touch.clientY - TV.dragOffY;
+    var maxX = window.innerWidth  - panel.offsetWidth;
+    var maxY = window.innerHeight - panel.offsetHeight;
+    x = Math.max(0, Math.min(x, maxX));
+    y = Math.max(0, Math.min(y, maxY));
+    panel.style.right  = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.left   = x + 'px';
+    panel.style.top    = y + 'px';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', function() {
+    TV.dragActive = false;
+  });
+}
+
+// ============ SPRINT 8 - TV: API pública para disparar glitch desde otros módulos ============
+
+function tvNotificarGlitch(motivo) {
+  tvDisparoGlitch();
+  // Actualizar ticker con el motivo
+  if (motivo) {
+    var span = document.getElementById('tv-ticker-text');
+    if (span) {
+      span.textContent = '⚠ ALERTA SS-TV: ' + motivo;
+      span.style.animation = 'none';
+      void span.offsetWidth;
+      span.style.animation = 'tv-ticker 14s linear infinite';
+    }
+  }
+  // Generar nuevo guión si hay API key
+  if (!TV.cooldownGuion && TV.abierta) {
+    setTimeout(tvGenerarGuion, 1200);
+  }
+}
+
+// ============ SPRINT 8 - TV: Iniciar cuando el DOM esté listo ============
+
+(function() {
+  // Esperar a que el DOM esté completamente disponible
+  // y que Firebase (dbRef) esté inicializado
+  var tvInitAttempts = 0;
+  var tvInitMax = 20;
+
+  function tvTryInit() {
+    tvInitAttempts++;
+    // Verificar que elementos críticos existan
+    var panel = document.getElementById('tv-pip-panel');
+    var canvas = document.getElementById('tv-avatar-canvas');
+
+    if (!panel || !canvas) {
+      if (tvInitAttempts < tvInitMax) {
+        setTimeout(tvTryInit, 300);
+      } else {
+        console.warn('SS-TV: no se pudo inicializar — elementos HTML no encontrados');
+      }
+      return;
+    }
+
+    // Firebase puede no estar listo aún
+    if (typeof dbRef === 'undefined') {
+      if (tvInitAttempts < tvInitMax) {
+        setTimeout(tvTryInit, 300);
+      } else {
+        // Iniciar igual sin Firebase
+        tvInit();
+      }
+      return;
+    }
+
+    tvInit();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(tvTryInit, 400);
+    });
+  } else {
+    setTimeout(tvTryInit, 400);
+  }
+})();
+
+// ============ SPRINT 8 - TV: Fin del módulo ============
 </script>
 
 </body>
