@@ -1206,6 +1206,309 @@ body {
   100% { box-shadow: 0 0 0 rgba(63,185,80,0); }
 }
 
+  /* SPRINT 8 - LICITACIONES: estilos del panel principal */
+  #panel-licitaciones {
+    background: #0d1117;
+    border: 1px solid #238636;
+    border-radius: 6px;
+    padding: 18px;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    color: #e6edf3;
+  }
+
+  #panel-licitaciones h2 {
+    color: #58a6ff;
+    font-size: 1.1rem;
+    margin: 0 0 14px 0;
+    border-bottom: 1px solid #238636;
+    padding-bottom: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* SPRINT 8 - LICITACIONES: sub-secciones */
+  .lic-seccion {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .lic-seccion h3 {
+    color: #e3b341;
+    font-size: 0.88rem;
+    margin: 0 0 10px 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* SPRINT 8 - LICITACIONES: tarjeta de licitación individual */
+  .lic-tarjeta {
+    background: #0d1117;
+    border: 1px solid #238636;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lic-tarjeta.expirada {
+    border-color: #f85149;
+    opacity: 0.55;
+  }
+
+  .lic-tarjeta .lic-info {
+    flex: 1 1 200px;
+  }
+
+  .lic-tarjeta .lic-nombre {
+    color: #58a6ff;
+    font-size: 0.85rem;
+    font-weight: bold;
+  }
+
+  .lic-tarjeta .lic-detalle {
+    color: #8b949e;
+    font-size: 0.75rem;
+    margin-top: 3px;
+  }
+
+  .lic-tarjeta .lic-monto {
+    color: #238636;
+    font-size: 0.9rem;
+    font-weight: bold;
+    min-width: 110px;
+    text-align: right;
+  }
+
+  .lic-tarjeta .lic-req {
+    color: #e3b341;
+    font-size: 0.72rem;
+    margin-top: 2px;
+  }
+
+  /* SPRINT 8 - LICITACIONES: botones */
+  .btn-lic {
+    background: #238636;
+    color: #e6edf3;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .btn-lic:hover {
+    background: #2ea043;
+  }
+
+  .btn-lic:disabled {
+    background: #21262d;
+    color: #484f58;
+    cursor: not-allowed;
+  }
+
+  .btn-lic.rojo {
+    background: #b91c1c;
+  }
+
+  .btn-lic.rojo:hover {
+    background: #f85149;
+  }
+
+  .btn-lic.azul {
+    background: #1d4ed8;
+  }
+
+  .btn-lic.azul:hover {
+    background: #58a6ff;
+    color: #0d1117;
+  }
+
+  /* SPRINT 8 - LICITACIONES: barra de contramedidas */
+  .barra-contenedor {
+    background: #21262d;
+    border-radius: 4px;
+    height: 18px;
+    width: 100%;
+    overflow: hidden;
+    margin: 8px 0 6px 0;
+    border: 1px solid #30363d;
+  }
+
+  .barra-relleno {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease, background 0.5s ease;
+    background: #238636;
+  }
+
+  .barra-relleno.nivel-medio {
+    background: #e3b341;
+  }
+
+  .barra-relleno.nivel-alto {
+    background: #f85149;
+  }
+
+  /* SPRINT 8 - LICITACIONES: etiquetas de estado */
+  .lic-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .lic-badge.verde {
+    background: #0f2b14;
+    color: #238636;
+    border: 1px solid #238636;
+  }
+
+  .lic-badge.rojo {
+    background: #2d1b1b;
+    color: #f85149;
+    border: 1px solid #f85149;
+  }
+
+  .lic-badge.ambar {
+    background: #2d2410;
+    color: #e3b341;
+    border: 1px solid #e3b341;
+  }
+
+  .lic-badge.azul {
+    background: #0d1f3c;
+    color: #58a6ff;
+    border: 1px solid #58a6ff;
+  }
+
+  /* SPRINT 8 - LICITACIONES: log de espionaje */
+  #log-espionaje {
+    background: #0a0e13;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 8px 10px;
+    max-height: 130px;
+    overflow-y: auto;
+    font-size: 0.74rem;
+    color: #8b949e;
+    line-height: 1.6;
+  }
+
+  #log-espionaje .entrada-info {
+    color: #58a6ff;
+  }
+
+  #log-espionaje .entrada-alerta {
+    color: #f85149;
+  }
+
+  #log-espionaje .entrada-ok {
+    color: #238636;
+  }
+
+  /* SPRINT 8 - LICITACIONES: stats del módulo */
+  .lic-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .lic-stat-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  .lic-stat-box .stat-val {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #58a6ff;
+  }
+
+  .lic-stat-box .stat-lbl {
+    font-size: 0.68rem;
+    color: #8b949e;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* SPRINT 8 - LICITACIONES: mensaje de sabotaje */
+  #aviso-sabotaje {
+    display: none;
+    background: #2d1b1b;
+    border: 1px solid #f85149;
+    border-radius: 4px;
+    padding: 10px 14px;
+    color: #f85149;
+    font-size: 0.82rem;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  #aviso-sabotaje strong {
+    color: #ff7b72;
+  }
+
+  /* SPRINT 8 - LICITACIONES: animación pulso para alertas */
+  @keyframes lic-pulso {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .pulso-rojo {
+    animation: lic-pulso 1.2s infinite;
+    color: #f85149;
+  }
+
+  /* SPRINT 8 - LICITACIONES: separador de filas */
+  .lic-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+
+  .lic-label {
+    color: #8b949e;
+    font-size: 0.78rem;
+  }
+
+  .lic-valor {
+    color: #e6edf3;
+    font-size: 0.82rem;
+    font-weight: bold;
+  }
+
+  /* SPRINT 8 - LICITACIONES: empty state */
+  .lic-empty {
+    color: #484f58;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 18px 0;
+    letter-spacing: 1px;
+  }
+
     </style>
 </head>
 <body>
@@ -1245,6 +1548,7 @@ body {
     <button class="tab-btn" data-tab="tab5">📰 PRENSA</button>
     <button class="tab-btn" data-tab="tab6">⚖️ LEYES & CONTRATOS</button>
     <button class="tab-btn" data-tab="tab7">⚖️ POLÍTICA & TECH</button>
+    <button class="tab-btn" data-tab="tab8">🕵 LICITACIONES & ESPIONAJE</button>
 </div>
 
 <!-- TAB 1: TESORERÍA -->
@@ -2651,6 +2955,912 @@ if (document.readyState === 'loading') {
 
 </div>
 
+<div id="tab8" class="tab-content">
+<!-- SPRINT 8 - LICITACIONES: insertar este bloque dentro de la pestaña Tesorería o nueva pestaña -->
+<div id="panel-licitaciones">
+  <h2>⚡ Licitaciones &amp; Espionaje Industrial</h2>
+
+  <!-- SPRINT 8 - LICITACIONES: aviso de ciber-sabotaje activo -->
+  <div id="aviso-sabotaje">
+    <strong>⚠ CIBER-SABOTAJE ACTIVO</strong> — Las corporaciones rivales han comprometido tus sistemas.
+    Pérdida de reputación e I+D en curso. Reduce las contramedidas inmediatamente.
+  </div>
+
+  <!-- SPRINT 8 - LICITACIONES: estadísticas rápidas -->
+  <div class="lic-stats-grid">
+    <div class="lic-stat-box">
+      <div class="stat-val" id="stat-licitaciones-ganadas">0</div>
+      <div class="stat-lbl">Contratos Ganados</div>
+    </div>
+    <div class="lic-stat-box">
+      <div class="stat-val" id="stat-licitaciones-activas">0</div>
+      <div class="stat-lbl">Ofertas Activas</div>
+    </div>
+    <div class="lic-stat-box">
+      <div class="stat-val" id="stat-contramedidas-pct">0%</div>
+      <div class="stat-lbl">Presión Rival</div>
+    </div>
+    <div class="lic-stat-box">
+      <div class="stat-val" id="stat-ultimo-evento">N/A</div>
+      <div class="stat-lbl">Último Evento</div>
+    </div>
+  </div>
+
+  <!-- SPRINT 8 - LICITACIONES: gaceta de licitaciones activas -->
+  <div class="lic-seccion">
+    <h3>📋 Gaceta de Licitaciones</h3>
+    <div id="lista-licitaciones">
+      <div class="lic-empty">Cargando licitaciones...</div>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+      <button class="btn-lic azul" id="btn-generar-licitacion" onclick="generarLicitacionAleatoria()">
+        + Generar Oferta
+      </button>
+      <button class="btn-lic" style="background:#21262d; color:#8b949e;" onclick="limpiarLicitacionesExpiradas()">
+        Limpiar Expiradas
+      </button>
+    </div>
+  </div>
+
+  <!-- SPRINT 8 - ESPIONAJE: barra de contramedidas rivales -->
+  <div class="lic-seccion">
+    <h3>🛡 Contramedidas Rivales</h3>
+    <div class="lic-fila">
+      <span class="lic-label">Presión de Corporaciones Rivales:</span>
+      <span class="lic-valor" id="txt-contramedidas">0 / 100</span>
+    </div>
+    <div class="barra-contenedor">
+      <div class="barra-relleno" id="barra-contramedidas" style="width:0%"></div>
+    </div>
+    <div class="lic-fila" style="margin-top:6px;">
+      <span id="estado-contramedidas" class="lic-badge verde">BAJO RIESGO</span>
+      <span class="lic-label" style="font-size:0.72rem;">Si llega al 100%: ciber-sabotaje automático</span>
+    </div>
+    <div style="margin-top:10px;">
+      <button class="btn-lic rojo" onclick="mitigarContramedidas()">
+        🔒 Mitigar Presión (-15 pts | -$10,000)
+      </button>
+    </div>
+  </div>
+
+  <!-- SPRINT 8 - ESPIONAJE: eventos aleatorios -->
+  <div class="lic-seccion">
+    <h3>🕵 Inteligencia &amp; Eventos de Espionaje</h3>
+    <div class="lic-fila">
+      <span class="lic-label">Último evento detectado:</span>
+      <span class="lic-valor" id="txt-ultimo-evento-espionaje" style="color:#e3b341;">Ninguno</span>
+    </div>
+    <div style="margin: 8px 0 6px 0;">
+      <button class="btn-lic" style="background:#1c2128; color:#e3b341; border:1px solid #e3b341;"
+              onclick="simularEventoEspionaje()">
+        ⚡ Simular Evento Espionaje
+      </button>
+    </div>
+    <div id="log-espionaje">
+      <span style="color:#484f58;">// Sin eventos registrados...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ JAVASCRIPT DEL MÓDULO ============ -->
+<script>
+// ============ SPRINT 8 - LICITACIONES: configuración y catálogo ============
+
+// Catálogo de posibles licitaciones (se elige aleatoriamente)
+var CATALOGO_LICITACIONES = [
+  {
+    id: 'LIC_001',
+    nombre: 'Suministro Firewall Gubernamental',
+    monto_min: 80000,
+    monto_max: 150000,
+    requisito_tecnico: 'Ciberseguridad Nv.2',
+    nivel_req: 2,
+    tipo: 'software'
+  },
+  {
+    id: 'LIC_002',
+    nombre: 'Hardware Vigilancia Portuaria',
+    monto_min: 50000,
+    monto_max: 100000,
+    requisito_tecnico: 'Hardware Nv.1',
+    nivel_req: 1,
+    tipo: 'hardware'
+  },
+  {
+    id: 'LIC_003',
+    nombre: 'Sistema Detección Intrusiones FFAA',
+    monto_min: 120000,
+    monto_max: 200000,
+    requisito_tecnico: 'Ciberseguridad Nv.3',
+    nivel_req: 3,
+    tipo: 'software'
+  },
+  {
+    id: 'LIC_004',
+    nombre: 'Drones de Patrulla Fronteriza',
+    monto_min: 90000,
+    monto_max: 170000,
+    requisito_tecnico: 'Robótica Nv.2',
+    nivel_req: 2,
+    tipo: 'hardware'
+  },
+  {
+    id: 'LIC_005',
+    nombre: 'Cifrado Comunicaciones Críticas',
+    monto_min: 60000,
+    monto_max: 110000,
+    requisito_tecnico: 'Criptografía Nv.1',
+    nivel_req: 1,
+    tipo: 'software'
+  },
+  {
+    id: 'LIC_006',
+    nombre: 'Radares Anti-Dron Aeropuerto',
+    monto_min: 100000,
+    monto_max: 180000,
+    requisito_tecnico: 'Electrónica Nv.2',
+    nivel_req: 2,
+    tipo: 'hardware'
+  },
+  {
+    id: 'LIC_007',
+    nombre: 'Plataforma SIEM Nacional',
+    monto_min: 75000,
+    monto_max: 140000,
+    requisito_tecnico: 'IA Defensiva Nv.2',
+    nivel_req: 2,
+    tipo: 'software'
+  },
+  {
+    id: 'LIC_008',
+    nombre: 'Blindaje Cibernético Infraestructura',
+    monto_min: 130000,
+    monto_max: 200000,
+    requisito_tecnico: 'Defensa Nv.3',
+    nivel_req: 3,
+    tipo: 'software'
+  }
+];
+
+// Tipos de eventos de espionaje
+var EVENTOS_ESPIONAJE = [
+  {
+    tipo: 'alerta',
+    nombre: 'Fuga de Datos Detectada',
+    descripcion: 'Información sensible de I+D filtrada a competidores.',
+    incremento_cm: 18,
+    rep_perdida: 8,
+    clase: 'entrada-alerta'
+  },
+  {
+    tipo: 'alerta',
+    nombre: 'Hackeo a Servidores Internos',
+    descripcion: 'Acceso no autorizado a sistemas de producción.',
+    incremento_cm: 22,
+    rep_perdida: 10,
+    clase: 'entrada-alerta'
+  },
+  {
+    tipo: 'alerta',
+    nombre: 'Infiltración de Proveedor',
+    descripcion: 'Un proveedor externo fue comprometido por rivales.',
+    incremento_cm: 12,
+    rep_perdida: 5,
+    clase: 'entrada-alerta'
+  },
+  {
+    tipo: 'info',
+    nombre: 'Intento de Phishing Bloqueado',
+    descripcion: 'Ataque de ingeniería social neutralizado.',
+    incremento_cm: 5,
+    rep_perdida: 0,
+    clase: 'entrada-info'
+  },
+  {
+    tipo: 'alerta',
+    nombre: 'Exfiltración de Blueprints',
+    descripcion: 'Planos de hardware robados por agentes rivales.',
+    incremento_cm: 25,
+    rep_perdida: 12,
+    clase: 'entrada-alerta'
+  },
+  {
+    tipo: 'info',
+    nombre: 'DDoS Mitigado',
+    descripcion: 'Ataque de denegación de servicio absorbido.',
+    incremento_cm: 8,
+    rep_perdida: 2,
+    clase: 'entrada-info'
+  }
+];
+
+// ============ SPRINT 8 - LICITACIONES: variables de estado ============
+
+var licEstado = {
+  activas: [],          // licitaciones activas cargadas de Firebase
+  ganadas: 0,           // contador de licitaciones ganadas
+  contramedidas: 0,     // valor actual 0-100
+  eventos: [],          // historial de eventos de espionaje
+  trimestreActual: 1,   // trimestre para expiración (puede vincularse a variable global)
+  sabotajeActivo: false // flag de ciber-sabotaje
+};
+
+// ============ SPRINT 8 - LICITACIONES: inicialización del módulo ============
+
+/**
+ * Inicializa el módulo leyendo datos de Firebase
+ * y arrancando listeners en tiempo real
+ */
+function inicializarModuloLicitaciones() {
+  // Validar que dbRef exista
+  if (typeof dbRef === 'undefined' || dbRef === null) {
+    setTimeout(inicializarModuloLicitaciones, 500);
+    return;
+  }
+
+  // Escuchar licitaciones activas en tiempo real
+  dbRef.child('partida/licitaciones/activas').on('value', function(snap) {
+    var val = snap.val();
+    licEstado.activas = val ? val : [];
+    renderizarListaLicitaciones();
+    document.getElementById('stat-licitaciones-activas').textContent =
+      licEstado.activas.length;
+  });
+
+  // Escuchar licitaciones ganadas
+  dbRef.child('partida/licitaciones/ganadas').on('value', function(snap) {
+    var val = snap.val();
+    licEstado.ganadas = val ? parseFloat(val) : 0;
+    document.getElementById('stat-licitaciones-ganadas').textContent =
+      licEstado.ganadas;
+  });
+
+  // Escuchar contramedidas
+  dbRef.child('partida/espionaje/contramedidas').on('value', function(snap) {
+    var val = snap.val();
+    licEstado.contramedidas = val !== null ? parseFloat(val) : 0;
+    actualizarBarraContramedidas();
+  });
+
+  // Escuchar eventos de espionaje
+  dbRef.child('partida/espionaje/eventos').on('value', function(snap) {
+    var val = snap.val();
+    licEstado.eventos = val ? val : [];
+    renderizarLogEspionaje();
+  });
+
+  // Escuchar último evento
+  dbRef.child('partida/espionaje/ultimo_evento').on('value', function(snap) {
+    var val = snap.val();
+    if (val) {
+      document.getElementById('txt-ultimo-evento-espionaje').textContent = val;
+      document.getElementById('stat-ultimo-evento').textContent =
+        val.length > 12 ? val.substring(0, 12) + '…' : val;
+    }
+  });
+
+  // Inicializar nodos si no existen
+  dbRef.child('partida/licitaciones/activas').once('value', function(snap) {
+    if (snap.val() === null) {
+      dbRef.child('partida/licitaciones/activas').set([]);
+    }
+  });
+
+  dbRef.child('partida/licitaciones/ganadas').once('value', function(snap) {
+    if (snap.val() === null) {
+      dbRef.child('partida/licitaciones/ganadas').set(0);
+    }
+  });
+
+  dbRef.child('partida/espionaje/contramedidas').once('value', function(snap) {
+    if (snap.val() === null) {
+      dbRef.child('partida/espionaje/contramedidas').set(0);
+    }
+  });
+
+  dbRef.child('partida/espionaje/eventos').once('value', function(snap) {
+    if (snap.val() === null) {
+      dbRef.child('partida/espionaje/eventos').set([]);
+    }
+  });
+
+  dbRef.child('partida/espionaje/ultimo_evento').once('value', function(snap) {
+    if (snap.val() === null) {
+      dbRef.child('partida/espionaje/ultimo_evento').set('Ninguno');
+    }
+  });
+
+  // Generar una licitación inicial si no hay ninguna
+  setTimeout(function() {
+    if (licEstado.activas.length === 0) {
+      generarLicitacionAleatoria();
+    }
+  }, 1500);
+}
+
+// ============ SPRINT 8 - LICITACIONES: generación de licitaciones ============
+
+/**
+ * Genera una licitación aleatoria del catálogo
+ * y la agrega a Firebase si no está ya presente
+ */
+function generarLicitacionAleatoria() {
+  if (typeof dbRef === 'undefined') return;
+
+  // Seleccionar entrada del catálogo al azar
+  var idx = Math.floor(Math.random() * CATALOGO_LICITACIONES.length);
+  var plantilla = CATALOGO_LICITACIONES[idx];
+
+  // Calcular monto aleatorio en el rango
+  var monto = Math.floor(
+    parseFloat(plantilla.monto_min) +
+    Math.random() * (parseFloat(plantilla.monto_max) - parseFloat(plantilla.monto_min))
+  );
+
+  // Redondear a múltiplos de 5000
+  monto = Math.round(monto / 5000) * 5000;
+
+  // Trimestre de expiración (2-3 trimestres desde ahora)
+  var expira = parseFloat(licEstado.trimestreActual) + Math.floor(2 + Math.random() * 2);
+
+  // Verificar que no esté duplicada por id
+  var yaExiste = false;
+  for (var i = 0; i < licEstado.activas.length; i++) {
+    if (licEstado.activas[i] && licEstado.activas[i].id === plantilla.id) {
+      yaExiste = true;
+      break;
+    }
+  }
+
+  if (yaExiste) {
+    // Si ya existe, elegir otra del catálogo
+    var intentos = 0;
+    while (yaExiste && intentos < 8) {
+      idx = Math.floor(Math.random() * CATALOGO_LICITACIONES.length);
+      plantilla = CATALOGO_LICITACIONES[idx];
+      yaExiste = false;
+      for (var j = 0; j < licEstado.activas.length; j++) {
+        if (licEstado.activas[j] && licEstado.activas[j].id === plantilla.id) {
+          yaExiste = true;
+          break;
+        }
+      }
+      intentos++;
+    }
+    if (yaExiste) {
+      agregarEvento('Gaceta: No hay nuevas licitaciones disponibles en este momento.', 'info');
+      return;
+    }
+    // Recalcular monto para la nueva plantilla
+    monto = Math.floor(
+      parseFloat(plantilla.monto_min) +
+      Math.random() * (parseFloat(plantilla.monto_max) - parseFloat(plantilla.monto_min))
+    );
+    monto = Math.round(monto / 5000) * 5000;
+  }
+
+  // Construir objeto de licitación
+  var nuevaLic = {
+    id: plantilla.id + '_' + Date.now(),
+    nombre: plantilla.nombre,
+    monto: monto,
+    requisito_tecnico: plantilla.requisito_tecnico,
+    nivel_req: parseFloat(plantilla.nivel_req),
+    tipo: plantilla.tipo,
+    expira_trimestre: parseFloat(expira),
+    timestamp: Date.now()
+  };
+
+  // Agregar a la lista existente
+  var listaActualizada = licEstado.activas.slice();
+  listaActualizada.push(nuevaLic);
+
+  // Guardar en Firebase
+  dbRef.child('partida/licitaciones/activas').set(listaActualizada, function(error) {
+    if (!error) {
+      agregarEvento(
+        'GACETA: Nueva licitación disponible — "' + nuevaLic.nombre +
+        '" por USD ' + nuevaLic.monto.toLocaleString(), 'info'
+      );
+    }
+  });
+}
+
+// ============ SPRINT 8 - LICITACIONES: competir en una licitación ============
+
+/**
+ * El jugador decide competir en una licitación
+ * @param {string} licId - ID único de la licitación
+ * @param {string} licNombre - Nombre para el log
+ * @param {number} licMonto - Monto a ganar
+ * @param {number} nivelReq - Nivel requerido
+ */
+function competirLicitacion(licId, licNombre, licMonto, nivelReq) {
+  if (typeof dbRef === 'undefined') return;
+
+  var montoNum = parseFloat(licMonto);
+  var nivelNum = parseFloat(nivelReq);
+
+  // Simular verificación de tecnología disponible
+  // (en producción, leer del nodo de tecnologías del jugador)
+  // Para este módulo: probabilidad de éxito basada en nivel requerido
+  var probBase = 0.85 - (nivelNum * 0.15); // Nv1=70%, Nv2=55%, Nv3=40%
+  var ganado = Math.random() < probBase;
+
+  if (ganado) {
+    // ===== VICTORIA: ingresar fondos a tesorería =====
+    dbRef.child('partida/finanzas/tesoreria').transaction(function(actual) {
+      return parseFloat(actual || 0) + montoNum;
+    }, function(error, committed) {
+      if (committed) {
+        // Sumar reputación por contrato ganado
+        var bonusRep = Math.floor(montoNum / 20000); // 2.5-10 pts aprox
+        dbRef.child('partida/estado/puntos_reputacion').transaction(function(rep) {
+          return parseFloat(rep || 0) + bonusRep;
+        });
+
+        // Incrementar contador de ganadas
+        dbRef.child('partida/licitaciones/ganadas').transaction(function(g) {
+          return parseFloat(g || 0) + 1;
+        });
+
+        // Incrementar contramedidas rivales por contrato ganado
+        var incrementoCM = 10 + Math.floor(Math.random() * 8);
+        incrementarContramedidas(incrementoCM, 'Contrato ganado: ' + licNombre);
+
+        // Registrar en bitácora
+        agregarEvento(
+          'LICITACIÓN GANADA: "' + licNombre + '" — +USD ' +
+          montoNum.toLocaleString() + ' | +' + bonusRep + ' REP', 'ingreso'
+        );
+
+        // Eliminar la licitación de la lista activa
+        removerLicitacion(licId);
+      }
+    });
+  } else {
+    // ===== DERROTA: no hay pérdida pero se registra =====
+    agregarEvento(
+      'LICITACIÓN PERDIDA: "' + licNombre +
+      '" — Competidor superó tu propuesta técnica.', 'info'
+    );
+    // Pequeño incremento de contramedidas por intento fallido
+    incrementarContramedidas(3, 'Intento fallido en licitación');
+    // Eliminar igualmente de activas
+    removerLicitacion(licId);
+  }
+}
+
+// ============ SPRINT 8 - LICITACIONES: remover licitación de la lista ============
+
+/**
+ * Elimina una licitación de la lista activa en Firebase
+ * @param {string} licId - ID de la licitación a remover
+ */
+function removerLicitacion(licId) {
+  if (typeof dbRef === 'undefined') return;
+
+  var listaFiltrada = licEstado.activas.filter(function(lic) {
+    return lic && lic.id !== licId;
+  });
+
+  dbRef.child('partida/licitaciones/activas').set(listaFiltrada);
+}
+
+// ============ SPRINT 8 - LICITACIONES: limpiar expiradas ============
+
+/**
+ * Elimina licitaciones expiradas según el trimestre actual
+ */
+function limpiarLicitacionesExpiradas() {
+  if (typeof dbRef === 'undefined') return;
+
+  var trimActual = parseFloat(licEstado.trimestreActual);
+  var listaValida = licEstado.activas.filter(function(lic) {
+    return lic && parseFloat(lic.expira_trimestre) > trimActual;
+  });
+
+  var eliminadas = licEstado.activas.length - listaValida.length;
+
+  dbRef.child('partida/licitaciones/activas').set(listaValida, function(error) {
+    if (!error && eliminadas > 0) {
+      agregarEvento(
+        'Gaceta: ' + eliminadas + ' licitación(es) expirada(s) eliminada(s).', 'info'
+      );
+    } else if (eliminadas === 0) {
+      agregarEvento('Gaceta: No hay licitaciones expiradas.', 'info');
+    }
+  });
+}
+
+// ============ SPRINT 8 - ESPIONAJE: incrementar contramedidas ============
+
+/**
+ * Incrementa la barra de contramedidas rivales
+ * Si llega a 100, ejecuta ciber-sabotaje
+ * @param {number} cantidad - Puntos a incrementar
+ * @param {string} motivo - Descripción del incremento
+ */
+function incrementarContramedidas(cantidad, motivo) {
+  if (typeof dbRef === 'undefined') return;
+
+  var cantNum = parseFloat(cantidad);
+
+  dbRef.child('partida/espionaje/contramedidas').transaction(function(actual) {
+    var actual_num = parseFloat(actual || 0);
+    var nuevo = actual_num + cantNum;
+    if (nuevo > 100) nuevo = 100;
+    return nuevo;
+  }, function(error, committed, snap) {
+    if (committed) {
+      var valorFinal = parseFloat(snap.val());
+      // Si alcanzó 100%: ejecutar ciber-sabotaje
+      if (valorFinal >= 100 && !licEstado.sabotajeActivo) {
+        ejecutarCiberSabotaje();
+      }
+    }
+  });
+}
+
+// ============ SPRINT 8 - ESPIONAJE: mitigar contramedidas ============
+
+/**
+ * Gasta USD 10,000 para reducir la barra de contramedidas en 15 pts
+ */
+function mitigarContramedidas() {
+  if (typeof dbRef === 'undefined') return;
+
+  var costoMitigacion = 10000;
+
+  // Verificar fondos
+  dbRef.child('partida/finanzas/tesoreria').once('value', function(snap) {
+    var tesoreria = parseFloat(snap.val() || 0);
+
+    if (tesoreria < costoMitigacion) {
+      agregarEvento(
+        'ESPIONAJE: Fondos insuficientes para mitigar contramedidas (requiere USD 10,000).', 'gasto'
+      );
+      return;
+    }
+
+    // Descontar de tesorería
+    dbRef.child('partida/finanzas/tesoreria').transaction(function(actual) {
+      return parseFloat(actual || 0) - costoMitigacion;
+    }, function(error, committed) {
+      if (committed) {
+        // Reducir contramedidas
+        dbRef.child('partida/espionaje/contramedidas').transaction(function(actual) {
+          var nuevo = parseFloat(actual || 0) - 15;
+          if (nuevo < 0) nuevo = 0;
+          return nuevo;
+        }, function(errCM, committedCM, snapCM) {
+          if (committedCM) {
+            var nuevo = parseFloat(snapCM.val());
+            agregarEvento(
+              'ESPIONAJE: Contramedidas mitigadas (-15 pts). Presión actual: ' +
+              nuevo + '%. Costo: -USD 10,000.', 'gasto'
+            );
+            // Desactivar aviso de sabotaje si ya bajó
+            if (nuevo < 100) {
+              licEstado.sabotajeActivo = false;
+              document.getElementById('aviso-sabotaje').style.display = 'none';
+            }
+          }
+        });
+      }
+    });
+  });
+}
+
+// ============ SPRINT 8 - ESPIONAJE: ciber-sabotaje automático ============
+
+/**
+ * Ejecuta el ciber-sabotaje cuando las contramedidas alcanzan 100%
+ * Aplica penalizaciones a reputación e I+D
+ */
+function ejecutarCiberSabotaje() {
+  if (typeof dbRef === 'undefined') return;
+
+  licEstado.sabotajeActivo = true;
+
+  // Mostrar aviso visual
+  var avisoEl = document.getElementById('aviso-sabotaje');
+  if (avisoEl) avisoEl.style.display = 'block';
+
+  // Penalización de reputación
+  var repPerdida = 15 + Math.floor(Math.random() * 10);
+  dbRef.child('partida/estado/puntos_reputacion').transaction(function(rep) {
+    var nueva = parseFloat(rep || 0) - repPerdida;
+    if (nueva < 0) nueva = 0;
+    return nueva;
+  });
+
+  // Penalización de tesorería (pérdida de contratos en cola)
+  var perdidaFinanciera = 20000 + Math.floor(Math.random() * 15000);
+  dbRef.child('partida/finanzas/tesoreria').transaction(function(actual) {
+    var nueva = parseFloat(actual || 0) - perdidaFinanciera;
+    if (nueva < 0) nueva = 0;
+    return nueva;
+  });
+
+  // Registrar el evento de sabotaje
+  agregarEvento(
+    '⚠ CIBER-SABOTAJE EJECUTADO: -' + repPerdida +
+    ' REP | -USD ' + perdidaFinanciera.toLocaleString() +
+    ' — Reduce la presión rival urgente.', 'gasto'
+  );
+
+  // Agregar al log de espionaje
+  agregarEntradaLogEspionaje(
+    '⚠ SABOTAJE: Corporaciones rivales comprometieron sistemas críticos.',
+    'entrada-alerta'
+  );
+
+  // Actualizar último evento
+  dbRef.child('partida/espionaje/ultimo_evento').set('SABOTAJE EJECUTADO');
+}
+
+// ============ SPRINT 8 - ESPIONAJE: simular evento aleatorio ============
+
+/**
+ * Genera un evento aleatorio de espionaje
+ * (fuga de datos, hackeo, etc.)
+ */
+function simularEventoEspionaje() {
+  if (typeof dbRef === 'undefined') return;
+
+  // Elegir evento aleatorio
+  var idx = Math.floor(Math.random() * EVENTOS_ESPIONAJE.length);
+  var evento = EVENTOS_ESPIONAJE[idx];
+
+  // Incrementar contramedidas
+  incrementarContramedidas(
+    parseFloat(evento.incremento_cm),
+    evento.nombre
+  );
+
+  // Restar reputación si aplica
+  if (parseFloat(evento.rep_perdida) > 0) {
+    dbRef.child('partida/estado/puntos_reputacion').transaction(function(rep) {
+      var nueva = parseFloat(rep || 0) - parseFloat(evento.rep_perdida);
+      if (nueva < 0) nueva = 0;
+      return nueva;
+    });
+  }
+
+  // Construir mensaje del log
+  var msgLog = '[' + new Date().toLocaleTimeString() + '] ' +
+    evento.nombre + ': ' + evento.descripcion;
+
+  // Agregar al log visual
+  agregarEntradaLogEspionaje(msgLog, evento.clase);
+
+  // Guardar en Firebase
+  var eventosActualizados = licEstado.eventos.slice();
+  eventosActualizados.unshift(msgLog); // Más reciente primero
+  if (eventosActualizados.length > 20) {
+    eventosActualizados = eventosActualizados.slice(0, 20);
+  }
+
+  dbRef.child('partida/espionaje/eventos').set(eventosActualizados);
+  dbRef.child('partida/espionaje/ultimo_evento').set(evento.nombre);
+
+  // Log general de bitácora
+  var tipoLog = evento.tipo === 'alerta' ? 'gasto' : 'info';
+  agregarEvento(
+    'ESPIONAJE — ' + evento.nombre + ': ' + evento.descripcion +
+    (parseFloat(evento.rep_perdida) > 0 ?
+      ' (-' + evento.rep_perdida + ' REP)' : ''),
+    tipoLog
+  );
+}
+
+// ============ SPRINT 8 - LICITACIONES: render lista de licitaciones ============
+
+/**
+ * Renderiza la lista de licitaciones activas en el DOM
+ */
+function renderizarListaLicitaciones() {
+  var contenedor = document.getElementById('lista-licitaciones');
+  if (!contenedor) return;
+
+  if (!licEstado.activas || licEstado.activas.length === 0) {
+    contenedor.innerHTML = '<div class="lic-empty">// Sin licitaciones activas — genera una oferta para comenzar</div>';
+    return;
+  }
+
+  var html = '';
+  var trimActual = parseFloat(licEstado.trimestreActual);
+
+  for (var i = 0; i < licEstado.activas.length; i++) {
+    var lic = licEstado.activas[i];
+    if (!lic) continue;
+
+    var expirada = parseFloat(lic.expira_trimestre) <= trimActual;
+    var tipoColor = lic.tipo === 'software' ? '#58a6ff' : '#e3b341';
+    var tipoLabel = lic.tipo === 'software' ? 'SOFTWARE' : 'HARDWARE';
+
+    html += '<div class="lic-tarjeta' + (expirada ? ' expirada' : '') + '">';
+    html += '<div class="lic-info">';
+    html += '<div class="lic-nombre">' + lic.nombre + '</div>';
+    html += '<div class="lic-req">⚡ Requisito: ' + lic.requisito_tecnico + '</div>';
+    html += '<div class="lic-detalle">';
+    html += '<span class="lic-badge" style="background:#1c2128;color:' + tipoColor + ';border-color:' + tipoColor + '">' + tipoLabel + '</span>';
+    html += ' &nbsp;Expira T' + lic.expira_trimestre;
+    if (expirada) {
+      html += ' &nbsp;<span class="lic-badge rojo">EXPIRADA</span>';
+    } else {
+      html += ' &nbsp;<span class="lic-badge verde">ACTIVA</span>';
+    }
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="text-align:right;">';
+    html += '<div class="lic-monto">+$' + parseFloat(lic.monto).toLocaleString() + '</div>';
+
+    if (!expirada) {
+      html += '<button class="btn-lic" style="margin-top:6px;" onclick="competirLicitacion(\'' +
+        lic.id + '\',\'' +
+        lic.nombre.replace(/'/g, "\\'") + '\',' +
+        parseFloat(lic.monto) + ',' +
+        parseFloat(lic.nivel_req) + ')">Competir ▶</button>';
+    } else {
+      html += '<button class="btn-lic" disabled style="margin-top:6px;">Expirada</button>';
+    }
+
+    html += '</div>';
+    html += '</div>';
+  }
+
+  contenedor.innerHTML = html;
+}
+
+// ============ SPRINT 8 - ESPIONAJE: actualizar barra de contramedidas ============
+
+/**
+ * Actualiza la representación visual de la barra de contramedidas
+ */
+function actualizarBarraContramedidas() {
+  var valor = parseFloat(licEstado.contramedidas);
+  if (isNaN(valor)) valor = 0;
+
+  var barra = document.getElementById('barra-contramedidas');
+  var txt = document.getElementById('txt-contramedidas');
+  var estado = document.getElementById('estado-contramedidas');
+  var statPct = document.getElementById('stat-contramedidas-pct');
+
+  if (!barra || !txt || !estado) return;
+
+  // Actualizar ancho y texto
+  barra.style.width = valor + '%';
+  txt.textContent = Math.round(valor) + ' / 100';
+  if (statPct) statPct.textContent = Math.round(valor) + '%';
+
+  // Color y clase según nivel
+  barra.className = 'barra-relleno';
+  if (valor >= 75) {
+    barra.classList.add('nivel-alto');
+    estado.textContent = 'CRÍTICO';
+    estado.className = 'lic-badge rojo';
+    if (valor >= 90) {
+      estado.classList.add('pulso-rojo');
+    }
+  } else if (valor >= 45) {
+    barra.classList.add('nivel-medio');
+    estado.textContent = 'ELEVADO';
+    estado.className = 'lic-badge ambar';
+  } else {
+    estado.textContent = 'BAJO RIESGO';
+    estado.className = 'lic-badge verde';
+  }
+
+  // Mostrar aviso de sabotaje si corresponde
+  var avisoEl = document.getElementById('aviso-sabotaje');
+  if (avisoEl) {
+    avisoEl.style.display = (valor >= 100 || licEstado.sabotajeActivo) ? 'block' : 'none';
+  }
+}
+
+// ============ SPRINT 8 - ESPIONAJE: render log de espionaje ============
+
+/**
+ * Renderiza el historial de eventos de espionaje en el log visual
+ */
+function renderizarLogEspionaje() {
+  var logEl = document.getElementById('log-espionaje');
+  if (!logEl) return;
+
+  if (!licEstado.eventos || licEstado.eventos.length === 0) {
+    logEl.innerHTML = '<span style="color:#484f58;">// Sin eventos registrados...</span>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < licEstado.eventos.length; i++) {
+    var entrada = licEstado.eventos[i];
+    var clase = 'entrada-info';
+    if (entrada.indexOf('SABOTAJE') !== -1 ||
+        entrada.indexOf('Hackeo') !== -1 ||
+        entrada.indexOf('Fuga') !== -1 ||
+        entrada.indexOf('Exfiltración') !== -1 ||
+        entrada.indexOf('Infiltración') !== -1) {
+      clase = 'entrada-alerta';
+    } else if (entrada.indexOf('Bloqueado') !== -1 ||
+               entrada.indexOf('Mitigado') !== -1) {
+      clase = 'entrada-ok';
+    }
+    html += '<div class="' + clase + '">' + entrada + '</div>';
+  }
+
+  logEl.innerHTML = html;
+  logEl.scrollTop = 0; // Mostrar más reciente
+}
+
+// ============ SPRINT 8 - ESPIONAJE: agregar entrada al log ============
+
+/**
+ * Agrega una entrada al log visual de espionaje sin reescribir todo
+ * @param {string} mensaje - Texto del evento
+ * @param {string} clase - Clase CSS para el color
+ */
+function agregarEntradaLogEspionaje(mensaje, clase) {
+  var logEl = document.getElementById('log-espionaje');
+  if (!logEl) return;
+
+  var entrada = document.createElement('div');
+  entrada.className = clase || 'entrada-info';
+  entrada.textContent = mensaje;
+
+  // Insertar al inicio del log
+  logEl.insertBefore(entrada, logEl.firstChild);
+
+  // Limpiar mensaje de "sin eventos"
+  var vacioEl = logEl.querySelector('[style*="color:#484f58"]');
+  if (vacioEl) {
+    logEl.removeChild(vacioEl);
+  }
+}
+
+// ============ SPRINT 8 - LICITACIONES: hook de trimestre ============
+
+/**
+ * Llamar esta función cuando el juego avanza un trimestre
+ * para actualizar el estado de licitaciones y eventos
+ * @param {number} nuevoTrimestre - Número del trimestre actual
+ */
+function avanzarTrimestreLicitaciones(nuevoTrimestre) {
+  licEstado.trimestreActual = parseFloat(nuevoTrimestre);
+
+  // Probabilidad de nuevo evento de espionaje (35%)
+  if (Math.random() < 0.35) {
+    simularEventoEspionaje();
+  }
+
+  // Probabilidad de nueva licitación (50%)
+  if (Math.random() < 0.50) {
+    generarLicitacionAleatoria();
+  }
+
+  // Limpiar expiradas automáticamente
+  limpiarLicitacionesExpiradas();
+}
+
+// ============ SPRINT 8 - LICITACIONES: arranque del módulo ============
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    inicializarModuloLicitaciones();
+  });
+} else {
+  // DOM ya listo
+  inicializarModuloLicitaciones();
+}
+
+// ============ SPRINT 8 - LICITACIONES: FIN DEL MÓDULO ============
+
+</script>
+</div>
+
 <!-- FOOTER -->
 <div class="footer">
     <button id="playPauseBtn">▶ PLAY</button>
@@ -2917,7 +4127,12 @@ function cerrarTrimestre() {
             agregarEvento("Economista aprobó el cierre del trimestre.", "info");
             dbRef.child('partida/estado').once('value', function(s) {
                 if (s.child('aprobacion_economista').val() && s.child('aprobacion_civil').val()) {
-                    dbRef.child('partida/tiempo/trimestre_actual').transaction(function(t) { return (Number(t) || 1) + 1; });
+                    dbRef.child('partida/tiempo/trimestre_actual').transaction(function(t) { return (Number(t) || 1) + 1; }, function(error, committed, snap) {
+                        // SPRINT 8 - LICITACIONES: hook de trimestre (sin await, Regla 7)
+                        if (committed && typeof avanzarTrimestreLicitaciones === 'function') {
+                            avanzarTrimestreLicitaciones(snap.val());
+                        }
+                    });
                     dbRef.child('partida/estado/aprobacion_economista').set(false);
                     dbRef.child('partida/estado/aprobacion_civil').set(false);
                     agregarEvento("✅ TRIMESTRE CERRADO. Ambos directores aprobaron.", "info");
@@ -3024,9 +4239,15 @@ async function motorHistorico_tick() {
 async function motorHistorico_procesarUnTrimestre() {
     agregarEvento('⏱️ Motor Histórico: trimestre cerrado automáticamente.', 'info');
 
-    await dbRef.child('partida/tiempo/trimestre_actual').transaction(function(t) {
+    var _txResultLic = await dbRef.child('partida/tiempo/trimestre_actual').transaction(function(t) {
         return (Number(t) || 1) + 1;
     });
+
+    // SPRINT 8 - LICITACIONES: hook de trimestre (con await, como el resto
+    // de este bloque — ver nota arriba sobre evitar transactions pisadas)
+    if (_txResultLic && _txResultLic.committed && typeof avanzarTrimestreLicitaciones === 'function') {
+        await avanzarTrimestreLicitaciones(_txResultLic.snapshot.val());
+    }
 
     // Secuencial con await (a diferencia de cerrarTrimestre() manual, que las
     // dispara en paralelo sin esperar): en catch-up varias de estas pueden
